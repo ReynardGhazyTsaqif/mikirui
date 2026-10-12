@@ -1,0 +1,57 @@
+=== E10
+E10: 273 fitur, train (70000, 273), test (30000, 273)
+  seed 42: OOF AUC 0.82624 | KS 0.49122 (mean-fold 0.49698) | fold AUC [0.8288, 0.8305, 0.8337, 0.8243, 0.8156] | iter [282, 263, 169, 165, 334] | 2.8 mnt
+  keputusan: DITERIMA (vs E03: delta mean-fold +0.00097 (pooled OOF +0.00070), membaik di 5/5 fold)
+=== E11
+E11: 299 fitur, train (70000, 299), test (30000, 299)
+  seed 42: OOF AUC 0.82642 | KS 0.49171 (mean-fold 0.49359) | fold AUC [0.8278, 0.8296, 0.8347, 0.8256, 0.8152] | iter [285, 254, 194, 163, 217] | 3.0 mnt
+  keputusan: DITOLAK (vs E10: delta mean-fold -0.00001 (pooled OOF +0.00018), membaik di 2/5 fold)
+=== E12
+E12: 290 fitur, train (70000, 290), test (30000, 290)
+  seed 42: OOF AUC 0.82610 | KS 0.49100 (mean-fold 0.49470) | fold AUC [0.8285, 0.8291, 0.8351, 0.8243, 0.8142] | iter [157, 211, 196, 188, 238] | 2.7 mnt
+  keputusan: DITOLAK (vs E10: delta mean-fold -0.00033 (pooled OOF -0.00014), membaik di 1/5 fold)
+=== E13
+E13: 280 fitur, train (70000, 280), test (30000, 280)
+  seed 42: OOF AUC 0.82669 | KS 0.48967 (mean-fold 0.49383) | fold AUC [0.8294, 0.8307, 0.8355, 0.825, 0.8131] | iter [238, 298, 247, 164, 118] | 2.7 mnt
+  keputusan: DITOLAK (vs E10: delta mean-fold +0.00014 (pooled OOF +0.00045), membaik di 4/5 fold)
+=== E50
+E50: 317 fitur, train (70000, 317), test (30000, 317)
+  seed 42: OOF AUC 0.83017 | KS 0.49775 (mean-fold 0.50064) | fold AUC [0.8284, 0.8336, 0.8392, 0.83, 0.8211] | iter [197, 307, 183, 106, 211] | 3.0 mnt
+  keputusan: DITERIMA (vs E10: delta mean-fold +0.00386 (pooled OOF +0.00393), membaik di 4/5 fold)
+=== E51
+E51: 344 fitur, train (70000, 344), test (30000, 344)
+  seed 42: OOF AUC 0.82824 | KS 0.49216 (mean-fold 0.49531) | fold AUC [0.8278, 0.831, 0.8377, 0.825, 0.8202] | iter [210, 158, 265, 129, 185] | 3.1 mnt
+  keputusan: DITOLAK (vs E50: delta mean-fold -0.00210 (pooled OOF -0.00193), membaik di 0/5 fold)
+=== E20
+E20: 334 fitur, train (70000, 334), test (30000, 334)
+  seed 42: OOF AUC 0.83001 | KS 0.49836 (mean-fold 0.50163) | fold AUC [0.8302, 0.8323, 0.8385, 0.8296, 0.8199] | iter [260, 214, 217, 131, 170] | 4.2 mnt
+  keputusan: DITOLAK (vs E50: delta mean-fold -0.00036 (pooled OOF -0.00016), membaik di 1/5 fold)
+=== E21
+E21: 330 fitur, train (70000, 330), test (30000, 330)
+  seed 42: OOF AUC 0.82993 | KS 0.49611 (mean-fold 0.50047) | fold AUC [0.829, 0.832, 0.8386, 0.8296, 0.821] | iter [308, 331, 236, 180, 172] | 3.9 mnt
+  keputusan: DITOLAK (vs E50: delta mean-fold -0.00038 (pooled OOF -0.00023), membaik di 1/5 fold)
+=== E30
+E30: 347 fitur, train (70000, 347), test (30000, 347)
+  seed 42: OOF AUC 0.82938 | KS 0.49776 (mean-fold 0.50017) | fold AUC [0.8296, 0.832, 0.8384, 0.8282, 0.8206] | iter [135, 164, 157, 160, 308] | 3.6 mnt
+  keputusan: DITOLAK (vs E50: delta mean-fold -0.00070 (pooled OOF -0.00078), membaik di 1/5 fold)
+=== E31
+E31: 331 fitur, train (70000, 331), test (30000, 331)
+  seed 42: OOF AUC 0.83131 | KS 0.50010 (mean-fold 0.50411) | fold AUC [0.8318, 0.8362, 0.8417, 0.8302, 0.8191] | iter [204, 254, 505, 151, 131] | 3.5 mnt
+  keputusan: DITERIMA (vs E50: delta mean-fold +0.00136 (pooled OOF +0.00115), membaik di 4/5 fold)
+=== E40
+E40: 367 fitur, train (70000, 367), test (30000, 367)
+  seed 42: OOF AUC 0.83097 | KS 0.49965 (mean-fold 0.50309) | fold AUC [0.8339, 0.8343, 0.8392, 0.8299, 0.8187] | iter [272, 217, 143, 170, 228] | 3.4 mnt
+  keputusan: DITOLAK (vs E31: delta mean-fold -0.00061 (pooled OOF -0.00034), membaik di 1/5 fold)
+=== E41
+E41: 343 fitur, train (70000, 343), test (30000, 343)
+  seed 42: OOF AUC 0.83135 | KS 0.50238 (mean-fold 0.50416) | fold AUC [0.8311, 0.8336, 0.8405, 0.8311, 0.8209] | iter [163, 146, 166, 199, 150] | 2.9 mnt
+  keputusan: DITOLAK (vs E31: delta mean-fold -0.00041 (pooled OOF +0.00003), membaik di 2/5 fold)
+=== E60
+E60: 341 fitur, train (70000, 341), test (30000, 341)
+  seed 42: OOF AUC 0.83157 | KS 0.50153 (mean-fold 0.50394) | fold AUC [0.8328, 0.8337, 0.8407, 0.8308, 0.8205] | iter [140, 132, 244, 100, 128] | 2.8 mnt
+  keputusan: DITOLAK (vs E31: delta mean-fold -0.00013 (pooled OOF +0.00025), membaik di 3/5 fold)
+=== E61
+E61: 333 fitur, train (70000, 333), test (30000, 333)
+  seed 42: OOF AUC 0.83171 | KS 0.50092 (mean-fold 0.50346) | fold AUC [0.8321, 0.8359, 0.8396, 0.8307, 0.8208] | iter [171, 213, 328, 161, 191] | 3.1 mnt
+  keputusan: DITOLAK (vs E31: delta mean-fold +0.00002 (pooled OOF +0.00039), membaik di 3/5 fold)
+SELESAI

@@ -1,0 +1,256 @@
+=== E75
+  fitur prof_raw_v1         7 kolom  (0.0 mnt)
+  fitur rp_naive_v1        34 kolom  (0.0 mnt)
+  fitur pa_naive_v1        35 kolom  (0.0 mnt)
+  fitur bu_naive_v1        65 kolom  (0.0 mnt)
+  fitur ab_naive_v1        42 kolom  (0.0 mnt)
+  fitur ec_naive_v1        24 kolom  (0.0 mnt)
+OOF E31: AUC 0.8313, KS 0.5001
+              segment            value     n  target_rate    auc     ks
+punya_riwayat_cicilan            False 23688       0.1215 0.8100 0.4658
+punya_riwayat_cicilan             True 46312       0.1431 0.8404 0.5176
+  punya_aplikasi_lama            False 21000       0.1172 0.8099 0.4675
+  punya_aplikasi_lama             True 49000       0.1438 0.8385 0.5141
+  punya_data_rekening            False 21000       0.1172 0.8099 0.4675
+  punya_data_rekening             True 49000       0.1438 0.8385 0.5141
+      n_provider_biro                1  2356       0.1290 0.8439 0.5519
+      n_provider_biro                2 20510       0.1388 0.8329 0.5027
+      n_provider_biro                3 47134       0.1349 0.8300 0.4980
+      employment_type         salaried 33473       0.1324 0.8308 0.5024
+      employment_type    self_employed 20987       0.1379 0.8283 0.4963
+      employment_type  variable_income 15540       0.1403 0.8363 0.5093
+               region         Region_A 13978       0.1357 0.8270 0.4967
+               region         Region_B 13951       0.1363 0.8307 0.4927
+               region         Region_C 13855       0.1355 0.8266 0.4986
+               region         Region_D 14042       0.1425 0.8353 0.5130
+               region         Region_E 14174       0.1291 0.8368 0.5135
+         loan_purpose        education 13901       0.1365 0.8326 0.5159
+         loan_purpose home_improvement 14143       0.1352 0.8272 0.4932
+         loan_purpose        household 14006       0.1382 0.8366 0.5088
+         loan_purpose          medical 13999       0.1363 0.8280 0.4936
+         loan_purpose  working_capital 13951       0.1330 0.8321 0.5092
+           tier_bunga             0.16 12560       0.0549 0.8235 0.4951
+           tier_bunga              0.2 29800       0.1065 0.8123 0.4699
+           tier_bunga             0.24 22358       0.1777 0.8023 0.4514
+           tier_bunga             0.28  4938       0.3036 0.8012 0.4561
+           tier_bunga             0.32   344       0.5029 0.8132 0.4934
+    recency_ecommerce             <=2h 11852       0.2764 0.7846 0.4283
+    recency_ecommerce             2-7h 16082       0.1739 0.7945 0.4407
+    recency_ecommerce            7-30h 24078       0.1061 0.8004 0.4457
+    recency_ecommerce             >30h 17988       0.0489 0.8169 0.4888
+                 usia              <30 14804       0.1398 0.8323 0.5140
+                 usia            30-40 18436       0.1333 0.8252 0.4872
+                 usia            40-50 18421       0.1381 0.8346 0.5082
+                 usia              50+ 18339       0.1328 0.8332 0.5081
+=== E70
+  fitur app_raw_v1          4 kolom  (0.0 mnt)
+  fitur prof_raw_v1         7 kolom  (0.0 mnt)
+  fitur app_ratios_v1      13 kolom  (0.0 mnt)
+  fitur pa_naive_v1        35 kolom  (0.0 mnt)
+  fitur rp_naive_v1        34 kolom  (0.0 mnt)
+  fitur bu_naive_v1        65 kolom  (0.0 mnt)
+  fitur bp_naive_v1        28 kolom  (0.0 mnt)
+  fitur ab_naive_v1        42 kolom  (0.0 mnt)
+  fitur ec_naive_v1        24 kolom  (0.0 mnt)
+  fitur rp_core_v1         21 kolom  (0.0 mnt)
+  fitur ec_window_v1       44 kolom  (0.0 mnt)
+  fitur pa_burden_v1       14 kolom  (0.0 mnt)
+  nan_gt_99: 0 kolom []
+  constant: 0 kolom []
+  duplicate: 4 kolom ['pa_rate_prev_max', 'rp_dpd_now_max', 'rp_hist_len_days', 'rp_sum_unpaid']
+  high_corr: 15 kolom ['ab_average_balance_last', 'ab_average_balance_max', 'ab_average_balance_mean', 'ab_average_balance_std', 'ab_closing_balance_max', 'ab_closing_balance_mean', 'ab_closing_balance_std', 'ab_minimum_balance_max'] ...
+  featset e70_b2: 312 dari 331 kolom
+  fitur app_raw_v1          4 kolom  (0.0 mnt)
+  fitur prof_raw_v1         7 kolom  (0.0 mnt)
+  fitur app_ratios_v1      13 kolom  (0.0 mnt)
+  fitur pa_naive_v1        35 kolom  (0.0 mnt)
+  fitur rp_naive_v1        34 kolom  (0.0 mnt)
+  fitur bu_naive_v1        65 kolom  (0.0 mnt)
+  fitur bp_naive_v1        28 kolom  (0.0 mnt)
+  fitur ab_naive_v1        42 kolom  (0.0 mnt)
+  fitur ec_naive_v1        24 kolom  (0.0 mnt)
+  fitur rp_core_v1         21 kolom  (0.0 mnt)
+  fitur ec_window_v1       44 kolom  (0.0 mnt)
+  fitur pa_burden_v1       14 kolom  (0.0 mnt)
+E70: 312 fitur, train (70000, 312), test (30000, 312)
+  seed 42: OOF AUC 0.83231 | KS 0.50333 (mean-fold 0.50489) | fold AUC [0.8304, 0.8353, 0.842, 0.832, 0.822] | iter [121, 227, 259, 164, 145] | 2.3 mnt
+  keputusan: DITERIMA (vs E31: delta mean-fold +0.00053 (pooled OOF +0.00099), membaik di 3/5 fold, batas -0.0003)
+  top 15 fitur (gain):
+rp_share_dpd1                18308.0
+rp_maxdpd_median              8898.0
+ec_w90_order_intensity        8107.0
+bu_score_mean                 5943.0
+ec_w30_order_intensity        5702.0
+rp_share_dpd30                3636.0
+bu_score_min                  3628.0
+ec_w14_order_intensity        3394.0
+bu_score_max                  3335.0
+ec_spend_mean                 3047.0
+rp_share_dpd60                3019.0
+pa_active_months_left_sum     3015.0
+rp_max_days_past_due_mean     2897.0
+ec_recency_over_gap           2079.0
+ec_cat_share_groceries        1952.0
+=== E71
+  fitur app_raw_v1          4 kolom  (0.0 mnt)
+  fitur prof_raw_v1         7 kolom  (0.0 mnt)
+  fitur app_ratios_v1      13 kolom  (0.0 mnt)
+  fitur pa_naive_v1        35 kolom  (0.0 mnt)
+  fitur rp_naive_v1        34 kolom  (0.0 mnt)
+  fitur bu_naive_v1        65 kolom  (0.0 mnt)
+  fitur bp_naive_v1        28 kolom  (0.0 mnt)
+  fitur ab_naive_v1        42 kolom  (0.0 mnt)
+  fitur ec_naive_v1        24 kolom  (0.0 mnt)
+  fitur rp_core_v1         21 kolom  (0.0 mnt)
+  fitur rp_window_v1       26 kolom  (0.0 mnt)
+  fitur rp_loan_v1         17 kolom  (0.0 mnt)
+  fitur rp_trend_v1         7 kolom  (0.0 mnt)
+  fitur bu_extra_v1        17 kolom  (0.0 mnt)
+  fitur bp_trend_v1        13 kolom  (0.0 mnt)
+  fitur pa_window_v1       30 kolom  (0.0 mnt)
+  fitur pa_burden_v1       14 kolom  (0.0 mnt)
+  fitur ab_window_v1       36 kolom  (0.0 mnt)
+  fitur ab_income_v1       12 kolom  (0.0 mnt)
+  fitur ec_window_v1       44 kolom  (0.0 mnt)
+  fitur ec_mix_v1          27 kolom  (0.0 mnt)
+  fitur x_cross_v1         10 kolom  (0.0 mnt)
+  fitur x_rate_resid_v1     2 kolom  (0.0 mnt)
+  null importance pada 528 kolom, 40 run acak
+  importance asli selesai (3 seed)
+  null importance 10/40
+  null importance 20/40
+  null importance 30/40
+  null importance 40/40
+  fitur app_raw_v1          4 kolom  (0.0 mnt)
+  fitur prof_raw_v1         7 kolom  (0.0 mnt)
+  fitur app_ratios_v1      13 kolom  (0.0 mnt)
+  fitur pa_naive_v1        35 kolom  (0.0 mnt)
+  fitur rp_naive_v1        34 kolom  (0.0 mnt)
+  fitur bu_naive_v1        65 kolom  (0.0 mnt)
+  fitur bp_naive_v1        28 kolom  (0.0 mnt)
+  fitur ab_naive_v1        42 kolom  (0.0 mnt)
+  fitur ec_naive_v1        24 kolom  (0.0 mnt)
+  fitur rp_core_v1         21 kolom  (0.0 mnt)
+  fitur ec_window_v1       44 kolom  (0.0 mnt)
+  fitur pa_burden_v1       14 kolom  (0.0 mnt)
+  selesai (17.0 mnt): sel_full 176/528 kolom, sel_b2 117/331 kolom
+  fitur dari grup ditolak yang lolos: 59, contoh ['ab_all_inst_vs_income', 'ab_all_outflow_vs_income', 'ab_w3_inst_vs_income', 'bp_prev_delinq_max', 'bp_prev_score_min', 'bp_score_delta_mean', 'bu_delinq_sum', 'bu_fresh_score', 'bu_n_delinq_providers', 'bu_revolving_headroom']
+=== E71a
+  fitur app_raw_v1          4 kolom  (0.0 mnt)
+  fitur prof_raw_v1         7 kolom  (0.0 mnt)
+  fitur app_ratios_v1      13 kolom  (0.0 mnt)
+  fitur pa_naive_v1        35 kolom  (0.0 mnt)
+  fitur rp_naive_v1        34 kolom  (0.0 mnt)
+  fitur bu_naive_v1        65 kolom  (0.0 mnt)
+  fitur bp_naive_v1        28 kolom  (0.0 mnt)
+  fitur ab_naive_v1        42 kolom  (0.0 mnt)
+  fitur ec_naive_v1        24 kolom  (0.0 mnt)
+  fitur rp_core_v1         21 kolom  (0.0 mnt)
+  fitur rp_window_v1       26 kolom  (0.0 mnt)
+  fitur rp_loan_v1         17 kolom  (0.0 mnt)
+  fitur rp_trend_v1         7 kolom  (0.0 mnt)
+  fitur bu_extra_v1        17 kolom  (0.0 mnt)
+  fitur bp_trend_v1        13 kolom  (0.0 mnt)
+  fitur pa_window_v1       30 kolom  (0.0 mnt)
+  fitur pa_burden_v1       14 kolom  (0.0 mnt)
+  fitur ab_window_v1       36 kolom  (0.0 mnt)
+  fitur ab_income_v1       12 kolom  (0.0 mnt)
+  fitur ec_window_v1       44 kolom  (0.0 mnt)
+  fitur ec_mix_v1          27 kolom  (0.0 mnt)
+  fitur x_cross_v1         10 kolom  (0.0 mnt)
+  fitur x_rate_resid_v1     2 kolom  (0.0 mnt)
+E71a: 528 fitur, train (70000, 528), test (30000, 528)
+  seed 42: OOF AUC 0.83083 | KS 0.49993 (mean-fold 0.50325) | fold AUC [0.8294, 0.8342, 0.8403, 0.8308, 0.8214] | iter [181, 133, 191, 135, 287] | 3.5 mnt
+  keputusan: DITOLAK (vs E70: delta mean-fold -0.00111 (pooled OOF -0.00148), membaik di 0/5 fold, batas +0.0005)
+  top 15 fitur (gain):
+rp_share_dpd1                16704.0
+ec_w90_order_intensity        7486.0
+rp_max_days_past_due_mean     4879.0
+rp_share_dpd30                4823.0
+x_rate_pred                   4735.0
+rp_maxdpd_median              4625.0
+ec_w14_order_intensity        3949.0
+ec_spend_mean                 3041.0
+ec_w30_order_intensity        3020.0
+pa_active_months_left_sum     2891.0
+x_rate_x_score                2704.0
+rp_wdpd_mean                  2605.0
+ec_w30_spend                  2216.0
+bu_score_mean                 2214.0
+ec_w180_order_intensity       2064.0
+=== E71b
+  fitur app_raw_v1          4 kolom  (0.0 mnt)
+  fitur prof_raw_v1         7 kolom  (0.0 mnt)
+  fitur app_ratios_v1      13 kolom  (0.0 mnt)
+  fitur pa_naive_v1        35 kolom  (0.0 mnt)
+  fitur rp_naive_v1        34 kolom  (0.0 mnt)
+  fitur bu_naive_v1        65 kolom  (0.0 mnt)
+  fitur bp_naive_v1        28 kolom  (0.0 mnt)
+  fitur ab_naive_v1        42 kolom  (0.0 mnt)
+  fitur ec_naive_v1        24 kolom  (0.0 mnt)
+  fitur rp_core_v1         21 kolom  (0.0 mnt)
+  fitur rp_window_v1       26 kolom  (0.0 mnt)
+  fitur rp_loan_v1         17 kolom  (0.0 mnt)
+  fitur rp_trend_v1         7 kolom  (0.0 mnt)
+  fitur bu_extra_v1        17 kolom  (0.0 mnt)
+  fitur bp_trend_v1        13 kolom  (0.0 mnt)
+  fitur pa_window_v1       30 kolom  (0.0 mnt)
+  fitur pa_burden_v1       14 kolom  (0.0 mnt)
+  fitur ab_window_v1       36 kolom  (0.0 mnt)
+  fitur ab_income_v1       12 kolom  (0.0 mnt)
+  fitur ec_window_v1       44 kolom  (0.0 mnt)
+  fitur ec_mix_v1          27 kolom  (0.0 mnt)
+  fitur x_cross_v1         10 kolom  (0.0 mnt)
+  fitur x_rate_resid_v1     2 kolom  (0.0 mnt)
+E71b: 176 fitur, train (70000, 176), test (30000, 176)
+  seed 42: OOF AUC 0.83249 | KS 0.50510 (mean-fold 0.50882) | fold AUC [0.8319, 0.8362, 0.8395, 0.8321, 0.8236] | iter [235, 217, 195, 107, 193] | 1.2 mnt
+  keputusan: DITOLAK (vs E70: delta mean-fold +0.00031 (pooled OOF +0.00018), membaik di 4/5 fold, batas +0.0005)
+  top 15 fitur (gain):
+rp_share_dpd1                14031.0
+ec_w90_order_intensity        8142.0
+ec_w30_order_intensity        6857.0
+rp_share_dpd30                6070.0
+rp_maxdpd_median              5747.0
+x_rate_pred                   4314.0
+ec_w14_order_intensity        3543.0
+rp_wdpd_mean                  3542.0
+ec_spend_mean                 3326.0
+pa_active_months_left_sum     3307.0
+bu_score_mean                 2983.0
+rp_max_days_past_due_mean     2882.0
+rp_w365_share_dpd1            2785.0
+x_rate_x_score                2737.0
+ec_w90_spend                  2652.0
+=== E71c
+  fitur app_raw_v1          4 kolom  (0.0 mnt)
+  fitur prof_raw_v1         7 kolom  (0.0 mnt)
+  fitur app_ratios_v1      13 kolom  (0.0 mnt)
+  fitur pa_naive_v1        35 kolom  (0.0 mnt)
+  fitur rp_naive_v1        34 kolom  (0.0 mnt)
+  fitur bu_naive_v1        65 kolom  (0.0 mnt)
+  fitur bp_naive_v1        28 kolom  (0.0 mnt)
+  fitur ab_naive_v1        42 kolom  (0.0 mnt)
+  fitur ec_naive_v1        24 kolom  (0.0 mnt)
+  fitur rp_core_v1         21 kolom  (0.0 mnt)
+  fitur ec_window_v1       44 kolom  (0.0 mnt)
+  fitur pa_burden_v1       14 kolom  (0.0 mnt)
+E71c: 117 fitur, train (70000, 117), test (30000, 117)
+  seed 42: OOF AUC 0.83287 | KS 0.50482 (mean-fold 0.50729) | fold AUC [0.832, 0.8371, 0.8411, 0.8323, 0.8222] | iter [186, 201, 171, 136, 194] | 0.8 mnt
+  keputusan: DITERIMA (vs E70: delta mean-fold +0.00060 (pooled OOF +0.00056), membaik di 4/5 fold, batas -0.0003)
+  top 15 fitur (gain):
+rp_share_dpd1                25441.0
+ec_w90_order_intensity        8349.0
+ec_w30_order_intensity        6795.0
+bu_score_mean                 5933.0
+rp_maxdpd_median              4253.0
+ec_w14_order_intensity        4070.0
+bu_score_max                  3866.0
+rp_max_days_past_due_mean     3726.0
+pa_active_months_left_sum     3584.0
+ec_spend_mean                 3531.0
+bu_score_min                  3448.0
+rp_share_dpd30                3263.0
+bu_score_A                    3188.0
+ec_w90_spend                  2755.0
+ec_w180_order_intensity       2659.0
+SELESAI

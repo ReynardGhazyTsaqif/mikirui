@@ -1,0 +1,21 @@
+{
+  "objective": "binary",
+  "metric": "auc",
+  "learning_rate": 0.02,
+  "num_leaves": 33,
+  "min_child_samples": 103,
+  "feature_fraction": 0.5146901982034298,
+  "bagging_fraction": 0.5232252063599989,
+  "bagging_freq": 1,
+  "lambda_l2": 0.007122305833333868,
+  "max_bin": 127,
+  "seed": 42,
+  "deterministic": true,
+  "force_row_wise": true,
+  "num_threads": 4,
+  "verbose": -1,
+  "max_depth": 10,
+  "lambda_l1": 0.26926469100861794,
+  "min_gain_to_split": 0.06505159298527952,
+  "extra_trees": false
+}

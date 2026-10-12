@@ -1,0 +1,25 @@
+=== E87
+E87: 176 fitur, train (70000, 176), test (30000, 176)
+  seed 42: OOF AUC 0.83363 | KS 0.50531 (mean-fold 0.50912) | fold AUC [0.8342, 0.8362, 0.84, 0.8329, 0.825] | iter [266, 251, 244, 179, 250] | 1.2 mnt
+  keputusan: KANDIDAT ENSEMBLE (vs E71b: Spearman 0.975 | blend 50/50 +0.00221 | bobot terbaik 0.55 -> +0.00225 mean-fold AUC, KS 0.5051 -> 0.5076)
+=== E81
+E81: 176 fitur, train (70000, 176), test (30000, 176)
+  seed 42: OOF AUC 0.83306 | KS 0.50546 (mean-fold 0.50784) | fold AUC [0.8348, 0.8362, 0.8402, 0.8315, 0.8226] | iter [224, 342, 249, 214, 221] | 2.1 mnt
+  keputusan: KANDIDAT ENSEMBLE (vs E71b: Spearman 0.977 | blend 50/50 +0.00173 | bobot terbaik 0.55 -> +0.00173 mean-fold AUC, KS 0.5051 -> 0.5078)
+=== E82
+E82: 176 fitur, train (70000, 176), test (30000, 176)
+  seed 42: OOF AUC 0.82315 | KS 0.48869 (mean-fold 0.49087) | fold AUC [0.8226, 0.8269, 0.8325, 0.8213, 0.8124] | iter [0, 0, 0, 0, 0] | 0.6 mnt
+  keputusan: KANDIDAT ENSEMBLE (vs E71b: Spearman 0.921 | blend 50/50 +0.00042 | bobot terbaik 0.25 -> +0.00152 mean-fold AUC, KS 0.5051 -> 0.5069)
+=== E84
+E84: 176 fitur, train (70000, 176), test (30000, 176)
+  seed 42: OOF AUC 0.81896 | KS 0.48336 (mean-fold 0.48491) | fold AUC [0.8182, 0.8193, 0.8276, 0.8206, 0.8094] | iter [0, 0, 0, 0, 0] | 6.5 mnt
+  keputusan: KANDIDAT ENSEMBLE (vs E71b: Spearman 0.932 | blend 50/50 -0.00219 | bobot terbaik 0.15 -> +0.00035 mean-fold AUC, KS 0.5051 -> 0.5060)
+=== E83
+E83: 176 fitur, train (70000, 176), test (30000, 176)
+  seed 42: OOF AUC 0.82094 | KS 0.48477 (mean-fold 0.48955) | fold AUC [0.8266, 0.8243, 0.8332, 0.8088, 0.8158] | iter [16, 17, 14, 22, 12] | 2.1 mnt
+  keputusan: KANDIDAT ENSEMBLE (vs E71b: Spearman 0.922 | blend 50/50 -0.00021 | bobot terbaik 0.25 -> +0.00129 mean-fold AUC, KS 0.5051 -> 0.5072)
+=== E80
+E80: 176 fitur, train (70000, 176), test (30000, 176)
+  seed 42: OOF AUC 0.83462 | KS 0.50920 (mean-fold 0.51250) | fold AUC [0.8359, 0.8366, 0.8415, 0.8336, 0.8256] | iter [652, 963, 719, 792, 592] | 9.7 mnt
+  keputusan: KANDIDAT ENSEMBLE (vs E71b: Spearman 0.969 | blend 50/50 +0.00296 | bobot terbaik 0.65 -> +0.00310 mean-fold AUC, KS 0.5051 -> 0.5111)
+SELESAI

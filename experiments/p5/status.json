@@ -1,0 +1,32 @@
+{
+  "stages": {
+    "S1_seedbag_dev": "done",
+    "S2_tune_lgb": "done",
+    "S3_tune_cat": "done",
+    "S4_tune_xgb": "partial",
+    "S5_final_train": "done",
+    "S6_ensemble": "done"
+  },
+  "updated": "2026-10-12 09:37:41",
+  "tune_lgb": {
+    "trials": 100,
+    "target": 100,
+    "best": 0.8415530230847134
+  },
+  "tune_cat": {
+    "trials": 40,
+    "target": 40,
+    "best": 0.8404310907628814
+  },
+  "tune_xgb": {
+    "trials": 41,
+    "target": 60,
+    "best": 0.8402655342242907
+  },
+  "logged": {
+    "T_cat_b3_a6abab": true,
+    "T_xgb_b3_565cf6": true,
+    "T_lgb_b3_4f3c7f": true,
+    "T_lgb_selb2_4f3c7f": true
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "base": "E31",
+  "dropped": [],
+  "groups": [
+    "app_raw_v1",
+    "prof_raw_v1",
+    "app_ratios_v1",
+    "pa_naive_v1",
+    "rp_naive_v1",
+    "bu_naive_v1",
+    "bp_naive_v1",
+    "ab_naive_v1",
+    "ec_naive_v1",
+    "rp_core_v1",
+    "ec_window_v1",
+    "pa_burden_v1"
+  ]
+}

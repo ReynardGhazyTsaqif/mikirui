@@ -1,0 +1,9 @@
+# Data panitia besar & hasil yang bisa dibangun ulang
+Dataset/
+features/
+oof/
+preds/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+catboost_info/

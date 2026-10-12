@@ -1,0 +1,25 @@
+{
+  "auc": 0.5034463661904762,
+  "top": {
+    "bu_score_std": 10581.247736215591,
+    "bu_report_age_days_C": 9948.75365948677,
+    "bu_report_age_days_B": 9580.867250442505,
+    "bu_score_B": 8697.950241327286,
+    "ec_qty_mean": 8488.23048567772,
+    "bu_report_age_days_std": 8418.366639852524,
+    "bu_score_C": 8284.95997262001,
+    "bu_score_A": 7963.562187433243,
+    "app_process_hours": 7908.769924402237,
+    "ec_days_since_first_order": 7819.007625818253,
+    "ec_cat_share_health": 7403.757282972336,
+    "ec_cat_share_personal_care": 7314.431219339371,
+    "bu_report_age_days_A": 7125.519791126251,
+    "app_age_started_job": 7122.075359344482,
+    "ec_cat_share_fashion": 6978.52446770668,
+    "bu_outstanding_balance_std": 6952.862952709198,
+    "ec_cat_share_home": 6873.351797819138,
+    "ec_cat_share_groceries": 6838.422047138214,
+    "app_tenure_share_of_age": 6745.227783203125,
+    "app_pti_per_member": 6685.0631630420685
+  }
+}

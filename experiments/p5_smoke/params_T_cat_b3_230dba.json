@@ -1,0 +1,12 @@
+{
+  "depth": 5,
+  "l2_leaf_reg": 41.23206532618726,
+  "random_strength": 3.6599697090570253,
+  "border_count": 64,
+  "rsm": 0.24646688973455957,
+  "grow_policy": "SymmetricTree",
+  "bootstrap_type": "Bayesian",
+  "bagging_temperature": 2.909729556485983,
+  "learning_rate": 0.04,
+  "od_wait": 300
+}

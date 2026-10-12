@@ -1,0 +1,26 @@
+{
+  "stages": {
+    "S1_seedbag_dev": "done",
+    "S2_tune_lgb": "done",
+    "S3_tune_cat": "partial",
+    "S4_tune_xgb": "done",
+    "S5_final_train": "done",
+    "S6_ensemble": "done"
+  },
+  "updated": "2026-10-11 22:27:54",
+  "tune_lgb": {
+    "trials": 2,
+    "target": 2,
+    "best": 0.83683291177706
+  },
+  "tune_cat": {
+    "trials": 2,
+    "target": 2,
+    "best": 0.8279698381654642
+  },
+  "tune_xgb": {
+    "trials": 2,
+    "target": 2,
+    "best": 0.8330144199977396
+  }
+}

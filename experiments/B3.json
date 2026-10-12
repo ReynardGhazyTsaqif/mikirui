@@ -1,0 +1,7 @@
+{
+  "exp_id": "E71b",
+  "featset": "sel_full",
+  "alasan": "Uji 3 seed (experiments/seed_check_b3.csv): E71b dan E71c seri di AUC (0,83286 vs 0,83290), KS E71b lebih tinggi di 3/3 seed (rata-rata 0,5066 vs 0,5043). Dipilih manual walau E71b tercatat DITOLAK di log (seed 42 saja, +0,00031 < 0,0005). E71c disimpan sebagai set kedua untuk ensemble.",
+  "catatan": "Seleksi null importance memakai target seluruh train; skor CV bisa sedikit optimis. Konfirmasi via public LB.",
+  "E72_E74": "Tidak ada yang dipakai: class weight & encoding kategori netral/negatif; monotone (E73) dibatalkan setelah uji 3 seed."
+}

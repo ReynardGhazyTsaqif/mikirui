@@ -1,0 +1,34 @@
+﻿  fitur app_raw_v1          4 kolom  (0.0 mnt)
+  fitur prof_raw_v1         7 kolom  (0.0 mnt)
+  fitur app_ratios_v1      13 kolom  (0.0 mnt)
+  fitur pa_naive_v1        35 kolom  (0.0 mnt)
+  fitur rp_naive_v1        34 kolom  (0.0 mnt)
+  fitur bu_naive_v1        65 kolom  (0.0 mnt)
+  fitur bp_naive_v1        28 kolom  (0.0 mnt)
+  fitur ab_naive_v1        42 kolom  (0.0 mnt)
+  fitur ec_naive_v1        24 kolom  (0.0 mnt)
+  fitur rp_core_v1         21 kolom  (0.0 mnt)
+  fitur rp_window_v1       26 kolom  (0.0 mnt)
+  fitur rp_loan_v1         17 kolom  (0.0 mnt)
+  fitur rp_trend_v1         7 kolom  (0.0 mnt)
+  fitur bu_extra_v1        17 kolom  (0.0 mnt)
+  fitur bp_trend_v1        13 kolom  (0.0 mnt)
+  fitur pa_window_v1       30 kolom  (0.0 mnt)
+  fitur pa_burden_v1       14 kolom  (0.0 mnt)
+  fitur ab_window_v1       36 kolom  (0.0 mnt)
+  fitur ab_income_v1       12 kolom  (0.0 mnt)
+  fitur ec_window_v1       44 kolom  (0.0 mnt)
+  fitur ec_mix_v1          27 kolom  (0.0 mnt)
+  fitur x_cross_v1         10 kolom  (0.0 mnt)
+  fitur x_rate_resid_v1     2 kolom  (0.0 mnt)
+[2026-10-13 12:37:28] === E128 {'seg': ['nohist'], 'lr': 0.02, 'rounds': 15000, 'seeds': [42, 43, 44], 'tag': ''} | punya riwayat train 0.700 test 0.700
+[2026-10-13 12:38:00] E128_nohist seed 42: AUC dalam segmen mean-fold 0.82418 (218 kolom) iter [3382, 1632, 1194, 1315, 2114] (0.5 mnt)
+[2026-10-13 12:38:30] E128_nohist seed 43: AUC dalam segmen mean-fold 0.82471 (218 kolom) iter [2864, 2262, 1540, 1024, 1245] (0.5 mnt)
+[2026-10-13 12:39:00] E128_nohist seed 44: AUC dalam segmen mean-fold 0.82454 (218 kolom) iter [3047, 1479, 1740, 1347, 1810] (0.5 mnt)
+[2026-10-13 12:39:00] --- gabungan segmen nohist
+[2026-10-13 12:39:00] global E130a: mean-fold 0.84314 KS 0.5231
+[2026-10-13 12:39:00]   segmen n=21000: AUC global 0.82579 segmen 0.82444
+[2026-10-13 12:39:00]   w=0.25: mean-fold 0.84318 (delta +0.00004, naik 4/5) KS 0.5229
+[2026-10-13 12:39:01]   w=0.50: mean-fold 0.84314 (delta -0.00000, naik 2/5) KS 0.5226
+[2026-10-13 12:39:01]   w=0.75: mean-fold 0.84301 (delta -0.00013, naik 2/5) KS 0.5224
+[2026-10-13 12:39:01]   w=1.00: mean-fold 0.84280 (delta -0.00034, naik 1/5) KS 0.5218

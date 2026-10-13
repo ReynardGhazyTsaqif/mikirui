@@ -68,12 +68,12 @@ def redundancy_filter(X, importance, corr_thr=0.995, sample=30000):
 
 
 # ---------------------------------------------------------------- E71: null importance
-def null_importance(X, y, n_actual=3, n_null=40, rounds=250, log=print):
+def null_importance(X, y, n_actual=3, n_null=40, rounds=250, log=print, params=None):
     """Gain importance asli (rata-rata n_actual seed) vs distribusi gain dengan target diacak.
 
     Return DataFrame: actual, null_q75, null_max, score = log((1e-10 + actual) / (1 + null_q75)).
     """
-    params = {**LGB_DEV}
+    params = {**LGB_DEV} if params is None else {**params}
     ds = lgb.Dataset(X, y, free_raw_data=False)
 
     def gains(target, seed):

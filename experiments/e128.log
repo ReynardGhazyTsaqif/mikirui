@@ -1,0 +1,36 @@
+[2026-10-13 12:34:59] === E128 {'seg': ['nohist', 'hist'], 'lr': 0.05, 'rounds': 15000, 'seeds': [42], 'tag': '_scr'} | punya riwayat train 0.700 test 0.700
+[2026-10-13 12:35:17] E128_nohist_scr seed 42: AUC dalam segmen mean-fold 0.82294 (218 kolom) iter [1686, 563, 722, 704, 433] (0.3 mnt)
+[2026-10-13 12:36:55] E128_hist_scr seed 42: AUC dalam segmen mean-fold 0.84733 (535 kolom) iter [1179, 1212, 1140, 994, 1526] (1.6 mnt)
+[2026-10-13 12:36:55] --- gabungan segmen nohist
+[2026-10-13 12:36:55] global E130a: mean-fold 0.84314 KS 0.5231
+[2026-10-13 12:36:55]   segmen n=21000: AUC global 0.82579 segmen 0.82242
+[2026-10-13 12:36:55]   w=0.25: mean-fold 0.84311 (delta -0.00002, naik 1/5) KS 0.5232
+[2026-10-13 12:36:55]   w=0.50: mean-fold 0.84295 (delta -0.00019, naik 1/5) KS 0.5224
+[2026-10-13 12:36:55]   w=0.75: mean-fold 0.84266 (delta -0.00048, naik 0/5) KS 0.5219
+[2026-10-13 12:36:55]   w=1.00: mean-fold 0.84225 (delta -0.00089, naik 0/5) KS 0.5205
+[2026-10-13 12:36:55] --- gabungan segmen hist
+[2026-10-13 12:36:55] global E130a: mean-fold 0.84314 KS 0.5231
+[2026-10-13 12:36:55]   segmen n=49000: AUC global 0.84883 segmen 0.84728
+[2026-10-13 12:36:56]   w=0.25: mean-fold 0.84312 (delta -0.00002, naik 2/5) KS 0.5224
+[2026-10-13 12:36:56]   w=0.50: mean-fold 0.84292 (delta -0.00021, naik 1/5) KS 0.5218
+[2026-10-13 12:36:56]   w=0.75: mean-fold 0.84257 (delta -0.00057, naik 0/5) KS 0.5204
+[2026-10-13 12:36:56]   w=1.00: mean-fold 0.84203 (delta -0.00111, naik 0/5) KS 0.5205
+[2026-10-13 12:36:56] --- gabungan semua segmen
+[2026-10-13 12:36:56] global E130a: mean-fold 0.84314 KS 0.5231
+[2026-10-13 12:36:56]   segmen n=21000: AUC global 0.82579 segmen 0.82242
+[2026-10-13 12:36:56]   segmen n=49000: AUC global 0.84883 segmen 0.84728
+[2026-10-13 12:36:56]   w=0.25: mean-fold 0.84309 (delta -0.00005, naik 2/5) KS 0.5216
+[2026-10-13 12:36:56]   w=0.50: mean-fold 0.84274 (delta -0.00040, naik 0/5) KS 0.5213
+[2026-10-13 12:36:56]   w=0.75: mean-fold 0.84209 (delta -0.00105, naik 0/5) KS 0.5191
+[2026-10-13 12:36:56]   w=1.00: mean-fold 0.84114 (delta -0.00200, naik 0/5) KS 0.5184
+[2026-10-13 12:37:28] === E128 {'seg': ['nohist'], 'lr': 0.02, 'rounds': 15000, 'seeds': [42, 43, 44], 'tag': ''} | punya riwayat train 0.700 test 0.700
+[2026-10-13 12:38:00] E128_nohist seed 42: AUC dalam segmen mean-fold 0.82418 (218 kolom) iter [3382, 1632, 1194, 1315, 2114] (0.5 mnt)
+[2026-10-13 12:38:30] E128_nohist seed 43: AUC dalam segmen mean-fold 0.82471 (218 kolom) iter [2864, 2262, 1540, 1024, 1245] (0.5 mnt)
+[2026-10-13 12:39:00] E128_nohist seed 44: AUC dalam segmen mean-fold 0.82454 (218 kolom) iter [3047, 1479, 1740, 1347, 1810] (0.5 mnt)
+[2026-10-13 12:39:00] --- gabungan segmen nohist
+[2026-10-13 12:39:00] global E130a: mean-fold 0.84314 KS 0.5231
+[2026-10-13 12:39:00]   segmen n=21000: AUC global 0.82579 segmen 0.82444
+[2026-10-13 12:39:00]   w=0.25: mean-fold 0.84318 (delta +0.00004, naik 4/5) KS 0.5229
+[2026-10-13 12:39:01]   w=0.50: mean-fold 0.84314 (delta -0.00000, naik 2/5) KS 0.5226
+[2026-10-13 12:39:01]   w=0.75: mean-fold 0.84301 (delta -0.00013, naik 2/5) KS 0.5224
+[2026-10-13 12:39:01]   w=1.00: mean-fold 0.84280 (delta -0.00034, naik 1/5) KS 0.5218

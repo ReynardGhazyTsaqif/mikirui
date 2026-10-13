@@ -1,0 +1,7 @@
+[2026-10-13 13:21:23] build fold 0: AUC ecm_mean val 0.7370 (2.3 mnt)
+[2026-10-13 13:23:30] build fold 1: AUC ecm_mean val 0.7413 (2.1 mnt)
+[2026-10-13 13:25:35] build fold 2: AUC ecm_mean val 0.7550 (2.1 mnt)
+[2026-10-13 13:27:53] build fold 3: AUC ecm_mean val 0.7354 (2.3 mnt)
+[2026-10-13 13:30:24] build fold 4: AUC ecm_mean val 0.7330 (2.5 mnt)
+[2026-10-13 13:30:24] fitur disimpan e121_ordermodel_v1_e.npz
+[13/10/2026 13:30:25,62] launcher E121e build selesai 

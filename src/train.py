@@ -132,7 +132,7 @@ def write_submission(test_ids, test_pred, name):
     assert sub["default_probability"].between(0, 1).all()
     SUBMISSIONS_DIR.mkdir(exist_ok=True)
     path = SUBMISSIONS_DIR / f"{name}.csv"
-    sub.to_csv(path, index=False)
+    sub.to_csv(path, index=False, lineterminator="\n")  # LF: MD5 sama di Windows dan Kaggle
     return path, md5(path)
 
 

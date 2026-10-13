@@ -1,0 +1,108 @@
+[2026-10-12 20:39:55] build fold 0: AUC ecm_mean val 0.7370 (1.3 mnt)
+[2026-10-12 20:41:14] build fold 1: AUC ecm_mean val 0.7413 (1.3 mnt)
+[2026-10-12 20:42:14] build fold 2: AUC ecm_mean val 0.7550 (1.0 mnt)
+[2026-10-12 20:43:15] build fold 3: AUC ecm_mean val 0.7354 (1.0 mnt)
+[2026-10-12 20:44:25] build fold 4: AUC ecm_mean val 0.7330 (1.2 mnt)
+[2026-10-12 20:44:26] fitur disimpan e121_ordermodel_v1.npz
+[2026-10-12 20:44:58] build fold 0: AUC ecm_mean val 0.5001 (0.4 mnt)
+[2026-10-12 20:45:24] build fold 1: AUC ecm_mean val 0.5002 (0.4 mnt)
+[2026-10-12 20:45:48] build fold 2: AUC ecm_mean val 0.4993 (0.4 mnt)
+[2026-10-12 20:46:13] build fold 3: AUC ecm_mean val 0.5055 (0.4 mnt)
+[2026-10-12 20:46:39] build fold 4: AUC ecm_mean val 0.5062 (0.4 mnt)
+[2026-10-12 20:46:39] fitur disimpan e121_ordermodel_v1_shuffle.npz
+[2026-10-12 20:46:46] === CV E121 rounds 15000 seeds [42, 43, 44]
+[2026-10-12 20:48:52] E121 seed 42: AUC mean-fold 0.84203 KS 0.5182 iter [3131, 6241, 3589, 2605, 2162] (2.1 mnt)
+[2026-10-12 20:51:03] E121 seed 43: AUC mean-fold 0.84229 KS 0.5204 iter [3558, 5154, 4253, 3099, 2614] (2.2 mnt)
+[2026-10-12 20:53:33] E121 seed 44: AUC mean-fold 0.84248 KS 0.5217 iter [3723, 5451, 3873, 4853, 3277] (2.5 mnt)
+[2026-10-12 20:53:33] E121 BAG [42, 43, 44]: AUC mean-fold 0.84261 KS 0.5207
+[2026-10-12 20:58:37] build fold 0: AUC ecm_mean val 0.7370 (1.9 mnt)
+[2026-10-12 21:00:30] build fold 1: AUC ecm_mean val 0.7421 (1.9 mnt)
+[2026-10-12 21:02:23] build fold 2: AUC ecm_mean val 0.7556 (1.9 mnt)
+[2026-10-12 21:04:02] build fold 3: AUC ecm_mean val 0.7354 (1.7 mnt)
+[2026-10-12 21:05:47] build fold 4: AUC ecm_mean val 0.7327 (1.8 mnt)
+[2026-10-12 21:05:47] fitur disimpan e121_ordermodel_v1_b.npz
+[2026-10-12 21:05:57] === CV E121b rounds 15000 seeds [42, 43, 44]
+[2026-10-12 21:08:15] E121b seed 42: AUC mean-fold 0.84194 KS 0.5197 iter [3560, 7026, 2928, 2755, 3705] (2.3 mnt)
+[2026-10-12 21:10:32] E121b seed 43: AUC mean-fold 0.84225 KS 0.5221 iter [4992, 4478, 3888, 3426, 3194] (2.3 mnt)
+[2026-10-12 21:12:54] E121b seed 44: AUC mean-fold 0.84240 KS 0.5212 iter [4073, 5158, 3590, 3922, 3727] (2.4 mnt)
+[2026-10-12 21:12:54] E121b BAG [42, 43, 44]: AUC mean-fold 0.84253 KS 0.5212
+[2026-10-12 21:14:23] build fold 0: AUC ecm_mean val 0.7327 (1.1 mnt)
+[2026-10-12 21:15:28] build fold 1: AUC ecm_mean val 0.7366 (1.1 mnt)
+[2026-10-12 21:16:36] build fold 2: AUC ecm_mean val 0.7506 (1.1 mnt)
+[2026-10-12 21:17:44] build fold 3: AUC ecm_mean val 0.7309 (1.1 mnt)
+[2026-10-12 21:18:51] build fold 4: AUC ecm_mean val 0.7281 (1.1 mnt)
+[2026-10-12 21:18:51] fitur disimpan e121_ordermodel_v1_c.npz
+[2026-10-12 21:18:59] === CV E121c rounds 15000 seeds [42, 43, 44]
+[2026-10-12 21:21:16] E121c seed 42: AUC mean-fold 0.84228 KS 0.5211 iter [3891, 6211, 3762, 2629, 3475] (2.3 mnt)
+[2026-10-12 21:23:38] E121c seed 43: AUC mean-fold 0.84209 KS 0.5211 iter [4787, 4732, 3792, 3813, 3498] (2.4 mnt)
+[2026-10-12 21:25:40] E121c seed 44: AUC mean-fold 0.84232 KS 0.5212 iter [3342, 3034, 3176, 2791, 3327] (2.0 mnt)
+[2026-10-12 21:25:40] E121c BAG [42, 43, 44]: AUC mean-fold 0.84259 KS 0.5215
+[2026-10-12 21:26:51] build fold 0: AUC ecm_mean val 0.5675 (0.3 mnt)
+[2026-10-12 21:27:07] build fold 1: AUC ecm_mean val 0.5609 (0.3 mnt)
+[2026-10-12 21:27:24] build fold 2: AUC ecm_mean val 0.5662 (0.3 mnt)
+[2026-10-12 21:27:41] build fold 3: AUC ecm_mean val 0.5520 (0.3 mnt)
+[2026-10-12 21:27:59] build fold 4: AUC ecm_mean val 0.5476 (0.3 mnt)
+[2026-10-12 21:27:59] fitur disimpan e121_ordermodel_v1_ab.npz
+[2026-10-12 21:28:32] build fold 0: AUC ecm_mean val 0.6594 (0.3 mnt)
+[2026-10-12 21:28:49] build fold 1: AUC ecm_mean val 0.6600 (0.3 mnt)
+[2026-10-12 21:29:05] build fold 2: AUC ecm_mean val 0.6602 (0.3 mnt)
+[2026-10-12 21:29:22] build fold 3: AUC ecm_mean val 0.6458 (0.3 mnt)
+[2026-10-12 21:29:40] build fold 4: AUC ecm_mean val 0.6397 (0.3 mnt)
+[2026-10-12 21:29:40] fitur disimpan e121_ordermodel_v1_rp.npz
+[2026-10-12 21:30:03] build fold 0: AUC ecm_mean val 0.6673 (0.2 mnt)
+[2026-10-12 21:30:15] build fold 1: AUC ecm_mean val 0.6714 (0.2 mnt)
+[2026-10-12 21:30:33] build fold 2: AUC ecm_mean val 0.6761 (0.3 mnt)
+[2026-10-12 21:30:45] build fold 3: AUC ecm_mean val 0.6774 (0.2 mnt)
+[2026-10-12 21:31:04] build fold 4: AUC ecm_mean val 0.6736 (0.3 mnt)
+[2026-10-12 21:31:04] fitur disimpan e121_ordermodel_v1_bu.npz
+[2026-10-12 21:31:18] build fold 0: AUC ecm_mean val 0.6001 (0.1 mnt)
+[2026-10-12 21:31:23] build fold 1: AUC ecm_mean val 0.6029 (0.1 mnt)
+[2026-10-12 21:31:28] build fold 2: AUC ecm_mean val 0.6078 (0.1 mnt)
+[2026-10-12 21:31:33] build fold 3: AUC ecm_mean val 0.5903 (0.1 mnt)
+[2026-10-12 21:31:38] build fold 4: AUC ecm_mean val 0.5933 (0.1 mnt)
+[2026-10-12 21:31:38] fitur disimpan e121_ordermodel_v1_pa.npz
+[2026-10-12 21:31:50] === CV E121d rounds 15000 seeds [42, 43, 44]
+[2026-10-12 21:34:20] E121d seed 42: AUC mean-fold 0.84191 KS 0.5186 iter [4418, 4199, 3963, 3643, 2616] (2.5 mnt)
+[2026-10-12 21:37:01] E121d seed 43: AUC mean-fold 0.84217 KS 0.5218 iter [4473, 3670, 3372, 3605, 4231] (2.7 mnt)
+[2026-10-12 21:39:21] E121d seed 44: AUC mean-fold 0.84192 KS 0.5172 iter [3297, 3477, 3349, 4344, 2354] (2.3 mnt)
+[2026-10-12 21:39:21] E121d BAG [42, 43, 44]: AUC mean-fold 0.84224 KS 0.5191
+[2026-10-12 21:40:37] basis fitur all: 528 kolom
+[2026-10-12 21:40:38] === CV E130a rounds 15000 seeds [42, 43, 44]
+[2026-10-12 21:45:13] E130a seed 42: AUC mean-fold 0.84291 KS 0.5209 iter [3455, 3621, 4249, 1947, 2371] (4.6 mnt)
+[2026-10-12 21:49:27] E130a seed 43: AUC mean-fold 0.84268 KS 0.5233 iter [2740, 4591, 3164, 2344, 2316] (4.2 mnt)
+[2026-10-12 21:53:50] E130a seed 44: AUC mean-fold 0.84289 KS 0.5217 iter [3222, 3717, 3717, 2386, 3161] (4.4 mnt)
+[2026-10-12 21:53:50] E130a BAG [42, 43, 44]: AUC mean-fold 0.84314 KS 0.5231
+[2026-10-12 22:05:04] basis fitur sel_tuned: 333 kolom
+[2026-10-12 22:05:05] === CV E130b rounds 15000 seeds [42, 43, 44]
+[2026-10-12 22:08:19] E130b seed 42: AUC mean-fold 0.84300 KS 0.5210 iter [3574, 3276, 3789, 1866, 4128] (3.2 mnt)
+[2026-10-12 22:11:54] E130b seed 43: AUC mean-fold 0.84339 KS 0.5214 iter [4377, 4870, 4272, 3125, 2745] (3.6 mnt)
+[2026-10-12 22:14:54] E130b seed 44: AUC mean-fold 0.84289 KS 0.5212 iter [3147, 3533, 3393, 1928, 3813] (3.0 mnt)
+[2026-10-12 22:14:54] E130b BAG [42, 43, 44]: AUC mean-fold 0.84350 KS 0.5217
+[2026-10-13 11:16:31] basis fitur all: 528 kolom
+[2026-10-13 11:16:33] parameter dari study tune_lgb_e146: {'num_leaves': 169, 'max_depth': -1, 'min_child_samples': 76, 'feature_fraction': 0.23410650618823053, 'bagging_fraction': 0.9306295631587163, 'lambda_l1': 3.8788718836937153, 'lambda_l2': 6.643554226596178, 'min_gain_to_split': 0.9662161322106926, 'max_bin': 127, 'extra_trees': True}
+[2026-10-13 11:16:33] === CV E146 rounds 15000 seeds [42, 43, 44]
+[2026-10-13 11:25:58] E146 seed 42: AUC mean-fold 0.84281 KS 0.5217 iter [2715, 3853, 4107, 2626, 2372] (9.4 mnt)
+[2026-10-13 11:35:32] E146 seed 43: AUC mean-fold 0.84288 KS 0.5237 iter [2827, 4038, 3831, 2443, 2472] (9.6 mnt)
+[2026-10-13 11:43:56] E146 seed 44: AUC mean-fold 0.84286 KS 0.5220 iter [3536, 2445, 2650, 2235, 2684] (8.4 mnt)
+[2026-10-13 11:43:56] E146 BAG [42, 43, 44]: AUC mean-fold 0.84313 KS 0.5237
+[2026-10-13 12:50:28] basis fitur all: 528 kolom
+[2026-10-13 12:50:30] fitur tambahan x_pred_v1.parquet: total 540 kolom
+[2026-10-13 12:50:31] parameter dari study tune_lgb: {'num_leaves': 35, 'max_depth': 4, 'min_child_samples': 34, 'feature_fraction': 0.12870618888259533, 'bagging_fraction': 0.9264683082866251, 'lambda_l1': 0.011885886537829151, 'lambda_l2': 7.664965525069028, 'min_gain_to_split': 0.9382501776308856, 'max_bin': 255, 'extra_trees': True}
+[2026-10-13 12:50:31] === CV E125 rounds 15000 seeds [42, 43, 44]
+[2026-10-13 12:56:14] E125 seed 42: AUC mean-fold 0.84274 KS 0.5224 iter [2518, 3072, 2614, 2106, 3244] (5.7 mnt)
+[2026-10-13 13:01:33] E125 seed 43: AUC mean-fold 0.84226 KS 0.5209 iter [2404, 2570, 4026, 2166, 3698] (5.3 mnt)
+[2026-10-13 13:06:12] E125 seed 44: AUC mean-fold 0.84275 KS 0.5228 iter [3650, 2380, 4403, 2166, 2546] (4.7 mnt)
+[2026-10-13 13:06:13] E125 BAG [42, 43, 44]: AUC mean-fold 0.84295 KS 0.5222
+[2026-10-13 13:07:16] basis fitur all: 528 kolom
+[2026-10-13 13:07:17] parameter dari study tune_xgb: {'max_depth': 3, 'min_child_weight': 55.42375509279889, 'subsample': 0.502659645559306, 'colsample_bytree': 0.7845625211063374, 'gamma': 1.770352521901153, 'reg_alpha': 1.5937082080853249, 'reg_lambda': 0.0035254270040396204}
+[2026-10-13 13:07:17] === CV E150_xgb rounds 15000 seeds [42, 43, 44]
+[2026-10-13 13:21:23] build fold 0: AUC ecm_mean val 0.7370 (2.3 mnt)
+[2026-10-13 13:23:30] build fold 1: AUC ecm_mean val 0.7413 (2.1 mnt)
+[2026-10-13 13:25:31] E150_xgb seed 42: AUC mean-fold 0.84197 KS 0.5202 iter [1117, 1094, 1572, 985, 1347] (18.2 mnt)
+[2026-10-13 13:25:35] build fold 2: AUC ecm_mean val 0.7550 (2.1 mnt)
+[2026-10-13 13:27:53] build fold 3: AUC ecm_mean val 0.7354 (2.3 mnt)
+[2026-10-13 13:30:24] build fold 4: AUC ecm_mean val 0.7330 (2.5 mnt)
+[2026-10-13 13:30:24] fitur disimpan e121_ordermodel_v1_e.npz
+[2026-10-13 13:43:11] E150_xgb seed 43: AUC mean-fold 0.84192 KS 0.5203 iter [951, 1741, 1148, 961, 1216] (17.7 mnt)
+[2026-10-13 13:58:30] E150_xgb seed 44: AUC mean-fold 0.84183 KS 0.5209 iter [1049, 1668, 1162, 831, 1020] (15.3 mnt)
+[2026-10-13 13:58:30] E150_xgb BAG [42, 43, 44]: AUC mean-fold 0.84230 KS 0.5206

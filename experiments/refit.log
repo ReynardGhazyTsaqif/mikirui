@@ -1,0 +1,15 @@
+[2026-10-12 20:03:55] === MULAI {'model': 'lgb', 'fs': ['b3', 'selb2'], 'rounds': 15000, 'seeds': [42, 43, 44], 'tag': '_r15k', 'submit': False} | 37 trial selesai
+[2026-10-12 20:08:02] T_lgb_b3_4f3c7f_r15k seed 42: AUC mean-fold 0.83763 KS 0.5142 iter [4336, 6547, 5063, 3421, 5163] (4.1 mnt)
+[2026-10-12 20:11:52] T_lgb_b3_4f3c7f_r15k seed 43: AUC mean-fold 0.83766 KS 0.5141 iter [4922, 6878, 4538, 3658, 3881] (3.8 mnt)
+[2026-10-12 20:16:00] T_lgb_b3_4f3c7f_r15k seed 44: AUC mean-fold 0.83790 KS 0.5147 iter [4835, 5466, 5724, 3415, 5705] (4.1 mnt)
+[2026-10-12 20:16:00] T_lgb_b3_4f3c7f_r15k BAG 3 seed [42, 43, 44]: AUC mean-fold 0.83798 KS 0.5142
+[2026-10-12 20:19:52] T_lgb_selb2_4f3c7f_r15k seed 42: AUC mean-fold 0.83707 KS 0.5132 iter [7380, 9443, 5978, 2839, 6842] (3.9 mnt)
+[2026-10-12 20:23:55] T_lgb_selb2_4f3c7f_r15k seed 43: AUC mean-fold 0.83700 KS 0.5123 iter [6917, 10613, 6743, 3042, 6265] (4.0 mnt)
+[2026-10-12 20:27:54] T_lgb_selb2_4f3c7f_r15k seed 44: AUC mean-fold 0.83706 KS 0.5133 iter [6585, 8873, 8919, 4169, 4586] (4.0 mnt)
+[2026-10-12 20:27:54] T_lgb_selb2_4f3c7f_r15k BAG 3 seed [42, 43, 44]: AUC mean-fold 0.83728 KS 0.5142
+[2026-10-12 20:27:55] === SELESAI
+[2026-10-12 20:28:59] === MULAI {'model': 'lgb', 'fs': ['b3'], 'rounds': 15000, 'seeds': [45, 46], 'tag': '_r15k', 'submit': False} | 37 trial selesai
+[2026-10-12 20:33:10] T_lgb_b3_4f3c7f_r15k seed 45: AUC mean-fold 0.83764 KS 0.5138 iter [5166, 6535, 5254, 3255, 6815] (4.2 mnt)
+[2026-10-12 20:37:18] T_lgb_b3_4f3c7f_r15k seed 46: AUC mean-fold 0.83797 KS 0.5145 iter [5956, 7307, 6329, 3731, 4818] (4.1 mnt)
+[2026-10-12 20:37:18] T_lgb_b3_4f3c7f_r15k BAG 5 seed [42, 43, 44, 45, 46]: AUC mean-fold 0.83806 KS 0.5142
+[2026-10-12 20:37:19] === SELESAI

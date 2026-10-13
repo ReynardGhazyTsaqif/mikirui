@@ -77,12 +77,14 @@ def params_hash(model, tuned):
     return hashlib.md5(json.dumps([model, tuned], sort_keys=True).encode()).hexdigest()[:6]
 
 
-def fit_fold(model, params, X_tr, y_tr, X_va, y_va, X_te, seed):
-    """Satu fold: return (pred_va, pred_te atau None, best_iter)."""
+def fit_fold(model, params, X_tr, y_tr, X_va, y_va, X_te, seed, rounds=None):
+    """Satu fold: return (pred_va, pred_te atau None, best_iter). rounds = batas iterasi (default 5000)."""
+    if rounds and model != "lgb":
+        params = {**params, ("iterations" if model == "cat" else "n_estimators"): rounds}
     if model == "lgb":
         dtr = lgb.Dataset(X_tr, y_tr, params={"max_bin": params.get("max_bin", 255)})
         dva = lgb.Dataset(X_va, y_va, reference=dtr)
-        m = lgb.train({**params, "seed": seed}, dtr, 5000, valid_sets=[dva],
+        m = lgb.train({**params, "seed": seed}, dtr, rounds or 5000, valid_sets=[dva],
                       callbacks=[lgb.early_stopping(200, verbose=False)])
         p_te = None if X_te is None else m.predict(X_te, num_iteration=m.best_iteration)
         return m.predict(X_va, num_iteration=m.best_iteration), p_te, m.best_iteration

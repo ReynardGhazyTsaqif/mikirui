@@ -7,7 +7,7 @@ description: Audit kebocoran (leakage) dan konsistensi train/test untuk fitur DS
 
 Kebocoran membuat CV terlalu optimis lalu gagal di private (45% nilai), dan di final juri akan bertanya bagaimana kita menjamin tidak ada kebocoran waktu. Audit ini punya tiga lapis: baca kode, cek angka, dan uji khusus untuk fitur bertarget. Laporkan temuan apa adanya; jangan "memperbaiki" angka agar terlihat aman.
 
-Konteks data yang sudah diverifikasi (CLAUDE.md dan riset 12 Okt): semua timestamp tabel pendukung < `decision_datetime` aplikasi saat ini, split train/test acak, tidak ada kebocoran lewat ID atau urutan baris. Jadi bahaya terbesar bukan di data mentah, melainkan di **kode fitur kita sendiri**.
+Konteks data yang sudah diverifikasi (CLAUDE.md, riset 12 Okt, eksplorasi 17 Okt): semua timestamp tabel pendukung < `decision_datetime` aplikasi saat ini, split train/test acak, tidak ada kebocoran lewat ID atau urutan baris (termasuk `loan_id`, `installment_id`, `order_id`, `order_item_id`, `bureau_observation_id` dan posisi baris di semua tabel pendukung: AUC 0,500–0,505). Jadi bahaya terbesar bukan di data mentah, melainkan di **kode fitur kita sendiri**.
 
 ## Lapis 1: baca kode builder
 
@@ -29,13 +29,13 @@ Buka builder yang berubah (`src/features/*.py`, entri di `src/features/registry.
 python .claude/skills/audit-leakage/scripts/audit_features.py --features features/<grup>_v1.parquet --data-dir Dataset --prefix <prefix_baru>
 ```
 
-Script memeriksa cakupan ID (70.000 train + 30.000 test, tanpa duplikat), nama kolom terlarang, kolom konstan, nilai `inf`, beda tingkat NaN train vs test, beda distribusi train vs test (statistik KS dua sampel), dan AUC univariat terhadap target. Exit code 1 jika ada ERROR.
+Script memeriksa cakupan ID (70.000 train + 30.000 test, tanpa duplikat), nama kolom terlarang, kolom konstan, nilai `inf`, beda tingkat NaN train vs test, beda distribusi train vs test (statistik KS dua sampel), dan AUC univariat terhadap target. Exit code 1 jika ada ERROR; temuan level AUDIT tidak menghentikan script.
 
 Cara membaca hasil:
 
 | Temuan | Arti | Tindakan |
 | --- | --- | --- |
-| AUC univariat ≥ 0,80 | Lebih kuat dari fitur sah terkuat yang diketahui (`rp_share_dpd1` 0,784) | Berhenti. Cari jalur ke target atau ke masa depan sebelum lanjut |
+| AUC univariat ≥ 0,80 (level AUDIT) | **Pemicu audit wajib, bukan penghenti.** Fitur sah bisa sekuat ini (laju lewat-bayar rantai bayar `miss_post` 0,808), dan fitur berupa skor dari model lain memang wajar punya AUC tinggi | Jalankan audit wajib sebelum hasil CV dipercaya: (1) cek cutoff waktu di kode (Lapis 1 butir 1–2), (2) KS train vs test, (3) adversarial validation, (4) uji label acak bila fitur memakai target (Lapis 3). Lanjut bila keempatnya lolos |
 | KS train vs test > 0,05 atau beda NaN > 2 poin | Fitur dihitung berbeda di train dan test | Cari cabang kode atau join yang beda |
 | KS train vs test 0,02–0,05 | Bisa jadi wajar untuk fitur diskrit, bisa jadi bug | Periksa distribusinya |
 | ID tidak lengkap / duplikat | Join salah | Perbaiki sebelum CV |
@@ -48,7 +48,7 @@ Berlaku untuk model level baris (E121), fitur hasil prediksi dengan target (E125
 
 1. **Nested wajib.** Untuk setiap fold luar k: latih model penghasil fitur hanya pada fold ≠ k (dengan CV dalam untuk baris train fold itu), lalu prediksi fold k dan test. Satu model yang dilatih pada semua label train lalu dipakai sebagai fitur = bocor.
 2. **Uji label acak.** Bangun ulang fitur dengan target train diacak (`np.random.default_rng(42).permutation`). Jalankan `audit_features.py` pada keluaran itu: AUC univariat terhadap target **asli** harus ≈ 0,50 (≤ 0,52). Kalau masih tinggi, informasi target asli bocor lewat jalur lain (mis. fitur konteks customer yang meniru agregat).
-3. **Fitur model baris harus intrinsik milik baris** (waktu relatif cutoff, nominal, kuantitas, kategori, metode bayar). Fitur konteks customer di model baris menurunkan nilai screen menjadi ~0 (temuan riset 12 Okt butir J).
+3. **Model baris yang labelnya target customer (gaya E121): fitur harus intrinsik milik baris** (waktu relatif cutoff, nominal, kuantitas, kategori, metode bayar). Fitur konteks customer di model seperti ini menurunkan nilai screen menjadi ~0 (temuan riset 12 Okt butir J). **Model berlabel sendiri** (label milik baris itu, bukan target sekarang: default pinjaman lama H02/H04, lewat-bayar per event H17) **boleh memakai konteks customer** asalkan (a) hasil dan jalur baris itu sendiri dikecualikan dari fiturnya (leave-one-out), (b) untuk model hazard/as-of, kovariat dihitung as-of tanggal baris itu, dan (c) target sekarang tidak pernah dibaca. Uji label acak tetap wajib (acak label baris itu).
 
 ## Laporan ke user
 

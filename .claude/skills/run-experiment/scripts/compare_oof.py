@@ -1,11 +1,21 @@
-"""Bandingkan OOF dua eksperimen secara berpasangan dan terapkan aturan terima.
+"""Bandingkan OOF dua eksperimen secara berpasangan dan terapkan aturan keputusan (berlaku 17 Okt 2026).
+
+Aturan (PROMPT_UTAMA Langkah 4):
+  - Kandidat dan acuan dibandingkan memakai OOF rata-rata >= 3 seed, pada fold yang sama.
+  - Delta = selisih mean-fold AUC. Bootstrap berpasangan berstrata per fold (1000x, seed 42) -> P(delta > 0), CI 95%.
+  - DITERIMA : P >= 0,95 dan delta >= +0,0003
+  - KANDIDAT : 0,80 <= P < 0,95, atau P >= 0,95 tetapi delta < +0,0003 (simpan OOF & preds untuk digabung nanti)
+  - DITOLAK  : P < 0,80
+  - Jumlah fold yang naik hanya informasi. P >= 0,95 dengan hanya 1-2 fold naik -> periksa fold anomali dulu.
+  - Delta > +0,005 dari satu perubahan -> audit kebocoran dulu sebelum diterima.
+  - KS dicatat, keputusan memakai mean-fold AUC.
 
 Contoh:
-    python .claude/skills/run-experiment/scripts/compare_oof.py --base T_lgb_b3_4f3c7f --cand E140a
-    python .claude/skills/run-experiment/scripts/compare_oof.py --base oof/a.npy --cand oof/b.npy --blend --bootstrap 300
+    python .claude/skills/run-experiment/scripts/compare_oof.py --base E122x1 --cand E200
+    python .claude/skills/run-experiment/scripts/compare_oof.py --base oof/a.npy --cand oof/b.npy --json hasil.json
 
 Nama eksperimen dicari sebagai oof/<nama>_s<seed>.npy (>= 2 file -> dirata-rata)
-atau oof/<nama>.npy. OOF diasumsikan berurutan sama dengan baris
+atau oof/<nama>.npy (jumlah seed tidak diketahui). OOF diasumsikan berurutan sama dengan baris
 Dataset/train_applications.csv. Cek dulu dengan --base X --cand X: mean-fold AUC
 harus sama dengan angka di experiments/log.csv.
 """
@@ -97,20 +107,71 @@ def per_fold(y, p, fold):
     return np.array(auc_list), np.array(ks_list)
 
 
+class _WeightedAUC:
+    """AUC berbobot cepat untuk satu fold: urutan skor dihitung sekali, tiap resample hanya bincount O(n).
+
+    Bobot = berapa kali baris terambil dalam resample bootstrap; nilai seri diberi setengah (sama dengan roc_auc_score).
+    """
+
+    def __init__(self, y, p):
+        self.vals, self.inv = np.unique(p, return_inverse=True)
+        self.pos = (y == 1).astype(float)
+        self.neg = 1.0 - self.pos
+        self.g = len(self.vals)
+
+    def __call__(self, w):
+        pw = np.bincount(self.inv, weights=w * self.pos, minlength=self.g)
+        nw = np.bincount(self.inv, weights=w * self.neg, minlength=self.g)
+        below = np.cumsum(nw) - nw
+        tp, tn = pw.sum(), nw.sum()
+        return float(np.dot(pw, below + 0.5 * nw) / (tp * tn))
+
+
 def bootstrap_delta(y, pb, pc, fold, n, seed=SEED):
-    """Bootstrap berstrata per fold untuk delta mean-fold AUC."""
+    """Bootstrap berpasangan berstrata per fold untuk delta mean-fold AUC.
+
+    Tiap resample: di setiap fold baris diambil ulang dengan pengembalian (ukuran sama), baris yang sama dipakai
+    untuk acuan dan kandidat; delta = rata-rata (AUC cand - AUC base) antar fold.
+    Return: (array delta bootstrap, CI 95%, P(delta > 0)).
+    """
     rng = np.random.default_rng(seed)
-    idx_by_fold = [np.flatnonzero(fold == k) for k in np.unique(fold)]
-    out = []
-    for _ in range(n):
+    folds = []
+    for k in np.unique(fold):
+        idx = np.flatnonzero(fold == k)
+        folds.append((len(idx), _WeightedAUC(y[idx], pb[idx]), _WeightedAUC(y[idx], pc[idx])))
+    out = np.empty(n)
+    for b in range(n):
         d = []
-        for idx in idx_by_fold:
-            s = rng.choice(idx, size=len(idx), replace=True)
-            if y[s].min() == y[s].max():
-                continue
-            d.append(roc_auc_score(y[s], pc[s]) - roc_auc_score(y[s], pb[s]))
-        out.append(np.mean(d))
-    return np.percentile(out, [2.5, 97.5]), float(np.mean(np.array(out) > 0))
+        for m, fb, fc in folds:
+            w = np.bincount(rng.integers(0, m, m), minlength=m).astype(float)
+            d.append(fc(w) - fb(w))
+        out[b] = np.mean(d)
+    return out, np.percentile(out, [2.5, 97.5]), float(np.mean(out > 0))
+
+
+def decide(delta, p_pos, n_up, n_folds, min_seed, a):
+    """Terapkan aturan 17 Okt. Return (keputusan, catatan)."""
+    notes = []
+    if p_pos >= a.p_accept and delta >= a.min_delta:
+        decision = "DITERIMA"
+        if n_up <= 2:
+            decision = "DITERIMA (BERSYARAT)"
+            notes.append(f"P >= {a.p_accept} tetapi hanya {n_up}/{n_folds} fold naik: periksa fold anomali sebelum menerima.")
+    elif p_pos >= a.p_accept:
+        decision = "KANDIDAT"
+        notes.append(f"P >= {a.p_accept} tetapi delta < {a.min_delta:+.4f}: simpan OOF & preds untuk digabung nanti.")
+    elif p_pos >= a.p_candidate:
+        decision = "KANDIDAT"
+        notes.append("Simpan OOF & preds untuk digabung nanti.")
+    else:
+        decision = "DITOLAK"
+    if min_seed is None or min_seed < a.min_seeds:
+        notes.append(f"Salah satu sisi < {a.min_seeds} seed (atau jumlah seed tidak diketahui): keputusan BELUM SAH; "
+                     f"ulangi dengan OOF rata-rata >= {a.min_seeds} seed.")
+        decision = f"BELUM SAH ({decision} bila seed cukup)"
+    if delta > 0.005:
+        notes.append("Delta > +0,005 dari satu perubahan: jalankan audit-leakage sebelum melapor diterima.")
+    return decision, notes
 
 
 def main():
@@ -122,12 +183,12 @@ def main():
     ap.add_argument("--folds", default="folds/folds.csv",
                     help="CSV application_id,fold; jika tidak ada, fold dibuat ulang (seed 42)")
     ap.add_argument("--seeds", type=int, nargs="*", help="batasi ke seed tertentu")
-    ap.add_argument("--min-delta", type=float, default=0.0005)
-    ap.add_argument("--min-folds", type=int, default=4)
-    ap.add_argument("--thin", type=float, default=0.001,
-                    help="di bawah ini keputusan dianggap tipis -> wajib 3 seed")
-    ap.add_argument("--blend", action="store_true", help="kandidat adalah blend: wajib >= 3 seed")
-    ap.add_argument("--bootstrap", type=int, default=0, help="jumlah resample bootstrap (0 = mati)")
+    ap.add_argument("--bootstrap", type=int, default=1000, help="jumlah resample bootstrap (default 1000)")
+    ap.add_argument("--p-accept", type=float, default=0.95, help="ambang P(delta>0) untuk DITERIMA")
+    ap.add_argument("--p-candidate", type=float, default=0.80, help="ambang P(delta>0) minimal untuk KANDIDAT")
+    ap.add_argument("--min-delta", type=float, default=0.0003, help="delta minimal untuk DITERIMA")
+    ap.add_argument("--min-seeds", type=int, default=3, help="seed minimal tiap sisi agar keputusan sah")
+    ap.add_argument("--blend", action="store_true", help="(kompatibilitas) kandidat adalah blend; aturan seed sama")
     ap.add_argument("--json", help="tulis ringkasan ke file JSON")
     a = ap.parse_args()
 
@@ -163,34 +224,20 @@ def main():
     print(f"OOF pooled KS  : {ks(y, pb):.4f} -> {ks(y, pc):.4f}")
     print(f"Spearman base~cand: {rho:.4f}")
 
-    ci = p_pos = None
-    if a.bootstrap:
-        ci, p_pos = bootstrap_delta(y, pb, pc, fold, a.bootstrap)
-        print(f"Bootstrap {a.bootstrap}x: 95% CI delta [{ci[0]:+.5f}, {ci[1]:+.5f}], P(delta>0) = {p_pos:.2f}")
+    boots, ci, p_pos = bootstrap_delta(y, pb, pc, fold, a.bootstrap)
+    print(f"Bootstrap {a.bootstrap}x (berpasangan, berstrata per fold, seed {SEED}): "
+          f"CI 95% delta [{ci[0]:+.5f}, {ci[1]:+.5f}], P(delta>0) = {p_pos:.3f}")
 
     known = [n for n in (nb, nc) if n is not None]
-    min_seed = min(known) if known else None
-    notes = []
-    passed = delta >= a.min_delta and n_up >= a.min_folds
-    if passed and delta < a.thin and (min_seed is None or min_seed < 3):
-        decision = "TIPIS - ulangi dengan 3 seed sebelum diterima"
-    elif passed:
-        decision = "DITERIMA"
-    else:
-        decision = "DITOLAK"
-    if a.blend and (min_seed is None or min_seed < 3):
-        notes.append("Blend dinilai dengan OOF < 3 seed (atau jumlah seed tidak diketahui): "
-                     "kenaikan blend bisa ~2x terlalu optimis. Ulangi dengan OOF rata-rata >= 3 seed.")
-        if decision == "DITERIMA":
-            decision = "TIPIS - blend wajib dinilai dengan OOF >= 3 seed"
-    if delta > 0.005:
-        notes.append("Delta > +0,005 dari satu perubahan: jalankan audit-leakage sebelum melapor diterima.")
+    min_seed = min(known) if len(known) == 2 else None
+    decision, notes = decide(delta, p_pos, n_up, len(auc_b), min_seed, a)
     if a.cand == a.base:
         notes.append("Base = cand: ini cek penyelarasan. Bandingkan mean-fold AUC di atas dengan log.csv.")
 
     print()
-    print(f"Aturan   : delta mean-fold AUC >= {a.min_delta:+.4f} dan naik di >= {a.min_folds}/{len(auc_b)} fold")
-    print(f"Hasil    : delta {delta:+.5f}, naik {n_up}/{len(auc_b)} fold")
+    print(f"Aturan   : DITERIMA jika P(delta>0) >= {a.p_accept} dan delta >= {a.min_delta:+.4f}; "
+          f"KANDIDAT jika P >= {a.p_candidate}; selain itu DITOLAK; OOF >= {a.min_seeds} seed")
+    print(f"Hasil    : delta {delta:+.5f}, P {p_pos:.3f}, naik {n_up}/{len(auc_b)} fold (informasi)")
     print(f"KEPUTUSAN: {decision}")
     for n in notes:
         print(f"CATATAN  : {n}")
@@ -199,12 +246,12 @@ def main():
         with open(a.json, "w", encoding="utf-8") as fh:
             json.dump({
                 "base": a.base, "cand": a.cand, "base_files": fb, "cand_files": fc,
-                "fold_source": fold_src,
+                "n_seed_base": nb, "n_seed_cand": nc, "fold_source": fold_src,
                 "auc_base": auc_b.tolist(), "auc_cand": auc_c.tolist(),
                 "ks_base": ks_b.tolist(), "ks_cand": ks_c.tolist(),
                 "mean_fold_auc_base": float(auc_b.mean()), "mean_fold_auc_cand": float(auc_c.mean()),
                 "delta": delta, "folds_up": n_up, "spearman": float(rho),
-                "bootstrap_ci": None if ci is None else [float(ci[0]), float(ci[1])],
+                "bootstrap_n": a.bootstrap, "bootstrap_ci": [float(ci[0]), float(ci[1])], "p_delta_pos": p_pos,
                 "decision": decision, "notes": notes,
             }, fh, indent=2)
 

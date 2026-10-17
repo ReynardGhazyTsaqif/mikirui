@@ -25,7 +25,9 @@ from sklearn.metrics import roc_auc_score
 
 PREFIXES = ("app_", "prof_", "pa_", "rp_", "bu_", "bp_", "ab_", "ec_", "x_")
 
-AUC_ERR, AUC_WARN = 0.80, 0.75          # rp_share_dpd1 = 0,784 adalah fitur sah terkuat
+# AUC >= 0,80 memicu AUDIT wajib (bukan ERROR): fitur sah bisa sekuat itu (miss_post rantai bayar 0,808)
+# dan skor dari model lain wajar tinggi. Audit: cutoff waktu, KS train-test, adversarial, uji label acak bila bertarget.
+AUC_AUDIT, AUC_WARN = 0.80, 0.75
 KS_ERR, KS_WARN = 0.05, 0.02            # noise KS 70k vs 30k ~ 0,009
 NAN_DIFF_ERR = 0.02
 
@@ -138,8 +140,9 @@ def main():
             auc = roc_auc_score(y[ok_tr], a_tr[ok_tr])
             auc = max(auc, 1 - auc)
             row["auc_univariat"] = auc
-            if auc >= AUC_ERR:
-                add("ERROR", c, f"AUC univariat {auc:.3f} >= {AUC_ERR} - lebih kuat dari fitur sah terkuat; cari kebocoran")
+            if auc >= AUC_AUDIT:
+                add("AUDIT", c, f"AUC univariat {auc:.3f} >= {AUC_AUDIT} - audit wajib: cutoff waktu, KS train-test, "
+                                "adversarial, uji label acak bila memakai target")
             elif auc >= AUC_WARN:
                 add("WARN", c, f"AUC univariat {auc:.3f} - periksa jalur ke target/masa depan")
         if 0.01 < nan_tr < 0.99:
@@ -157,13 +160,21 @@ def main():
         print("\nKolom dengan AUC univariat tertinggi:")
         print(show.head(15).to_string(index=False, float_format=lambda v: f"{v:.4f}"))
     errs = [i for i in issues if i[0] == "ERROR"]
+    audits = [i for i in issues if i[0] == "AUDIT"]
     warns = [i for i in issues if i[0] == "WARN"]
-    print(f"\nERROR {len(errs)}, WARN {len(warns)}")
-    for lvl_, scope, msg in errs + warns[:40]:
+    print(f"\nERROR {len(errs)}, AUDIT {len(audits)}, WARN {len(warns)}")
+    for lvl_, scope, msg in errs + audits + warns[:40]:
         print(f"  [{lvl_}] {scope}: {msg}")
     if len(warns) > 40:
         print(f"  ... {len(warns) - 40} WARN lain (lihat --report)")
-    print("\nSTATUS: " + ("PERLU PERBAIKAN" if errs else "Lapis 2 aman (tetap lakukan Lapis 1 dan adversarial validation)"))
+    if errs:
+        status = "PERLU PERBAIKAN"
+    elif audits:
+        status = (f"Lapis 2 lolos, tetapi AUDIT WAJIB untuk {len(audits)} kolom (cutoff, KS train-test, adversarial, "
+                  "label acak bila bertarget) sebelum hasil CV dipercaya")
+    else:
+        status = "Lapis 2 aman (tetap lakukan Lapis 1 dan adversarial validation)"
+    print("\nSTATUS: " + status)
     sys.exit(1 if errs else 0)
 
 

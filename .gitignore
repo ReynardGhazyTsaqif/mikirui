@@ -1,8 +1,11 @@
 # Data panitia besar & hasil yang bisa dibangun ulang
 Dataset/
-features/
+# hanya cache fitur di root; kode builder src/features/ harus ter-version
+/features/
 oof/
 preds/
+.claude/worktrees/
+.claude/settings.local.json
 __pycache__/
 *.pyc
 .ipynb_checkpoints/

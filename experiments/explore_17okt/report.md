@@ -1,0 +1,408 @@
+# Laporan kerja eksplorasi 17 Okt+ — DSC LOGIKA UI 2026
+
+> Sumber perintah: `PROMPT_UTAMA.md` di root repo (17 Okt 21.11). `LAMPIRAN_ide_eksternal.md` sengaja tidak dibuka sebelum Langkah 3 selesai.
+>
+> Lokasi: file ini ditulis di worktree `.claude/worktrees/explore-17okt` (branch `worktree-explore-17okt`), karena sesi latar ini wajib terisolasi dari checkout utama. Data, cache `features/`, `oof/`, `preds/` dibaca (hanya baca) dari checkout utama `D:\Unand\Sems 7\Lomba\DSC\dsc-logika`. Script analisis ada di folder yang sama dengan file ini.
+
+## 0. Ringkasan satu halaman (selalu diperbarui)
+
+*Status 18 Okt: Langkah 1–3 selesai. Daftar 16 hipotesis diserahkan; menunggu daftar ide user (LAMPIRAN) dan jawaban batch #1–#2. Belum ada eksperimen baru yang dijalankan.*
+
+- **Posisi**: public terbaik tercatat 0,55951 (`E122x1_E141_rank50`, 16 Okt; prompt menyebut 0,55858 → pertanyaan 2.1). CV terbaik: E141x mean-fold AUC 0,84516; acuan GBDT E122x1 0,84495.
+- **Target terverifikasi**: public 0,58 ≈ mean-fold AUC 0,857–0,860 → butuh **+0,012 s.d. +0,015**.
+- **Temuan terpenting**:
+  1. **Cara data dibangkitkan**: tiap customer punya risiko default laten π yang **stabil**; target sekarang berperilaku persis seperti "satu pinjaman lagi" (ICC label antarpinjaman 0,40). Pembayaran hanya terjadi di ulang bulan due (rantai Markov bulanan); laju lewat-bayar datar 23 bulan (0,35 vs 0,15). E-commerce & rekening punya **ramp khusus sebelum keputusan sekarang yang bergantung langsung pada target**. Biro = laten stabil + noise per laporan.
+  2. **Batas informasi bukan penghalang**: dengan π diketahui sempurna AUC ≈ 0,927. Kesalahan model (FN/FP) tidak bisa dibedakan dari kasus benar → gain harus dari **taksiran π yang lebih tajam**, bukan pola baru di kasus salah.
+  3. **Model hampir jenuh** terhadap representasi sekarang: kurva belajar asimtot ≈ 0,848 (lr 0,05); 25+ kandidat sinyal baru |z| < 2. Satu-satunya sisa terukur: **rantai bayar level event** (z 6,3; screen +0,00069, 5/5).
+  4. **Data berlabel tambahan**: 81.745 pinjaman lama lengkap berlabel dari mekanisme yang sama; bukti LOO AUC 0,825 vs 0,817 untuk target; 2× data ≈ +0,002. E126 gagal karena desain as-of.
+  5. Kejanggalan proyek: `src/features/` tidak ter-version; penolakan Fase 2 berbasis 1 seed di dalam noise; parameter tuned berasal dari set 176 kolom; tidak ada kebocoran ID/urutan baris.
+- **Hipotesis teratas** (bagian 5): H01 rantai bayar event (+0,0005–0,001), H02 model bantu PD pinjaman LOO (+0,001–0,003), H03 model sifat statis tanpa riwayat, H04 NN multi-tugas, H05 10-fold + refit. Jumlah jujur semua tuas berbukti ≈ +0,003–0,006.
+- **Kenaikan CV terkumpul**: +0,0000 (belum ada eksperimen; target +0,013).
+- **Rencana berikutnya**: gabung ide user → batch #3 → diff compare_oof/skill/CLAUDE.md → nilai ulang eksperimen lama → uji H01, H02, H05 → putaran penemuan berikutnya (mekanisme ramp & tier).
+- **Pertanyaan terbuka**: batch #1 (13 butir, bagian 2) dan batch #2 (5 butir, bagian 4).
+
+---
+
+## 1. Pemahaman awal (Langkah 1)
+
+### 1.1 Masalah, data, aturan
+
+- **Target**: `target = 1` jika DPD akhir hari pinjaman mencapai 90 dalam 12 bulan kalender setelah pencairan. Semua pinjaman tenor 12 bulan. Train 70.000 (13,58% positif), test 30.000. 1 customer = 1 aplikasi; customer train dan test tidak tumpang tindih.
+- **Metrik**: KS dua sampel (`ks_2samp` prediksi kelas 1 vs 0) = max(TPR − FPR). Hanya bergantung urutan. Dicek ulang hari ini: `src.train.ks_score` = `ks_2samp` persis (0,524551 = 0,524551 pada OOF E122x1).
+- **Data** (`Dataset/`, ±905 MB): 8 tabel. Kunci `customer_id`; biro memakai `application_id` (aplikasi sekarang dan aplikasi lama); cicilan memakai `loan_id` → aplikasi lama. Semua timestamp tabel pendukung < `decision_datetime` (diverifikasi tim 12 Okt). 30% customer tidak punya aplikasi lama sekaligus tidak punya data rekening (persis 21.000 dari 70.000 di train).
+- **Aturan (guidebook hal. 14–18, dibaca ulang)**: wajib Python; dilarang data selain dari panitia; skor penyisihan = Public 45% + Private 45% + notebook 10% (reproduksibilitas dan kelancaran kode); 8 besar lolos hanya jika output notebook = output submisi terpilih di Kaggle; telat −1 poin/menit (30 Okt 23.59 WIB); tidak boleh kerja sama antartim; plagiarisme = diskualifikasi. Larangan "model pretrained berbasis data luar" berasal dari CLAUDE.md/keputusan tim, guidebook hanya menyebut larangan data selain dari panitia.
+- **Kuota**: 3 submission/hari (reset 05.00). Jadwal internal: feature freeze 26 Okt, notebook 27–29 Okt, upload 30 Okt ≤ 12.00 WIB.
+
+### 1.2 Pipeline saat ini
+
+```
+Dataset/ ──► 23 builder grup fitur (src/features, cache features/*_v1.parquet) ──► 528 kolom
+        └──► fitur bertarget nested per fold (format npz tr{k}/va{k}/te{k}):
+               ecm_* (7)    : LightGBM level order e-commerce, agregat per customer (e121.py --build, CPU)
+               seq_* (3)    : GRU / biGRU / Transformer pada urutan order (Kaggle GPU), persentil per blok
+               seqx_* (3)   : GRU pada urutan cicilan / rekening / aplikasi lama (Kaggle GPU), persentil per blok
+   ──► LightGBM tuned (Optuna tune_lgb: leaves 35, depth 4, min_child 34, ff 0,129, bagging 0,926,
+        L1 0,012, L2 7,66, min_gain 0,94, extra_trees, lr 0,02, ES 200 pada fold luar, batas 15000) × 5 fold × 3 seed
+   ──► LightGBM DART (pohon sama, lr 0,05, 5000 ronde, drop 0,1, skip 0,5) × 5 fold × 3 seed
+   ──► blend rank 50:50 ──► submission (round 6, LF)
+```
+
+**Perintah persis untuk mereproduksi submission public terbaik `E122x1_E141_rank50_auc0.84480.csv` (MD5 7da18bf0…)** — direkonstruksi hari ini dari `preds/` dan MD5-nya cocok (`experiments/explore_17okt/` belum berisi script ini; versi sementara ada di `$CLAUDE_JOB_DIR/tmp/repro_sub.py`):
+
+```
+# 0. cache 528 kolom (dibangun otomatis saat pertama dipakai) + fitur order e-commerce nested (CPU)
+python e121.py --build                                   # -> features/e121_ordermodel_v1.npz
+# 1. GPU Kaggle (dataset privat dsc-logika-exp dari `python kaggle/make_dataset.py`, tabel urutan dari
+#    `python kaggle/make_seq_tables.py`): e122_gru.ipynb, e122_bigru.ipynb, e122_tf.ipynb, e122x_single.ipynb
+python kaggle/import_results.py
+python kaggle/rank_blocks.py features/e122_gru_v1.npz features/e122_gru_v1r.npz      # dst. untuk _bigru, _tf, e122x_rp/ab/pa
+# 2. CV + prediksi test
+python e121.py --cv --use e121_ordermodel_v1.npz+e122_gru_v1r.npz+e122_gru_v1_bigrur.npz+e122_gru_v1_tfr.npz+e122x_rp_v1r.npz+e122x_ab_v1r.npz+e122x_pa_v1r.npz --basefs all --name E122x1
+python e141.py --rounds 5000 --lr 0.05 --seeds 42 43 44 --name E141          # DART pada set E130a (hanya ecm)
+# 3. blend: bag(x) = rank(rata-rata rank seed 42/43/44); sub = round(rank(0.5*bag(E122x1)+0.5*bag(E141))/30000, 6)
+#    merge ke sample_submission, to_csv(lineterminator="\n")  (pola experiments/make_sub_e141x.py)
+```
+
+Komponen GPU (seq_*, seqx_*) dilatih di Kaggle T4 dengan `torch.use_deterministic_algorithms(True, warn_only=True)`: reproduksi bit-identik belum diuji → tag **butuh cek**. Komponen lain CPU-deterministik (LightGBM `deterministic=True`, `force_row_wise=True`, 4 thread).
+
+### 1.3 Verifikasi hubungan public–CV (dari `submissions/LOG.md` + `experiments/log.csv`)
+
+| Subset submission | Regresi public ~ mean-fold AUC | r | AUC untuk public 0,58 |
+|---|---|---|---|
+| 9 pertama (versi Riset bag. 10) | public = −0,913 + 1,742·AUC | 0,956 | **0,8568** |
+| Semua 20 | public = −0,723 + 1,514·AUC | 0,958 | 0,8604 |
+| GBDT saja (14) | public = −0,754 + 1,553·AUC | 0,978 | 0,8592 |
+| GBDT dengan AUC > 0,84 (9) | tidak ada hubungan (r = −0,05) | — | — |
+
+- Kesimpulan: target CV **0,857–0,860** terkonfirmasi (+0,012 s.d. +0,015 dari 0,845). Di pita 0,842–0,846 public sudah tidak bisa membedakan model (sd selisih berpasangan 0,003–0,004).
+- Selisih **public − OOF KS** sangat stabil: GBDT rata-rata +0,0339 (sd 0,0021), blend lintas keluarga +0,027–0,031. Sumber yang masuk akal: prediksi test = rata-rata 5 model fold (lebih kuat dari OOF 1 model per baris), bias positif KS pada sampel kecil, dan keberuntungan subset public yang sama untuk semua submission. Implikasi: private kemungkinan lebih rendah dari public untuk semua tim; yang penting adalah kekuatan relatif.
+
+### 1.4 Peta informasi (setiap kolom mentah)
+
+Legenda: **D** = dipakai mendalam (banyak turunan + diuji model khusus), **K** = hanya agregat kasar/mentah, **B** = belum disentuh sebagai fitur. "B3" = masuk set 176 kolom terpilih; set acuan sekarang memakai semua 528 kolom.
+
+| Tabel | Kolom | Status | Dipakai di |
+|---|---|---|---|
+| applications | application_datetime | K | app_hour/dow/month, process_hours (E02 ditolak; probe 12 Okt: lama proses AUC 0,502) |
+| | decision_datetime | D sebagai cutoff, K sebagai fitur | dec_hour saja; tanggal/hari bulan/jarak ke akhir bulan belum |
+| | loan_amount, proposed_monthly_installment | D | mentah, PTI, LTI, vs pinjaman lama, total PTI |
+| | annual_interest_rate | D | mentah, interaksi, rate_pred/resid (E61 netral) |
+| | term_months | — | konstan 12 |
+| | loan_purpose | K | kategori native |
+| customer_profiles | age, employment_tenure_months, dependents | K | mentah + 3 rasio |
+| | declared_monthly_income | K–D | mentah, PTI/LTI, vs income rekening (E41), belanja vs income (E60), `total_vi` di model order |
+| | region, employment_type, housing_status | K | kategori native (tidak informatif sendirian) |
+| previous_applications | decision_datetime, decision | D | jumlah/porsi/jendela 30–365 hari, recency, keputusan terakhir, pinjaman aktif, GRU seqx_pa |
+| | application_datetime | K | umur aplikasi, lama proses rata-rata |
+| | requested_amount, approved_amount, term_months, annual_interest_rate, scheduled_monthly_installment | K–D | naive stats, beban aktif (E31 diterima), rasio vs pinjaman sekarang, GRU seqx_pa |
+| | loan_id | K | join ke cicilan (rp_loan E12 ditolak 1 seed; pinjaman baru belum jatuh tempo) |
+| repayment_history | due_date, amount_due, amount_paid, last_payment_datetime, days_past_due, max_days_past_due | D | rp_naive/core/window/loan/trend, GRU seqx_rp, model baris E121d (+0,0001) |
+| | installment_id | — | ID (tidak dipakai) |
+| | urutan cicilan dalam pinjaman, pola bayar parsial, selisih amount_due vs jadwal | B | hanya implisit di GRU seqx_rp (`inst_k`) |
+| bureau_observations (sekarang) | score | D | pivot A/B/C, statistik, skor segar berbobot, delta vs laporan lama |
+| | active_accounts, outstanding_balance, revolving_*, utilization, inquiries_last_6m, delinquent_accounts_last_12m | K–D | pivot + statistik + jumlah (bu_naive/bu_extra) |
+| | report_datetime, available_datetime | K | umur laporan, avail_age_min; jeda report→available, laporan terbit setelah `application_datetime` (1%) belum |
+| bureau_observations (aplikasi lama) | semua kolom | K | bp_naive (mean/max/min), bp_trend (E21 ditolak 1 seed), ringkasan per aplikasi lama di seqx_pa |
+| account_behavior | closing/average/minimum_balance, inflows, outflows, income_like_credits, low_balance_days | K–D | naive, jendela 3/6/12 bln, slope, CV, vs income deklarasi (E40/E41 ditolak 1 seed), GRU seqx_ab, model baris (+0,0001) |
+| | opening_balance | K | naive saja; kontinuitas opening(m) vs closing(m−1) belum dicek |
+| | month | K | indeks bulan dari belakang |
+| ecommerce_transactions | transaction_datetime, order_total, order_status | D | recency, jendela 3–365 hari, intensitas, gap, model order ecm_*, GRU seq_* |
+| | product_category, item_total, quantity, payment_method | K–D | porsi kategori/metode, pergeseran (E51 ditolak −0,0021), fitur model order |
+| | jam/hari order | K | share_night/weekend (E51), fitur model order |
+
+Catatan: probe 16 Okt menyatakan semua kolom mentah dirujuk di `src/features`. Yang **belum** disentuh adalah relasi antarkolom dan antartabel yang spesifik (kontinuitas saldo, jadwal vs realisasi cicilan, waktu terbit laporan biro vs waktu aplikasi, kalender keputusan), bukan kolomnya.
+
+### 1.5 Riwayat eksperimen dan kualitas bukti
+
+Aturan lama: Δ mean-fold AUC ≥ +0,0005 dan ≥ 4/5 fold. Noise antar seed: E03 std 0,00013; set besar (E31) std ±0,0006; LGB tuned bag 3 seed jauh lebih stabil.
+
+| ID | Isi | Hasil (mean-fold AUC) | Seed / acuan | Kualitas bukti | Alasan tolak yang sebenarnya |
+|---|---|---|---|---|---|
+| E01–E03 | baseline B0 → agregat naif | 0,6517 → 0,8256 | 1 | kuat (lompatan besar) | — |
+| E02 | rasio aplikasi/profil | −0,0010 | 1, vs E01 | lemah | tidak terbukti; 4 kolomnya kemudian lolos null importance |
+| E10 | rp_core | +0,0010 diterima | 1, vs E03 | sedang | — |
+| E11 / E12 / E13 | rp jendela / per pinjaman / tren | −0,0000 / −0,0003 / +0,0001 | 1, vs E10 | **lemah** (di dalam noise ±0,0006) | tumpang tindih dengan rp_naive/rp_core; 15/9/3 kolomnya lolos null importance |
+| E50 | ec jendela | +0,0039 diterima | 1, vs E10 | kuat | — |
+| E51 | ec metode bayar/kategori/pola waktu | −0,0021 | 1, vs E50 | sedang (negatif besar untuk param dev) | dilusi (27 kolom, ff 0,5); hanya 1 kolom lolos null importance |
+| E20 / E21 | biro ekstra / tren biro lama | −0,0004 / −0,0004 | 1 | lemah | tumpang tindih; 6/3 kolom lolos |
+| E30 / E31 | pa jendela / beban aktif | −0,0007 / +0,0014 diterima | 1 | lemah / sedang | E30: tumpang tindih (13 kolom lolos) |
+| E40 / E41 | ab jendela / income | −0,0006 / −0,0004 | 1 | lemah | 0 / 3 kolom lolos; rekening memang lemah (AUC univariat maks 0,576) |
+| E60 / E61 | lintas tabel / residual bunga | −0,0001 / +0,0000 | 1 | lemah | tumpang tindih |
+| E62 | ablation per grup | semua grup B2 berguna | 1 | sedang | — |
+| E70 / E71 | filter redundan / null importance (target seluruh train) | +0,0005 / B3 = 176 kolom (3 seed 0,8329) | 3 | sedang; seleksi bisa sedikit optimis | — |
+| E72–E74 | class weight / monotone / encoding | netral–negatif | 1–3 | sedang | — |
+| E80–E87 | CatBoost/XGB/LR/MLP/ET/extra_trees | 0,8190–0,8346 | 1 → 3 | sedang | dipakai sebagai bahan blend |
+| E90–E92 (P5) | Optuna LGB/Cat/XGB pada B3, fold 0–2 | LGB 0,83788 bag 3 | 3 | sedang | param tuned di set lama |
+| E140a / E144 | 15.000 iterasi / 5 seed | +0,0001 / +0,0001 | 3–5 | kuat (memang kecil) | — |
+| **E121** | model order e-commerce nested (ecm_*) | **+0,00455** (0,84261) | 3, vs T_lgb r15k | kuat, 5/5, audit label acak lolos | — |
+| E121b/c/d/e | model order besar / level item / tabel lain / agregat waktu | −0,0001 … −0,0004 / screen +0,0001 | 3 / screen | sedang | informasi sama dengan ecm_* |
+| E130a | semua 528 kolom + ecm | +0,00053 (0,84314) | 3, vs E121 | sedang (4/5) | — (membuktikan grup "ditolak" berguna dengan param tuned) |
+| E130b | null importance ulang (333 kolom) | +0,00036, 3/5 | 3, vs E130a | sedang | ditolak aturan lama; **perlu dinilai ulang dengan aturan baru** |
+| E146 | Optuna ulang di fold 0–2 | −0,00001 | 3 | sedang | overfit ke fold tuning; tuning 5 fold belum pernah |
+| E125 | prediksi label bantu (bukan target) | −0,00019 | 3 | sedang | informasi sudah tersirat |
+| E128 | model khusus segmen tanpa riwayat | +0,00004 | 3 | sedang | model global sudah menangkap segmen |
+| E150_xgb / E150c | XGB / CatBoost di set besar | 0,84230 / 0,84222 (1 seed) | 3 / 1 | sedang | diversitas kecil (Spearman 0,98–0,99) |
+| E141 | DART | +0,00038 vs E130a, 5/5, P 0,97 | 3 | sedang | "kandidat" aturan lama; **lolos aturan baru** (P ≥ 0,95 & Δ ≥ 0,0003) — perlu dihitung ulang |
+| **E122** | GRU urutan order (seq_gru) | **+0,00097** (0,84411), 5/5 | 3, vs E130a | kuat, uji label acak lolos | — |
+| E122r / E122c | persentil per blok / 3 varian urutan | +0,00019 (P 0,97) / +0,00044 (P 1,00) | 3 | sedang–kuat | E122c **lolos aturan baru**; E122r jadi "kandidat" |
+| E122x1/2/3 | GRU cicilan/rekening/aplikasi lama | +0,00041 (P 0,99) / +0,00033 / +0,00041 | 3, vs E122c | sedang | E122x1 **lolos aturan baru** |
+| E142 | RealMLP / TabM (Kaggle GPU) | 0,8428–0,8448 (seq/iv) | 5 | sedang | blend naik di OOF, tidak di public |
+| E120 | analisis kasus salah | FN berprofil bersih, FP berprofil buruk | — | analisis kualitatif 15 timeline | disimpulkan "keacakan label" |
+| E126 | pinjaman lama sebagai data berlabel | fitur PD 0,00000 (1 seed); baris tambahan +0,0004 (model 96 fitur) | 1 | lemah | as-of hanya 96 fitur, riwayat tipis |
+| E170 | model zona KS | +0,0010 KS / −0,0006 | 1 | lemah | — |
+| E141x | DART di set E122x1 | +0,00020 vs E122x1, 3/5, P 0,85 | 3 | sedang | kandidat |
+
+Pola umum: kenaikan besar hanya datang dari **informasi baru** (agregat semua tabel E03 +0,17; jendela e-commerce E50 +0,004; model order E121 +0,0046; urutan order E122 +0,001). Tuning, seed, blend, seleksi masing-masing ≤ +0,0005. Semua sumber kenaikan ≥ 0,001 sejak E50 berasal dari e-commerce.
+
+### 1.6 Hal janggal / perlu dipertanyakan
+
+1. **`src/features/` tidak ter-version**: pola `features/` di `.gitignore` juga cocok dengan `src/features/`. Builder 528 kolom tidak ada di git (0 file ter-track). Risiko besar untuk notebook final (harus inline semua builder) dan kehilangan kode. Perbaikan: ubah jadi `/features/` lalu commit (minta izin).
+2. **Script pembuat submission public terbaik (`E122x1_E141_rank50`) tidak tersimpan** di repo (hanya varian `make_sub_e141x.py`, belum di-commit). Sudah saya rekonstruksi; MD5 cocok.
+3. **Early stopping memakai fold validasi luar** (`train.run_lgb_cv`, `tuning.fit_fold`): iterasi terbaik dipilih pada data yang dinilai → OOF sedikit optimis. Bias sama untuk semua eksperimen, tetapi memengaruhi perbandingan dengan DART (tanpa ES) dan NN `_iv`.
+4. **Parameter tuned berasal dari set lain**: tuning di B3 (176 kolom, fold 0–2, lr 0,05) lalu dipakai untuk 541 kolom. feature_fraction 0,129 berarti ±23 kolom per pohon di B3 tetapi ±70 di set sekarang. Satu-satunya tuning ulang (E146) hanya di fold 0–2. Tuning 5 fold di set sekarang belum pernah dilakukan.
+5. **Penolakan 1 seed di Fase 2**: Δ −0,0007 … +0,0001 dengan std antar seed ±0,0006 → bukti lemah. E71/E130a membuktikan grup-grup itu berisi kolom berguna. Kesimpulan "fitur X ditolak" dari Fase 2 tidak boleh dipakai untuk menutup arah baru.
+6. **Fitur nested bagian latih berasal dari model 60% data, bagian validasi/test dari model 80% data** (pergeseran skala; sudah diatasi untuk seq_* dengan persentil per blok, ecm_* tidak, E122rr menunjukkan efeknya nol).
+7. **Kolom `diterima` di log tidak bisa dipercaya untuk eksperimen `e121.py`/`e141.py`**: selalu ditulis "kandidat"; keputusan nyata ada di CLAUDE.md/Riset.
+8. **Importance model acuan sekarang tidak tersimpan** (file importance terakhir E87, set B3). Kita tidak tahu kolom apa yang diandalkan E122x1/E141x.
+9. **Analisis kasus salah E120 hanya 15 timeline** dan menyimpulkan "keacakan label". Kesimpulan ini kuat terhadap FN berprofil bersih, tetapi belum menguji pola sistematik (mis. waktu relatif, jadwal cicilan, urutan kejadian lintas tabel) pada ribuan baris.
+10. **E126 (pinjaman lama berlabel)** diuji dengan model 96 fitur sendiri, bukan dengan fitur kaya model utama; sinyal "+0,0004 sebagai baris tambahan" diukur pada model yang lebih lemah. Arah ini belum benar-benar teruji.
+11. **Tidak ada fitur kalender keputusan** (tanggal dalam bulan, jarak ke tanggal jatuh tempo, hari kerja). Probe 12 Okt hanya mengecek efek bulan dan region × bulan.
+12. Prompt menyebut public terbaik 0,55858 (#39); LOG.md mencatat 0,55951 (16 Okt). Perlu konfirmasi angka leaderboard terbaru.
+
+### 1.7 Jadwal sampai feature freeze 26 Okt (usulan)
+
+| Tanggal | Kegiatan |
+|---|---|
+| 17 Okt malam | Langkah 1 (selesai) + batch #1; mulai Langkah 2 |
+| 18 Okt | Langkah 2: proses pembangkitan data, relasi antartabel, kehidupan customer, kasus salah → batch #2; Langkah 3: ≥ 15 hipotesis → serahkan, berhenti |
+| 19 Okt | Gabung ide user + batch #3; diff compare_oof/skill/CLAUDE.md; nilai ulang eksperimen lama dengan aturan baru; mulai uji hipotesis #1–#3 |
+| 20–24 Okt | Siklus builder → audit → screen (jalur cepat) → CV 3 seed → bootstrap; 2–4 hipotesis/hari di laptop, komponen berat di komputer lain/Kaggle; putaran hipotesis kedua dari kegagalan |
+| 25 Okt | Gabungan semua yang diterima + ablation + seed baru (konfirmasi); tuning 5 fold bila set fitur banyak berubah |
+| 26 Okt | **Feature freeze**; daftar kandidat final (best-CV + robust) |
+| 27–29 Okt | Notebook final self-contained, fresh run ×2, mesin kedua, MD5 |
+| 30 Okt ≤ 12.00 | Upload notebook |
+
+---
+
+## 2. Pertanyaan batch #1 (dikirim 17 Okt malam)
+
+**A. Posisi dan leaderboard**
+1. Public terbaik kita sekarang 0,55858 (prompt) atau 0,55951 (`E122x1_E141_rank50`, LOG.md 16 Okt)? Berapa skor #1, #8, #10 terbaru? — *menentukan gap nyata dan apakah 8 besar realistis.*
+2. Berapa persen test yang dipakai public LB (tertulis di halaman Leaderboard Kaggle)? — *menentukan noise public dan seberapa besar private bisa berbeda.*
+3. Berapa submission final yang boleh dipilih di Kaggle (1 atau 2)? Jika 2, mana yang dicocokkan dengan notebook? — *strategi best-CV vs robust.*
+
+**B. Data**
+4. Apakah panitia pernah menyebut asal data (simulasi/sintetis atau data nyata yang dianonimkan)? — *kalau sintetis, struktur pembangkitnya bisa direkonstruksi dari data itu sendiri (sah, data panitia).*
+5. Dictionary bertuliskan "v2". Apakah pernah ada v1 atau update data selama lomba, dan apa yang berubah? — *perubahan versi biasanya menutup kebocoran; itu petunjuk "sambungan" pembangkit data.*
+6. Sejak 12 Okt, apakah tab Discussion/Code di Kaggle sudah dicek lagi (pengumuman host, notebook publik skor tinggi)? — *hanya untuk tahu arah; tidak disalin.*
+
+**C. Notebook final**
+7. Apakah panitia menjalankan ulang notebook, atau hanya mencocokkan output yang tersimpan di .ipynb dengan submisi terpilih? Jika dijalankan ulang: di mesin apa dan ada batas waktu? — *menentukan apakah komponen GPU/berat boleh masuk final.*
+8. Komposisi notebook final sudah diputuskan (dengan atau tanpa fitur GRU dari GPU)? — *acuan yang saya tingkatkan harus pipeline yang benar-benar masuk final; kalau tanpa GRU, acuannya E130a/E141, bukan E122x1.*
+
+**D. Komputasi dan cara kerja**
+9. Spesifikasi "komputer lain yang lebih kuat" (CPU/core, RAM, GPU, OS) dan kapan tersedia? — *untuk tag komputasi; LightGBM bisa beda hasil antar OS/jumlah thread sehingga MD5 berubah.*
+10. Sisa kuota GPU Kaggle minggu ini? — *untuk komponen urutan/NN.*
+11. Untuk Langkah 4 (eksperimen yang menulis `oof/`, `preds/`, `experiments/log.csv`, Riset, CLAUDE.md), boleh saya bekerja langsung di checkout utama? Saat ini saya terisolasi di worktree; checkout utama punya perubahan belum di-commit (log.csv, Riset, CLAUDE.md, LOG.md). — *supaya tidak menimpa pekerjaan Anda.*
+12. Boleh saya perbaiki `.gitignore` (`features/` → `/features/`) dan meng-commit `src/features/`? Apakah repo GitHub `mikirui` privat (boleh push branch)? — *kode fitur saat ini tidak ter-version; push ke repo publik bisa melanggar larangan kerja sama.*
+13. Apakah ada anggota tim yang sedang/akan menjalankan job di laptop, dan jam berapa laptop bebas untuk job panjang? — *RAM 7,7 GB; dua job bersamaan pernah membuat pipeline mati.*
+
+---
+
+## 3. Langkah 2 — Data sampai level baris
+
+Script: `s01`–`s18` di folder ini (semua hanya membaca checkout utama). Residual = target − OOF E122x1 (bag 3 seed) yang dikalibrasi logistik; z = korelasi Pearson rank(fitur) vs residual × √n (noise |z| ≈ 1; |z| > 3 = sinyal di luar model). Alat: `resid.py`.
+
+### 3.1 Bagaimana data dibangkitkan (bukti per tabel)
+
+| Tabel | Struktur yang ditemukan (bukti) |
+|---|---|
+| Aplikasi sekarang | Keputusan jam 08.00–20.59, detik selalu 0, jam seragam; lama proses 0,2–120 jam; nominal kelipatan Rp100 rb; cicilan = anuitas persis; 5 tier bunga; target per bulan 12,0–14,7%, per hari/jam keputusan rata. |
+| Profil | Umur 23–60, income kontinu (bukan bulat), tanggungan 0–4; korelasi Spearman nominal pinjaman ~ income 0,81. |
+| Aplikasi lama | 1–11 per customer (70% customer), Jan 2023–Des 2025; tenor 6/12/18 sama rata; 72% disetujui penuh, sisanya dipotong ke 73–100%; anuitas persis; lama proses sama sebarannya dengan aplikasi sekarang. |
+| Cicilan | Due = tanggal-jam pencairan + k bulan; `amount_due` = cicilan terjadwal (yang terakhir menyesuaikan pembulatan). **Pembayaran hanya terjadi tepat di ulang bulan due**, dialokasikan FIFO ke cicilan tertua, tidak pernah dibayar di muka. Per event customer membayar 0–3 cicilan. DPD karenanya terkuantisasi (0/28–31/59–62/88–92/…). Event berlanjut setelah tenor selama masih menunggak. Default = tunggakan mencapai 3 cicilan pada event 1–9 (setara DPD ≥ 90 dalam 12 bulan). |
+| Biro | 1–3 provider per aplikasi (sekarang dan lama, 100%). Laporan dibuat ≤ 120 hari sebelum aplikasi, tersedia di antara waktu aplikasi dan keputusan. Skor = laten customer **stabil** + noise per laporan independen: korelasi antar provider 0,81, antar aplikasi 0,90–0,91 untuk jarak 0–60 hari maupun > 1 tahun, deviasi provider tidak menetap antar aplikasi (r = 0,005). |
+| Rekening | Akuntansi tertutup sempurna (opening = closing bulan lalu; closing − opening = inflow − outflow; low days > 0 ⇔ min < 250 rb). Panjang riwayat seragam 8–23 bulan, selalu berakhir bulan sebelum keputusan. Ada untuk persis 70% customer yang sama dengan pemilik aplikasi lama. Cicilan dibayar dari rekening: di bulan lewat-bayar outflow turun dan saldo naik. |
+| E-commerce | Riwayat 2 tahun, **dipotong tepat 24 jam sebelum keputusan**. Jam order seragam 0–23 (sintetis). Jumlah order **tidak** terkait target (AUC 0,49); **sebaran waktunya** terkait: rasio-kemungkinan per order +1,03 di 1 hari sebelum keputusan → +0,4 di 25 hari → 0 di ±140 hari → −0,39 di 650 hari. Defaulter: nominal order ±22% lebih besar dan COD +3–6 poin di semua jendela. |
+
+### 3.2 Kehidupan customer dan relasi antartabel
+
+- Customer dengan riwayat (70%): aplikasi lama sejak 2023 → tiap aplikasi mendapat laporan biro → yang disetujui menjadi pinjaman dengan event bayar bulanan → rekening 8–23 bulan terakhir → e-commerce 2 tahun → aplikasi sekarang (laporan biro, tier, keputusan). Customer tanpa riwayat (30%): hanya profil, aplikasi, biro sekarang, e-commerce.
+- **Satu risiko laten per customer yang stabil** menggerakkan semua pinjamannya:
+  - Laju lewat-bayar per event **datar sepanjang 23 bulan** sebelum keputusan: 0,33–0,37 untuk customer yang nantinya default vs 0,15 untuk yang tidak (s06). Tidak ada tren menjelang keputusan.
+  - Korelasi lewat-bayar antarpinjaman milik customer yang sama: rasio vs independen 1,60 di bulan kalender sama, turun ke 1,40 di lag 6–12 bulan → sebagian besar heterogenitas customer tetap, plus guncangan bulanan kecil.
+  - **Label default pinjaman lama sangat berulang**: ICC 0,40 antar pinjaman customer yang sama (81.745 pinjaman berjendela lengkap); P(default | pinjaman lain default) 0,44 vs 0,09 (s14).
+  - **Target sekarang = "satu pinjaman lagi"** (s14):
+
+    | n pinjaman lama lengkap, k default | P(target) | P(pinjaman lama terbaru default \| k dari n lainnya) |
+    |---|---|---|
+    | n=1, k=0 / k=1 | 0,109 / 0,463 | 0,085 / 0,435 |
+    | n=2, k=0 / 1 / 2 | 0,077 / 0,309 / 0,501 | 0,077 / 0,323 / 0,643 |
+    | n=3, k=0 / 1 / 2 / 3 | 0,058 / 0,177 / 0,384 / 0,585 | 0,076 / 0,272 / 0,411 / 0,600 |
+
+  - Di dalam customer yang sama, ciri pinjaman hampir tidak menentukan pinjaman mana yang default (pasangan beda label: tier lebih tinggi 0,28 vs lebih rendah 0,30; PTI 0,52/0,48; LTI 0,55/0,44) (s16). Tier adalah penilaian lender atas **customer**, bukan atas pinjaman.
+- **Sinyal "ramp" khusus keputusan sekarang**: dalam 1–3 bulan terakhir, defaulter punya outflow/income 0,95 vs 0,81, arus bersih 0,16 vs 0,31, hari saldo rendah 1,64 vs 1,24 (s13); order e-commerce 2–2,8× lebih rapat dalam 7 hari terakhir. Ramp ini **tidak ada sebelum keputusan pinjaman lama** (rasio laju 7 hari 1,19 vs 1,12; P(order 7 hari) 0,28 vs 0,34) dan **bergantung langsung pada target**, tidak hanya pada risiko customer: di kuintil risiko (posterior pinjaman lama) terendah, order 7 hari defaulter 1,04 vs 0,53 (s17).
+
+### 3.3 Batas informasi
+
+- Dengan risiko default per customer π ~ Beta(0,19; 1,33) (rata-rata 0,123, ICC 0,40), **AUC maksimum jika π diketahui sempurna = 0,927** (simulasi 400 rb, s14). Kita di 0,845. Batasnya bukan keacakan label, melainkan ketepatan menaksir π (ditambah ramp yang bergantung pada target).
+- Namun hasil pinjaman lama **sudah dipakai penuh** oleh model: posterior beta-binomial dengan definisi target persis + sensor untuk pinjaman belum lengkap: AUC 0,708, z residual −0,06; model sudah terkalibrasi persis mengikutinya per desil (s15).
+
+### 3.4 Kasus salah model terbaik (E122x1, s17)
+
+| Kelompok | n | punya riwayat | π posterior | q0 | jam order terakhir (median) | order 7 hari | ramp outflow | skor biro | tier |
+|---|---|---|---|---|---|---|---|---|---|
+| FN: y=1, skor < median | 890 | 0,66 | 0,079 | 0,139 | 412 | 0,36 | 1,02 | 676 | 0,205 |
+| TN pembanding: y=0, skor < median | 34.109 | 0,66 | 0,073 | 0,114 | 556 | 0,30 | 0,94 | 688 | 0,200 |
+| FP: y=0, skor > p95 | 1.197 | 0,79 | 0,389 | 0,304 | 47 | 2,43 | 1,36 | 619 | 0,245 |
+| TP pembanding: y=1, skor > p95 | 2.303 | 0,82 | 0,424 | 0,314 | 44 | 2,64 | 1,38 | 614 | 0,249 |
+
+- FN hampir identik dengan TN berskor sama; FP identik dengan TP berskor sama. Kesalahan individual berasal dari undian Bernoulli pada π yang sama, bukan pola yang terlewat (menguatkan E120 dengan ribuan baris).
+- **Baterai sinyal baru** (s07, s08, s09, s11, s13, s15): hanya **proses bayar level event** yang membawa sinyal di luar model — laju mengejar tunggakan `c` z 6,3; laju lewat-bayar saat lancar `q0` z 4,0; bulan sejak lewat-bayar terakhir z −3,0; event setelah tenor z 2,2. Screen tim (11 kolom, `cand_ev_v1.parquet`): **+0,00069 mean-fold AUC, 5/5 fold, |z| maks 6,3 → lolos**. Semua lainnya |z| < 2: skor biro gabungan semua laporan, tier gabungan, keputusan lender, LLR waktu e-commerce (jumlah/rata/30 hari), atribut order, rekening relatif income, waktu biro/aplikasi, order setelah aplikasi, posterior pinjaman lama.
+- **Cek kebocoran** (s11): posisi baris customer di 6 tabel, keterurutan order/aplikasi lama, pola hex `loan_id`/`application_id` → semua AUC 0,500–0,503, |z| ≤ 1,4. Tidak ada kebocoran dari data panitia yang terdeteksi.
+
+### 3.5 Data berlabel tambahan dan kurva belajar
+
+- **Pinjaman lama = label dari mekanisme yang sama** (s20). Regresi logistik 7 fitur dengan bukti *leave-one-loan-out* (hasil pinjaman lengkap lain, laju lewat-bayar event pinjaman lain, skor biro, tier): AUC **0,825** untuk default pinjaman lama tenor 12 (27.868 pinjaman) dan **0,817** untuk target sekarang (customer punya riwayat). Dilatih di pinjaman lama → dinilai di target sekarang: **0,808**; arah sebaliknya 0,817. Koefisien laju lewat-bayar hampir sama (9,3 vs 9,2); tier jauh lebih kuat untuk pinjaman sekarang (0,77 vs 0,15).
+- **Mengapa E126 gagal**: desain *as-of* membuang bukti yang datang setelah pinjaman lama itu (pinjaman berikutnya, pembayaran berikutnya); karena risiko customer stabil, bukti itu sah dan justru yang terkuat (AUC model PD E126 0,704 vs 0,825 di sini).
+- **Kurva belajar** (s18, set E130a, LGB tuned lr 0,05, 1 seed, 5 fold): 14k baris 0,8351 → 28k 0,8392 → 42k 0,8414 → 56k 0,8421. Kurva pangkat: AUC = 0,8479 − 3,56·n^−0,589 → 63k (10-fold) 0,8426, 70k (refit) 0,8429, 112k (2× data) 0,8441, 140k 0,8446. **Model masih lapar data (+0,002 untuk 2× data), tetapi asimtot representasi sekarang ≈ 0,848** (≈ 0,851 untuk versi lr 0,02 bag 3 seed). Data saja tidak cukup untuk 0,858.
+
+### 3.6 Uji tambahan yang negatif (supaya tidak diulang)
+
+| Uji | Hasil |
+|---|---|
+| Interaksi ramp × risiko (z residual ramp per kuintil skor model) | semua dalam noise (maks 2,4 dari 20 uji) |
+| Ramp biro (laporan sekarang − laporan lama: skor, utang, inquiry, delinquent, limit, util) | \|z\| ≤ 2,1 |
+| Aplikasi lama menjelang keputusan (14/30/60/90 hari) | tidak pernah ada dalam 14 hari; \|z\| ≤ 0,4 |
+| Guncangan kalender pada lewat-bayar | P(miss) per bulan 0,173–0,184; sd antar bulan 0,0025 vs sampling 0,0017 |
+| Ciri pinjaman sekarang relatif pinjaman lama (LTI, PTI, tier, nominal) | \|z\| ≤ 1,0 |
+| Segmen tanpa riwayat: sinyal e-commerce | \|z\| ≤ 1,7 |
+
+### 3.7 Implikasi untuk hipotesis
+
+1. Gap ke 0,858 tidak bisa ditutup dengan "pola baru" pada customer yang salah prediksi; harus dari **taksiran risiko customer (π) yang lebih tajam** untuk semua customer, dan dari **ekstraksi informasi baru** (asimtot representasi sekarang ≈ 0,848–0,851).
+2. Sumber yang terbukti masih punya sisa: **rantai bayar level event** (screen +0,0007) dan **data berlabel tambahan dari pinjaman lama** dengan bukti LOO (kurva belajar: 2× data ≈ +0,002; transfer lintas tipe pinjaman 0,808).
+3. Sumber yang terbukti jenuh: hasil pinjaman lama sebagai hitungan, biro, tier, keputusan lender, waktu e-commerce, rekening, waktu aplikasi/biro, interaksi ramp.
+4. Perkiraan jujur: semua tuas yang punya bukti dijumlahkan ≈ +0,003 s.d. +0,006. Sisa gap butuh putaran penemuan berikutnya (Langkah 4), terutama pada **mekanisme ramp** (sinyal yang bergantung langsung pada target sekarang) dan **cara lender menetapkan tier** sekarang (koefisien tier 5× lebih kuat untuk pinjaman sekarang daripada pinjaman lama).
+
+---
+
+## 4. Pertanyaan batch #2 (dikirim 18 Okt dini hari)
+
+1. **Pinjaman lama milik customer test sebagai baris latih model bantu** (18.415 dari 81.745 pinjaman lengkap; label dihitung dari `repayment_history`, bukan dari target test). Saya menilainya sah (data panitia, target test tidak disentuh), tetapi ini pemakaian transduktif data test. Boleh? — *menentukan desain H02/H06; tanpa itu label tambahan turun ke ±63 rb.*
+2. **Sinyal ramp** (order e-commerce rapat dan outflow rekening naik dalam 1–3 bulan terakhir) hanya muncul sebelum keputusan sekarang dan bergantung langsung pada target. Menurut saya ini bukan kebocoran: informasinya tersedia sebelum keputusan (e-commerce dipotong 24 jam sebelum keputusan), lebih mirip "jejak digital" yang memang disuntikkan pembangkit, dan sudah dipakai model sejak E03. Setuju tetap dipakai? — *aturan: pola mirip kebocoran wajib dilaporkan.*
+3. **Definisi label pinjaman lama**: saya memakai "tunggakan ≥ 3 cicilan pada event 1–9" (setara DPD ≥ 90 dalam 12 bulan sejak `decision_datetime`). Apakah tim tahu titik awal "12 calendar months" versi panitia? Jika "tidak tahu", saya uji beberapa varian definisi dan memilih yang paling konsisten dengan pola target sekarang. — *label H02.*
+4. **Prioritas**: tuas yang punya bukti ≈ +0,003–0,006, asimtot representasi sekarang ≈ 0,848–0,851. Urutan yang Anda inginkan: (a) amankan kenaikan pasti dulu (H01, H02, H05) lalu penemuan, atau (b) langsung paralel dengan eksperimen penemuan berisiko (NN multi-tugas, mekanisme ramp/tier)? — *urutan Langkah 4.*
+5. **Batas waktu notebook final**: model bantu PD pinjaman (H02) menambah ±30–60 menit CPU. Apakah ada batas waktu run (terkait batch #1 no. 7)? — *desain final.*
+
+---
+
+## 5. Langkah 3 — Hipotesis (diserahkan 18 Okt; menunggu daftar ide dari user)
+
+Skor = Bukti (1–5) × Dampak (1–5) × Kebaruan (1–3). Bukti: 5 = sinyal residual |z| > 4 atau screen lolos di data kita; 4 = bukti struktural kuat; 3 = bukti tidak langsung yang konsisten; 2 = prinsip umum + petunjuk lemah; 1 = tanpa bukti. Dampak: 5 ≥ +0,003; 4 = +0,0015–0,003; 3 = +0,0007–0,0015; 2 = +0,0003–0,0007; 1 < +0,0003. Kebaruan: 3 = belum pernah; 2 = variasi eksperimen lama dengan alasan berbeda; 1 = pengulangan. Biaya tidak ikut menentukan urutan. Tag reproduksibilitas: **CPU-det** = CPU-deterministik, **GPU**, **cek** = butuh cek.
+
+| # | Hipotesis | B | D | K | Skor | Perkiraan Δ AUC | Komputasi | Tag |
+|---|---|---|---|---|---|---|---|---|
+| H01 | Rantai bayar bulanan level event | 5 | 3 | 3 | **45** | +0,0005–0,001 | CPU < 5 mnt build, CV 3 seed ±20 mnt, RAM 2 GB | CPU-det |
+| H02 | Model bantu PD pinjaman dengan bukti leave-one-loan-out | 4 | 4 | 2 | **32** | +0,001–0,003 | CPU 1–1,5 jam total, RAM 3 GB | CPU-det |
+| H03 | Model bantu "sifat statis" untuk segmen tanpa riwayat | 3 | 3 | 3 | **27** | +0,0005–0,0015 | CPU ±1 jam, RAM 3 GB | CPU-det |
+| H04 | NN multi-tugas: encoder customer atas semua pinjaman | 3 | 3 | 3 | **27** | +0,0007–0,002 | GPU 3–6 jam (Kaggle T4/komputer lain) | GPU |
+| H05 | 10-fold bersarang di 5 fold + refit 100% untuk test | 4 | 2 | 3 | **24** | +0,0003–0,0007 CV | CPU 2× CV (±40 mnt 3 seed) | CPU-det |
+| H06 | Pinjaman lama sebagai baris latih model utama | 3 | 4 | 2 | **24** | +0,001–0,003 (tumpang tindih H02) | CPU builder LOO 528 kolom: dev 1 hari, run 1–2 jam, RAM 4–6 GB (komputer lain) | CPU-det |
+| H07 | Sub-model per sumber bukti (nested) + stacking | 2 | 3 | 3 | **18** | +0,0005–0,002 | CPU 1–2 jam, RAM 3 GB | CPU-det |
+| H08 | Posterior "tipe default" untuk pinjaman yang masih berjalan | 3 | 2 | 3 | **18** | +0,0002–0,0006 | CPU < 30 mnt | CPU-det |
+| H09 | Status bulan kalender terakhir lintas semua pinjaman | 3 | 2 | 3 | **18** | +0,0002–0,0005 | CPU < 5 mnt | CPU-det |
+| H10 | GRU pada rantai event bulanan (kalender) | 3 | 2 | 2 | **12** | +0,0003–0,001 | GPU ±2–3 jam | GPU |
+| H11 | Ramp e-commerce bersyarat risiko (LLR per strata π) | 2 | 2 | 3 | **12** | +0,0002–0,0007 | CPU < 1 jam | CPU-det |
+| H12 | Tuning ulang Optuna 5 fold di set sekarang | 2 | 2 | 2 | **8** | +0,0003–0,001 | CPU 5–8 jam (komputer lain) | CPU-det |
+| H13 | Pangkas kolom yang bertentangan dengan pembangkit + nilai ulang E130b | 2 | 2 | 2 | **8** | +0,0002–0,0005 | CPU 20–40 mnt/varian | CPU-det |
+| H14 | Rekonstruksi skor kontinu lender di balik tier | 2 | 2 | 2 | **8** | +0,0002–0,0007 | CPU < 1 jam | CPU-det |
+| H15 | Pseudo-label test (protokol per fold) | 1 | 2 | 3 | **6** | 0 – +0,0005 | CPU ±1 jam | CPU-det |
+| H16 | Seed bag 5–10 + DART untuk final | 5 | 1 | 1 | **5** | +0,0001–0,0003 | CPU 1–2 jam | CPU-det |
+
+### Rincian per hipotesis
+
+**H01 — Rantai bayar bulanan level event.**
+- *Bukti*: pembayaran hanya terjadi di ulang bulan due, FIFO, 0–3 cicilan per event (s02, s05). Laju lewat-bayar stabil 23 bulan dan memisahkan target (0,33–0,37 vs 0,15, s06). Residual E122x1: `c` (laju mengejar) z 6,3, `catch_rate` 5,1, `q0` 4,0, `miss_post` 3,4, bulan sejak lewat-bayar terakhir −3,0, event pasca-tenor 2,2; fitur DPD lama z ≈ 0 (s07, s10, s11). Screen tim 11 kolom: **+0,00069, 5/5 fold** (s12). `miss_post` AUC univariat 0,808 (> `rp_share_dpd1` 0,784).
+- *Definisi (as-of cutoff = `decision_datetime` aplikasi sekarang)*: per pinjaman lama, event j = 1..J, J = jumlah ulang bulan pencairan yang < cutoff; event setelah tenor hanya dihitung selama masih menunggak. X_j = jumlah cicilan yang lunas penuh dengan `last_payment_datetime` di event j; A_j = min(j, tenor) − ΣX. Per customer: n0/m0 (event dan lewat-bayar saat A_prev = 0), n1/m1 (saat A_prev ≥ 1), p1/c1 (event bayar saat menunggak; yang membayar ≥ 2), `q0`, `q1`, `c` = posterior Beta (prior method of moments dari semua customer, tanpa target), `pd_struct` = P(A mencapai 3 dalam 9 event | q0, q1, c) lewat DP, bulan kalender sejak lewat-bayar terakhir, jumlah event pasca-tenor, laju lewat-bayar 3/6/12 bulan kalender terakhir. Prefix `rp_ev_`.
+- *Dampak*: screen +0,0007; CV penuh biasanya 60–100% dari screen → +0,0005–0,001.
+- *Kebocoran*: tanpa target; hanya cicilan due < cutoff dan alokasi pembayaran < cutoff (dictionary). AUC univariat `miss_post` 0,81 → audit wajib: cek cutoff kode, KS train-test, adversarial. Uji label acak tidak perlu (tanpa target).
+- *Kebaruan*: belum pernah (E10–E13 memakai DPD per cicilan; GRU seqx_rp memakai baris cicilan, bukan event).
+
+**H02 — Model bantu PD pinjaman dengan bukti leave-one-loan-out (LOO).**
+- *Bukti*: ICC label default antarpinjaman customer 0,40; target sekarang = "satu pinjaman lagi" (tabel 3.2); regresi logistik LOO 7 fitur AUC 0,825 (pinjaman lama) vs 0,817 (target sekarang), transfer silang 0,808 (s20); kurva belajar: 2× data ≈ +0,002 (s18). E126 gagal karena desain as-of membuang bukti setelah pinjaman (AUC 0,704).
+- *Definisi*: baris = pinjaman lama dengan jendela 12 bulan lengkap sebelum cutoff (81.745 dari semua 100 rb customer; varian: hanya tenor 12, 27.868, + tenor sebagai fitur). Label = A ≥ 3 pada event 1–9. Fitur = bukti customer **tanpa** pinjaman itu: hasil pinjaman lengkap lain (k, n, tersensor), statistik H01 dihitung tanpa event pinjaman itu, semua laporan biro, profil, ciri pinjaman itu (tier, tenor, LTI, PTI, potongan approved/requested), sifat e-commerce stabil (N order, porsi COD, nominal) **tanpa** ramp sekarang. LightGBM, CV GroupKFold per customer untuk memilih iterasi. Prediksi aplikasi sekarang dengan bukti penuh + ciri pinjaman sekarang → `x_auxpd` (probabilitas dan logit) sebagai fitur model utama.
+- *Dampak*: +0,001–0,003 (setara sebagian "2× data" untuk komponen π, ditambah pemetaan bukti yang lebih bersih).
+- *Kebocoran*: target sekarang tidak pernah dibaca → tidak perlu nested. Risiko: fitur pinjaman itu memuat dirinya sendiri (harus dikecualikan event & hasilnya); guncangan bulan bersama membuat baris pinjaman lama sedikit optimis (tidak menyentuh target). Pinjaman lama milik customer train dan test diperlakukan simetris. Audit: (1) acak label pinjaman lama → `x_auxpd` harus kehilangan nilai di CV; (2) adversarial train vs test; (3) grep kode: kolom `target` tidak dibaca.
+- *Kebaruan*: variasi E126 dengan alasan berbeda (bukti LOO, bukan as-of; termasuk pinjaman customer test).
+
+**H03 — Model bantu "sifat statis" untuk segmen tanpa riwayat.**
+- *Bukti*: segmen tanpa riwayat (30%) hanya punya biro, profil, aplikasi, e-commerce; AUC model di segmen ini 0,81–0,83 vs 0,85 punya riwayat. Defaulter punya nominal order +22% dan COD +3–6 poin di **semua** jendela (sifat stabil, s09). Kurva belajar: model masih lapar data.
+- *Definisi*: model PD dilatih pada pinjaman lama (seperti H02) **hanya** dengan fitur yang juga dimiliki customer tanpa riwayat: profil (umur disesuaikan ke waktu pinjaman), biro laporan pinjaman itu, ciri pinjaman, sifat e-commerce stabil (tanpa 90 hari terakhir sebelum keputusan sekarang). Diterapkan ke semua aplikasi sekarang → `x_staticpd`.
+- *Dampak*: +0,0005–0,0015 (terutama segmen tanpa riwayat).
+- *Kebocoran*: sama dengan H02; tambahan: jangan memakai e-commerce di jendela ramp sekarang.
+- *Kebaruan*: belum pernah.
+
+**H04 — NN multi-tugas: encoder customer atas semua pinjaman.**
+- *Bukti*: sama dengan H02 (mekanisme bersama); NN setara GBDT di data ini (TabM 0,8448).
+- *Definisi*: sampel = pinjaman (lama lengkap + aplikasi sekarang). Input = urutan pinjaman lain milik customer (ciri, rantai event, hasil) + profil/biro + ciri pinjaman target + (khusus aplikasi sekarang) ramp. Head biner default 12 bulan, bobot tugas per tipe baris. Baris aplikasi sekarang nested per fold (validasi fold k tidak pernah dilatih).
+- *Dampak*: +0,0007–0,002 sebagai fitur/anggota blend (diversitas + data lebih banyak).
+- *Kebocoran*: baris target sekarang wajib nested; uji label acak (acak target dan label pinjaman lama).
+- *Kebaruan*: belum pernah.
+
+**H05 — 10-fold bersarang di 5 fold + refit 100% untuk test.**
+- *Bukti*: kurva belajar: 63k baris → +0,0005, 70k → +0,0008 (s18).
+- *Definisi*: tiap fold k dibelah 2 (StratifiedKFold(2, seed 42) di dalam fold) → 10 sub-fold; model dilatih di 9/10 data; mean-fold AUC tetap dihitung pada 5 fold asli. Fitur nested memakai `tr{k}`/`va{k}` yang ada (model luar fold k tidak pernah melihat label fold k → aman untuk kedua sub-fold). Test = rata 10 model; versi refit 100% (iterasi rata-rata × 1,1) hanya untuk submission.
+- *Kebocoran*: rendah; audit penyelarasan fold.
+- *Kebaruan*: belum pernah (E145 refit tanpa ukuran CV).
+
+**H06 — Pinjaman lama sebagai baris latih model utama.**
+- *Bukti*: H02 + kurva belajar.
+- *Definisi*: latih model utama pada aplikasi sekarang fold latih ∪ pinjaman lama lengkap (fitur 528 kolom versi LOO + indikator tipe baris); pinjaman lama milik customer validasi fold k (dan grup test yang sesuai) dikeluarkan dari latih fold k agar tidak "menghafal" customer.
+- *Kebocoran*: tinggi jika pengelompokan salah (ICC 0,4) → GroupKFold konsisten + uji label acak.
+- *Kebaruan*: variasi E126(c) (baris tambahan +0,0004 pada model 96 fitur) dengan fitur LOO kaya.
+
+**H07 — Sub-model per sumber bukti (nested) + stacking.**
+- *Bukti*: E121 (sub-model e-commerce) memberi kenaikan terbesar sejak Fase 2 (+0,0046); pembangkit tampak aditif per sumber (π + ramp); model utama depth 4/ff 0,13 jarang menggabungkan banyak kolom satu sumber dalam satu pohon.
+- *Definisi*: 4 model nested (format npz): riwayat (rp/pa/bp + H01), rekening (ab), biro+aplikasi+profil, e-commerce agregat; logit OOF → fitur model utama.
+- *Kebocoran*: nested + uji label acak.
+- *Kebaruan*: baru di level fitur customer (E121d di level baris, +0,0001).
+
+**H08 — Posterior "tipe default" untuk pinjaman yang masih berjalan.**
+- *Bukti*: 56.171 pinjaman tersensor; default terjadi di event 3–9 (S1 = 1; 1; 1; 0,83; 0,65; 0,46; 0,29; 0,19; 0,09; 0); posterior beta-binomial dari pinjaman lengkap sudah terpakai (z ≈ 0), tetapi progres tunggakan pinjaman berjalan (A = 1/2 di event terakhir) belum diperlakukan sebagai bukti tipe default.
+- *Definisi*: per pinjaman berjalan, P(tipe default | jalur) = π·L1/(π·L1 + (1−π)·L0); L1, L0 = likelihood jalur di bawah model Markov yang diestimasi pada pinjaman lengkap default vs tidak; agregat maks dan jumlah per customer.
+- *Kebaruan*: belum pernah.
+
+**H09 — Status bulan kalender terakhir lintas semua pinjaman.**
+- *Bukti*: lewat-bayar antarpinjaman di bulan kalender sama rasio 1,60 vs 1,40 di lag 6–12 (guncangan bulanan bersama); bulan sejak lewat-bayar terakhir z −3,0.
+- *Definisi*: per customer, untuk 1/2/3 bulan kalender terakhir sebelum cutoff: jumlah pinjaman jatuh tempo, lewat-bayar, tunggakan total, indikator semua pinjaman lewat-bayar.
+- *Kebaruan*: belum pernah (rp_window memakai jendela due_date, bukan bulan kalender event lintas pinjaman).
+
+**H10 — GRU pada rantai event bulanan (kalender).** Urutan 24 bulan kalender sebelum cutoff; per bulan: pinjaman aktif, jatuh tempo, dibayar, lewat-bayar, tunggakan total/maks, event pasca-tenor, pencairan baru; nested 5×(1+4)×3 seed seperti E122x. Bukti: H01; GRU baris cicilan (seqx_rp) +0,0004. Variasi E122x dengan representasi berbeda. Tag GPU, determinisme butuh cek.
+
+**H11 — Ramp e-commerce bersyarat risiko.** Bukti: ramp bergantung langsung pada target **di dalam** kuintil π (order 7 hari 1,04 vs 0,53 di kuintil terendah); LLR marginal sudah jenuh (z −1,2) dan z per kuintil dalam noise → bukti lemah bahwa model salah. Definisi: LLR per order dari densitas waktu yang diestimasi per strata π (cross-fit per fold), dijumlahkan per customer. Nested (memakai target) + uji label acak.
+
+**H12 — Tuning ulang Optuna 5 fold di set sekarang.** Bukti: parameter dipilih di B3 (176 kolom, fold 0–2, lr 0,05) lalu dipakai di 541 kolom; E146 (fold 0–2) overfit ke fold tuning; kurva belajar: iterasi naik 629 → 1.361 dengan data. 60–100 trial × 5 fold (lr 0,05), lalu final lr 0,02 3 seed; konfirmasi seed baru. Variasi E146.
+
+**H13 — Pangkas kolom yang bertentangan dengan pembangkit + nilai ulang E130b.** Bukti: laju lewat-bayar datar 23 bulan → kolom jendela/tren rp_ dan ab_ redundan; E130b (333 kolom) +0,00036 (3/5) — status bisa berubah dengan aturan baru. Variasi E130b.
+
+**H14 — Rekonstruksi skor kontinu lender di balik tier.** Bukti: koefisien tier untuk target sekarang 0,77 vs 0,15 untuk pinjaman lama (s20) → tier sekarang memuat informasi spesifik keputusan sekarang; tier diskrit 5 level membuang variasi di dalam tier. Definisi: model ordinal tier ~ semua bukti (tanpa target), cross-fit; fitur = ekspektasi tier, posisi di dalam tier (residual ordinal). Variasi E61 (residual regresi sederhana, netral) dengan model ordinal + bukti lengkap.
+
+**H15 — Pseudo-label test.** Bukti umum (lapar data), tanpa bukti spesifik; label semu dari model fold lain (protokol E160). Dampak kecil.
+
+**H16 — Seed bag 5–10 + DART untuk final.** Bukti terukur (E144 +0,0001; E141x +0,0002, P 0,85). Pengulangan; tetap dipakai di final.
+
+### Ide yang dibuang karena terbantah data (bukti di bagian 3)
+
+| Ide | Bukti yang membantah |
+|---|---|
+| Hitungan hasil pinjaman lama dengan definisi target persis + sensor | posterior beta-binomial z −0,06 (sudah terserap) |
+| Skor biro gabungan semua laporan / berbobot presisi | z −0,9; laten skor stabil tetapi sudah terpakai |
+| Agregat rasio-kemungkinan waktu e-commerce (jumlah/rata/30 hari) | z −1,2 |
+| Agregat rekening relatif income, lonjakan outflow bulan terakhir | \|z\| ≤ 1,5 |
+| Ramp biro sekarang vs laporan lama | \|z\| ≤ 2,1 |
+| Fitur waktu aplikasi/biro (lama proses, jam, hari, lag available) | \|z\| ≤ 0,75 |
+| Ciri pinjaman sekarang relatif pinjaman lama | \|z\| ≤ 1,0 |
+| Bobot peluruhan waktu / jendela recency untuk perilaku bayar (E131) | laju lewat-bayar datar 23 bulan |
+| Efek kalender/musiman pada pembayaran | sd antar bulan ≈ sampling |
+| Fitur posisi baris / ID (cek kebocoran) | AUC 0,500–0,503 |

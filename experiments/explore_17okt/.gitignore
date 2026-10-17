@@ -1,0 +1,3 @@
+# cache hasil script (bisa dibangun ulang dengan s01-s21)
+*.parquet
+__pycache__/

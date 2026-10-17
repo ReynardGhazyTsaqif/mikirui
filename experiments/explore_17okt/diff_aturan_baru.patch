@@ -1,0 +1,421 @@
+--- a/.claude/skills/run-experiment/scripts/compare_oof.py
++++ b/.claude/skills/run-experiment/scripts/compare_oof.py
+@@ -1,11 +1,21 @@
+-"""Bandingkan OOF dua eksperimen secara berpasangan dan terapkan aturan terima.
++"""Bandingkan OOF dua eksperimen secara berpasangan dan terapkan aturan keputusan (berlaku 17 Okt 2026).
++
++Aturan (PROMPT_UTAMA Langkah 4):
++  - Kandidat dan acuan dibandingkan memakai OOF rata-rata >= 3 seed, pada fold yang sama.
++  - Delta = selisih mean-fold AUC. Bootstrap berpasangan berstrata per fold (1000x, seed 42) -> P(delta > 0), CI 95%.
++  - DITERIMA : P >= 0,95 dan delta >= +0,0003
++  - KANDIDAT : 0,80 <= P < 0,95, atau P >= 0,95 tetapi delta < +0,0003 (simpan OOF & preds untuk digabung nanti)
++  - DITOLAK  : P < 0,80
++  - Jumlah fold yang naik hanya informasi. P >= 0,95 dengan hanya 1-2 fold naik -> periksa fold anomali dulu.
++  - Delta > +0,005 dari satu perubahan -> audit kebocoran dulu sebelum diterima.
++  - KS dicatat, keputusan memakai mean-fold AUC.
+ 
+ Contoh:
+-    python .claude/skills/run-experiment/scripts/compare_oof.py --base T_lgb_b3_4f3c7f --cand E140a
+-    python .claude/skills/run-experiment/scripts/compare_oof.py --base oof/a.npy --cand oof/b.npy --blend --bootstrap 300
++    python .claude/skills/run-experiment/scripts/compare_oof.py --base E122x1 --cand E200
++    python .claude/skills/run-experiment/scripts/compare_oof.py --base oof/a.npy --cand oof/b.npy --json hasil.json
+ 
+ Nama eksperimen dicari sebagai oof/<nama>_s<seed>.npy (>= 2 file -> dirata-rata)
+-atau oof/<nama>.npy. OOF diasumsikan berurutan sama dengan baris
++atau oof/<nama>.npy (jumlah seed tidak diketahui). OOF diasumsikan berurutan sama dengan baris
+ Dataset/train_applications.csv. Cek dulu dengan --base X --cand X: mean-fold AUC
+ harus sama dengan angka di experiments/log.csv.
+ """
+@@ -97,20 +107,71 @@
+     return np.array(auc_list), np.array(ks_list)
+ 
+ 
++class _WeightedAUC:
++    """AUC berbobot cepat untuk satu fold: urutan skor dihitung sekali, tiap resample hanya bincount O(n).
++
++    Bobot = berapa kali baris terambil dalam resample bootstrap; nilai seri diberi setengah (sama dengan roc_auc_score).
++    """
++
++    def __init__(self, y, p):
++        self.vals, self.inv = np.unique(p, return_inverse=True)
++        self.pos = (y == 1).astype(float)
++        self.neg = 1.0 - self.pos
++        self.g = len(self.vals)
++
++    def __call__(self, w):
++        pw = np.bincount(self.inv, weights=w * self.pos, minlength=self.g)
++        nw = np.bincount(self.inv, weights=w * self.neg, minlength=self.g)
++        below = np.cumsum(nw) - nw
++        tp, tn = pw.sum(), nw.sum()
++        return float(np.dot(pw, below + 0.5 * nw) / (tp * tn))
++
++
+ def bootstrap_delta(y, pb, pc, fold, n, seed=SEED):
+-    """Bootstrap berstrata per fold untuk delta mean-fold AUC."""
++    """Bootstrap berpasangan berstrata per fold untuk delta mean-fold AUC.
++
++    Tiap resample: di setiap fold baris diambil ulang dengan pengembalian (ukuran sama), baris yang sama dipakai
++    untuk acuan dan kandidat; delta = rata-rata (AUC cand - AUC base) antar fold.
++    Return: (array delta bootstrap, CI 95%, P(delta > 0)).
++    """
+     rng = np.random.default_rng(seed)
+-    idx_by_fold = [np.flatnonzero(fold == k) for k in np.unique(fold)]
+-    out = []
+-    for _ in range(n):
++    folds = []
++    for k in np.unique(fold):
++        idx = np.flatnonzero(fold == k)
++        folds.append((len(idx), _WeightedAUC(y[idx], pb[idx]), _WeightedAUC(y[idx], pc[idx])))
++    out = np.empty(n)
++    for b in range(n):
+         d = []
+-        for idx in idx_by_fold:
+-            s = rng.choice(idx, size=len(idx), replace=True)
+-            if y[s].min() == y[s].max():
+-                continue
+-            d.append(roc_auc_score(y[s], pc[s]) - roc_auc_score(y[s], pb[s]))
+-        out.append(np.mean(d))
+-    return np.percentile(out, [2.5, 97.5]), float(np.mean(np.array(out) > 0))
++        for m, fb, fc in folds:
++            w = np.bincount(rng.integers(0, m, m), minlength=m).astype(float)
++            d.append(fc(w) - fb(w))
++        out[b] = np.mean(d)
++    return out, np.percentile(out, [2.5, 97.5]), float(np.mean(out > 0))
++
++
++def decide(delta, p_pos, n_up, n_folds, min_seed, a):
++    """Terapkan aturan 17 Okt. Return (keputusan, catatan)."""
++    notes = []
++    if p_pos >= a.p_accept and delta >= a.min_delta:
++        decision = "DITERIMA"
++        if n_up <= 2:
++            decision = "DITERIMA (BERSYARAT)"
++            notes.append(f"P >= {a.p_accept} tetapi hanya {n_up}/{n_folds} fold naik: periksa fold anomali sebelum menerima.")
++    elif p_pos >= a.p_accept:
++        decision = "KANDIDAT"
++        notes.append(f"P >= {a.p_accept} tetapi delta < {a.min_delta:+.4f}: simpan OOF & preds untuk digabung nanti.")
++    elif p_pos >= a.p_candidate:
++        decision = "KANDIDAT"
++        notes.append("Simpan OOF & preds untuk digabung nanti.")
++    else:
++        decision = "DITOLAK"
++    if min_seed is None or min_seed < a.min_seeds:
++        notes.append(f"Salah satu sisi < {a.min_seeds} seed (atau jumlah seed tidak diketahui): keputusan BELUM SAH; "
++                     f"ulangi dengan OOF rata-rata >= {a.min_seeds} seed.")
++        decision = f"BELUM SAH ({decision} bila seed cukup)"
++    if delta > 0.005:
++        notes.append("Delta > +0,005 dari satu perubahan: jalankan audit-leakage sebelum melapor diterima.")
++    return decision, notes
+ 
+ 
+ def main():
+@@ -122,12 +183,12 @@
+     ap.add_argument("--folds", default="folds/folds.csv",
+                     help="CSV application_id,fold; jika tidak ada, fold dibuat ulang (seed 42)")
+     ap.add_argument("--seeds", type=int, nargs="*", help="batasi ke seed tertentu")
+-    ap.add_argument("--min-delta", type=float, default=0.0005)
+-    ap.add_argument("--min-folds", type=int, default=4)
+-    ap.add_argument("--thin", type=float, default=0.001,
+-                    help="di bawah ini keputusan dianggap tipis -> wajib 3 seed")
+-    ap.add_argument("--blend", action="store_true", help="kandidat adalah blend: wajib >= 3 seed")
+-    ap.add_argument("--bootstrap", type=int, default=0, help="jumlah resample bootstrap (0 = mati)")
++    ap.add_argument("--bootstrap", type=int, default=1000, help="jumlah resample bootstrap (default 1000)")
++    ap.add_argument("--p-accept", type=float, default=0.95, help="ambang P(delta>0) untuk DITERIMA")
++    ap.add_argument("--p-candidate", type=float, default=0.80, help="ambang P(delta>0) minimal untuk KANDIDAT")
++    ap.add_argument("--min-delta", type=float, default=0.0003, help="delta minimal untuk DITERIMA")
++    ap.add_argument("--min-seeds", type=int, default=3, help="seed minimal tiap sisi agar keputusan sah")
++    ap.add_argument("--blend", action="store_true", help="(kompatibilitas) kandidat adalah blend; aturan seed sama")
+     ap.add_argument("--json", help="tulis ringkasan ke file JSON")
+     a = ap.parse_args()
+ 
+@@ -163,34 +224,20 @@
+     print(f"OOF pooled KS  : {ks(y, pb):.4f} -> {ks(y, pc):.4f}")
+     print(f"Spearman base~cand: {rho:.4f}")
+ 
+-    ci = p_pos = None
+-    if a.bootstrap:
+-        ci, p_pos = bootstrap_delta(y, pb, pc, fold, a.bootstrap)
+-        print(f"Bootstrap {a.bootstrap}x: 95% CI delta [{ci[0]:+.5f}, {ci[1]:+.5f}], P(delta>0) = {p_pos:.2f}")
++    boots, ci, p_pos = bootstrap_delta(y, pb, pc, fold, a.bootstrap)
++    print(f"Bootstrap {a.bootstrap}x (berpasangan, berstrata per fold, seed {SEED}): "
++          f"CI 95% delta [{ci[0]:+.5f}, {ci[1]:+.5f}], P(delta>0) = {p_pos:.3f}")
+ 
+     known = [n for n in (nb, nc) if n is not None]
+-    min_seed = min(known) if known else None
+-    notes = []
+-    passed = delta >= a.min_delta and n_up >= a.min_folds
+-    if passed and delta < a.thin and (min_seed is None or min_seed < 3):
+-        decision = "TIPIS - ulangi dengan 3 seed sebelum diterima"
+-    elif passed:
+-        decision = "DITERIMA"
+-    else:
+-        decision = "DITOLAK"
+-    if a.blend and (min_seed is None or min_seed < 3):
+-        notes.append("Blend dinilai dengan OOF < 3 seed (atau jumlah seed tidak diketahui): "
+-                     "kenaikan blend bisa ~2x terlalu optimis. Ulangi dengan OOF rata-rata >= 3 seed.")
+-        if decision == "DITERIMA":
+-            decision = "TIPIS - blend wajib dinilai dengan OOF >= 3 seed"
+-    if delta > 0.005:
+-        notes.append("Delta > +0,005 dari satu perubahan: jalankan audit-leakage sebelum melapor diterima.")
++    min_seed = min(known) if len(known) == 2 else None
++    decision, notes = decide(delta, p_pos, n_up, len(auc_b), min_seed, a)
+     if a.cand == a.base:
+         notes.append("Base = cand: ini cek penyelarasan. Bandingkan mean-fold AUC di atas dengan log.csv.")
+ 
+     print()
+-    print(f"Aturan   : delta mean-fold AUC >= {a.min_delta:+.4f} dan naik di >= {a.min_folds}/{len(auc_b)} fold")
+-    print(f"Hasil    : delta {delta:+.5f}, naik {n_up}/{len(auc_b)} fold")
++    print(f"Aturan   : DITERIMA jika P(delta>0) >= {a.p_accept} dan delta >= {a.min_delta:+.4f}; "
++          f"KANDIDAT jika P >= {a.p_candidate}; selain itu DITOLAK; OOF >= {a.min_seeds} seed")
++    print(f"Hasil    : delta {delta:+.5f}, P {p_pos:.3f}, naik {n_up}/{len(auc_b)} fold (informasi)")
+     print(f"KEPUTUSAN: {decision}")
+     for n in notes:
+         print(f"CATATAN  : {n}")
+@@ -199,12 +246,12 @@
+         with open(a.json, "w", encoding="utf-8") as fh:
+             json.dump({
+                 "base": a.base, "cand": a.cand, "base_files": fb, "cand_files": fc,
+-                "fold_source": fold_src,
++                "n_seed_base": nb, "n_seed_cand": nc, "fold_source": fold_src,
+                 "auc_base": auc_b.tolist(), "auc_cand": auc_c.tolist(),
+                 "ks_base": ks_b.tolist(), "ks_cand": ks_c.tolist(),
+                 "mean_fold_auc_base": float(auc_b.mean()), "mean_fold_auc_cand": float(auc_c.mean()),
+                 "delta": delta, "folds_up": n_up, "spearman": float(rho),
+-                "bootstrap_ci": None if ci is None else [float(ci[0]), float(ci[1])],
++                "bootstrap_n": a.bootstrap, "bootstrap_ci": [float(ci[0]), float(ci[1])], "p_delta_pos": p_pos,
+                 "decision": decision, "notes": notes,
+             }, fh, indent=2)
+ 
+--- a/.claude/skills/run-experiment/SKILL.md
++++ b/.claude/skills/run-experiment/SKILL.md
+@@ -1,90 +1,94 @@
+ ---
+ name: run-experiment
+-description: Menjalankan dan memutuskan satu eksperimen DSC LOGIKA UI 2026 (prediksi default kredit, metrik KS) sesuai protokol tim. Gunakan skill ini setiap kali user minta menjalankan, menguji, atau menilai apa pun yang bisa mengubah skor - fitur baru, grup fitur, model, parameter, iterasi, seed, blend/ensemble, seleksi fitur - atau bilang "lanjut", "coba E1xx", "screen fitur ini", "diterima atau tidak?", "bandingkan dengan acuan", bahkan jika kata "eksperimen" tidak disebut.
++description: Menjalankan dan memutuskan satu eksperimen DSC LOGIKA UI 2026 (prediksi default kredit, metrik KS) sesuai protokol tim. Gunakan skill ini setiap kali user minta menjalankan, menguji, atau menilai apa pun yang bisa mengubah skor - fitur baru, grup fitur, model, parameter, iterasi, seed, blend/ensemble, seleksi fitur - atau bilang "lanjut", "coba E2xx", "screen fitur ini", "diterima atau tidak?", "bandingkan dengan acuan", bahkan jika kata "eksperimen" tidak disebut.
+ ---
+ 
+ # run-experiment
+ 
+-Satu eksperimen = satu perubahan, dinilai berpasangan terhadap acuan terbaik pada fold yang sama, lalu dicatat. Skill ini menegakkan protokol dari `Planning Model DSC LOGIKA UI 2026.md` (bagian Protokol eksperimen) dan `Riset Peningkatan Skor DSC LOGIKA UI 2026.md` (bagian 6 dan 8). Kalau dokumen itu dan skill ini berbeda, dokumen proyek yang menang; beri tahu user perbedaannya.
++Satu eksperimen = satu perubahan, dinilai berpasangan terhadap acuan terbaik pada fold yang sama, lalu dicatat. Aturan keputusan yang berlaku sejak 17 Okt 2026 ada di bagian 3 (menggantikan aturan lama "+0,0005 dan ≥ 4/5 fold"). Kalau dokumen proyek dan skill ini berbeda, beri tahu user perbedaannya.
+ 
+ Script ada di `.claude/skills/run-experiment/scripts/`. Jalankan dari root repo dengan `python` (Windows, Python 3.12).
+ 
+ ## 0. Siapkan sebelum menjalankan apa pun
+ 
+-1. Baca `CLAUDE.md` bagian "Cara Menjalankan" dan hasil terakhir, lalu antrean di bagian 8 dokumen riset. Ambil eksperimen berikutnya dari antrean kecuali user menyebut ID lain.
+-2. Tulis untuk diri sendiri: ID eksperimen, hipotesis satu kalimat, **satu** perubahan yang diuji, dan acuan pembanding.
+-3. Tentukan acuan dari data, bukan dari ingatan: model diterima terbaik di `experiments/log.csv` lewat `run.accepted_rows()` (kolom `diterima` bertipe teks, jangan pakai `== True`). Saat skill ini ditulis acuannya `T_lgb_b3_4f3c7f` (mean-fold AUC 0,83788, OOF KS 0,5138).
++1. Baca `CLAUDE.md` bagian "Cara Menjalankan" dan hasil terakhir. Eksperimen diambil dari daftar hipotesis aktif (`experiments/explore_17okt/report.md` dan file Riset bagian "## 11. Eksperimen 17 Okt+") atau dari ID yang disebut user. Antrean lama di file Riset bagian 8 hanya riwayat.
++2. Tulis untuk diri sendiri: ID eksperimen (E200 ke atas), hipotesis satu kalimat, bukti datanya, **satu** perubahan yang diuji, dan acuan pembanding.
++3. Tentukan acuan dari data, bukan dari ingatan: acuan terbaru tertulis di `CLAUDE.md` (baris hasil terakhir) dan dicek di `experiments/log.csv`. Kolom `diterima` bertipe teks dan untuk eksperimen `e121.py`/`e141.py` selalu tertulis "kandidat", jadi keputusan sebenarnya dibaca dari CLAUDE.md/Riset.
+ 4. Kalau eksperimen menambah atau mengubah fitur, jalankan skill `audit-leakage` dulu. Fitur yang belum lolos audit tidak boleh masuk CV penuh.
+ 
+ **Sekali saja, cek penyelarasan:** jalankan `compare_oof.py --base <acuan> --cand <acuan>`. Mean-fold AUC yang dicetak harus sama dengan angka di log (±0,00005). Kalau beda, urutan OOF atau fold tidak cocok; perbaiki argumen `--folds`/`--oof-dir` sebelum mempercayai keputusan apa pun.
+ 
+-## 1. Screen cepat (khusus ide fitur baru, ±2 menit)
++## 1. Screen cepat (jalur cepat, bukan gerbang)
+ 
+ ```
+-python .claude/skills/run-experiment/scripts/screen.py --base-oof T_lgb_b3_4f3c7f --features features/<grup>_v1.parquet --prefix ec_ordermodel_
++python .claude/skills/run-experiment/scripts/screen.py --base-oof <acuan> --features features/<grup>_v1.parquet --prefix <prefix_baru>
+ ```
+ 
+-- Lolos jika Δ mean-fold AUC ≥ +0,0005 **atau** ada kolom dengan |z| korelasi residual > 3. Lolos berarti boleh CV penuh, belum berarti diterima.
+-- Tidak lolos: catat "ditolak di screen" beserta angkanya, lalu berhenti. Jangan masuk CV penuh hanya karena AUC univariatnya tinggi; riset 12 Okt menunjukkan banyak fitur kuat sendirian tetapi sudah terserap model.
+-- Screen tidak nested dan sedikit optimis. Ia hanya menyaring, tidak memutuskan.
++- Screen = residual boosting di atas OOF acuan + korelasi residual. Lolos jika Δ mean-fold AUC ≥ +0,0005 **atau** ada kolom dengan |z| > 3.
++- Lolos → CV penuh 3 seed.
++- **Tidak lolos tetapi hipotesis punya bukti kuat dari data** (analisis pembangkit, residual, struktur data) → tetap CV penuh 3 seed. Screen tidak bisa melihat interaksi dengan fitur yang sudah ada dan bisa meremehkan perubahan representasi.
++- Tidak lolos dan bukti lemah → catat "ditolak di screen" beserta angkanya.
++- Screen tidak nested dan sedikit optimis; ia hanya menyaring, tidak memutuskan.
+ - Tanpa LightGBM (mis. lingkungan uji), tambahkan `--engine sklearn`. Di laptop tim selalu pakai default `lgb`.
+ 
+ Model, parameter, seed, dan blend tidak perlu screen; langsung ke langkah 2.
+ 
+ ## 2. CV penuh
+ 
+-- Pakai pipeline yang sudah ada: tambahkan konfigurasi ke `EXPERIMENTS` (dan builder ke `GROUPS`/registry jika fitur baru) di `run.py`, ganti versi cache (`_v2`) kalau logika fitur berubah.
+-- Jalankan 3 seed: `python run.py <EXP> --seeds 42 43 44`.
+-- Job yang kira-kira > 30 menit (CatBoost, tuning, null importance, seed banyak) **jangan** dijalankan sebagai background task Claude. Buat launcher `.cmd` seperti `experiments/p5/run_p5.cmd` dan minta user menjalankannya via `Start-Process`, atau pindahkan ke Kaggle Notebook. RAM laptop 7,7 GB pernah membuat pipeline dimatikan.
++- Pakai pipeline yang sudah ada: tambahkan konfigurasi ke `EXPERIMENTS` (dan builder ke `GROUPS`/registry jika fitur baru) di `run.py`, atau pakai `e121.py --cv --use ... --extra ...` untuk set acuan sekarang. Ganti versi cache (`_v2`) kalau logika fitur berubah.
++- Jalankan 3 seed (42, 43, 44); simpan `oof/<EXP>_s<seed>.npy` dan `preds/<EXP>_s<seed>.npy`.
++- Job yang kira-kira > 30 menit **jangan** dijalankan sebagai background task Claude. Buat launcher `.cmd` seperti `experiments/p5/run_p5.cmd` dan jalankan via `Start-Process`, atau pindahkan ke Kaggle Notebook (privat). Job > 3 jam: minta izin dulu.
+ - Jangan pernah mengubah fold, `SEED`, atau data di `Dataset/`.
+ 
+ ## 3. Putuskan
+ 
+ ```
+-python .claude/skills/run-experiment/scripts/compare_oof.py --base T_lgb_b3_4f3c7f --cand <EXP>
++python .claude/skills/run-experiment/scripts/compare_oof.py --base <acuan> --cand <EXP>
+ ```
+ 
+-Script membaca `oof/<nama>_s<seed>.npy` (dirata-rata) atau `oof/<nama>.npy`, menghitung AUC dan KS per fold, lalu menerapkan aturan:
++Script membaca `oof/<nama>_s<seed>.npy` (dirata-rata) atau `oof/<nama>.npy`, menghitung AUC dan KS per fold, lalu bootstrap berpasangan berstrata per fold (1000×, seed 42) untuk Δ mean-fold AUC:
+ 
+ | Kondisi | Keputusan |
+ | --- | --- |
+-| Δ mean-fold AUC ≥ +0,0005 dan naik di ≥ 4/5 fold | Diterima |
+-| Lolos aturan tapi Δ < 0,001 dan salah satu sisi < 3 seed | Tipis: ulangi dengan 3 seed dulu |
+-| Selain itu | Ditolak |
+-
+-- Keputusan memakai **mean-fold AUC**. KS hanya dicatat dan dipakai sebagai pemecah seri (E170), karena KS jauh lebih noisy.
+-- **Blend/ensemble** wajib dinilai dengan OOF rata-rata ≥ 3 seed (`--blend`). OOF 1 seed melebih-lebihkan kenaikan blend sekitar 2×.
+-- Δ besar yang mencurigakan (> +0,005 dari satu perubahan fitur) → hentikan, jalankan `audit-leakage` sebelum melapor "diterima".
+-- Untuk keputusan yang sangat tipis, tambahkan `--bootstrap 300` untuk interval kepercayaan Δ.
++| P(Δ > 0) ≥ 0,95 dan Δ ≥ +0,0003 | **Diterima** |
++| 0,80 ≤ P < 0,95, atau P ≥ 0,95 tetapi Δ < +0,0003 | **Kandidat** (simpan OOF & preds untuk digabung nanti) |
++| P < 0,80 | **Ditolak** |
++
++- Kedua sisi wajib OOF rata-rata **≥ 3 seed** pada fold yang sama; kurang dari itu keputusan "belum sah".
++- Jumlah fold yang naik dicatat sebagai informasi, bukan syarat. P ≥ 0,95 dengan hanya 1–2 fold naik → periksa fold anomali sebelum menerima.
++- Δ > +0,005 dari satu perubahan → hentikan, jalankan `audit-leakage` sebelum melapor "diterima".
++- KS dicatat (dan dipakai sebagai pemecah seri), keputusan memakai **mean-fold AUC**.
++- Ambang adalah pilihan tim, bukan hukum; usulan perubahan ambang ditanyakan ke user dulu. Gabungan akhir dikonfirmasi ulang dengan ablation dan seed baru.
+ 
+ ## 4. Catat
+ 
+-1. `experiments/log.csv`, `oof/`, `preds/` sudah ditulis otomatis oleh `run.py`. Pastikan baris eksperimen ada.
+-2. Perbarui kolom Status di dokumen yang memiliki ID itu: E00–E112 di `Planning Model DSC LOGIKA UI 2026.md`, E120 ke atas di `Riset Peningkatan Skor DSC LOGIKA UI 2026.md`. **Jangan gabungkan kedua file.** Format status singkat: `Diterima +0,0012 (3 seed, 5/5 fold)` atau `Ditolak (−0,0003, 2/5 fold)`.
+-3. Kalau acuan berubah, perbarui baris hasil di `CLAUDE.md` agar sesi berikutnya tahu acuan baru.
+-
+-## 5. Submit ke Kaggle? (opsional)
+-
+-- Submit hanya jika CV naik jelas (sekitar ≥ +0,002 AUC) atau ada perubahan pipeline besar. Kuota 3/hari, reset 05.00; pakai maksimal 1–2 per hari.
+-- Sebelum upload, jalankan `verify_submission.py` dari skill `check-repro` dan catat MD5 ke `submissions/LOG.md`.
+-- Selisih public < ±0,005 antara dua submission sendiri adalah noise. Jangan pernah memilih fitur, bobot blend, atau submission final berdasarkan public.
++1. `experiments/log.csv`, `oof/`, `preds/` ditulis oleh pipeline. Pastikan baris eksperimen ada.
++2. Status eksperimen E200+ ditulis di file Riset bagian "## 11. Eksperimen 17 Okt+" (buat jika belum ada); E00–E112 di file Planning, E120–E199 di file Riset bagian lama. **Jangan gabungkan kedua file.** Format: `Diterima Δ +0,0012, CI [+0,0006; +0,0018], P 0,99 (3 seed, naik 5/5 fold)`.
++3. Kalau acuan berubah, tambahkan satu baris hasil di `CLAUDE.md` agar sesi berikutnya tahu acuan baru. Acuan tidak diganti sebelum dilaporkan ke user.
++
++## 5. Submit ke Kaggle? (usulan ke user)
++
++- Usulkan ke user kapan dan file mana yang perlu di-submit; user yang mengunggah. Kuota 3/hari, reset 05.00.
++- Sebelum upload, selalu `verify_submission.py --log` dari skill `check-repro` (MD5 tercatat di `submissions/LOG.md`).
++- Selisih public kecil antara dua submission sendiri adalah noise. Fitur, bobot blend, dan pilihan final diputuskan dari CV.
+ 
+ ## Larangan (berlaku di semua langkah)
+ 
+ - `*_id` tidak boleh jadi fitur. Data hanya dari `Dataset/`. Tidak ada model pretrained atau data eksternal.
+-- Fitur yang memakai target (model level baris, target encoding, KNN target mean, fitur hasil prediksi bertarget) harus **nested**: untuk fold luar k, model penghasil fitur tidak boleh melihat label fold k.
++- Fitur yang memakai target (model level baris, target encoding, KNN target mean, fitur hasil prediksi bertarget) harus **nested** (untuk fold luar k, model penghasil fitur tidak boleh melihat label fold k) dan lolos uji label acak.
+ - Tidak menyalin notebook publik peserta lain; membaca ide boleh, kode harus milik sendiri.
+ 
+ ## Laporan ke user
+ 
+-Tutup setiap eksperimen dengan blok singkat ini, lalu satu langkah berikutnya dari antrean:
++Tutup setiap eksperimen dengan blok singkat ini:
+ 
+ ```
+ E<ID> - <judul>
+ Hipotesis : ...
++Bukti     : ...
+ Perubahan : ...
+-Hasil     : mean-fold AUC <base> → <cand> (Δ +0,00xx, naik x/5 fold), KS <base> → <cand>, seed <n>
+-Keputusan : Diterima / Tipis / Ditolak
+-Dicatat   : log.csv, Status di <dokumen>
+-Berikutnya: <ID berikutnya di antrean>
++Hasil     : mean-fold AUC <acuan> → <kandidat> (Δ +0,00xx, CI 95% [.., ..], P 0,xx, naik x/5 fold), KS <..> → <..>, seed <n>
++Keputusan : Diterima / Kandidat / Ditolak
++Dicatat   : log.csv, Status di Riset bagian 11
++Berikutnya: <hipotesis berikutnya>
+ ```
+--- a/.claude/skills/audit-leakage/SKILL.md
++++ b/.claude/skills/audit-leakage/SKILL.md
+@@ -7,7 +7,7 @@
+ 
+ Kebocoran membuat CV terlalu optimis lalu gagal di private (45% nilai), dan di final juri akan bertanya bagaimana kita menjamin tidak ada kebocoran waktu. Audit ini punya tiga lapis: baca kode, cek angka, dan uji khusus untuk fitur bertarget. Laporkan temuan apa adanya; jangan "memperbaiki" angka agar terlihat aman.
+ 
+-Konteks data yang sudah diverifikasi (CLAUDE.md dan riset 12 Okt): semua timestamp tabel pendukung < `decision_datetime` aplikasi saat ini, split train/test acak, tidak ada kebocoran lewat ID atau urutan baris. Jadi bahaya terbesar bukan di data mentah, melainkan di **kode fitur kita sendiri**.
++Konteks data yang sudah diverifikasi (CLAUDE.md, riset 12 Okt, eksplorasi 17 Okt): semua timestamp tabel pendukung < `decision_datetime` aplikasi saat ini, split train/test acak, tidak ada kebocoran lewat ID atau urutan baris (termasuk `loan_id`, `installment_id`, `order_id`, `order_item_id`, `bureau_observation_id` dan posisi baris di semua tabel pendukung: AUC 0,500–0,505). Jadi bahaya terbesar bukan di data mentah, melainkan di **kode fitur kita sendiri**.
+ 
+ ## Lapis 1: baca kode builder
+ 
+@@ -29,13 +29,13 @@
+ python .claude/skills/audit-leakage/scripts/audit_features.py --features features/<grup>_v1.parquet --data-dir Dataset --prefix <prefix_baru>
+ ```
+ 
+-Script memeriksa cakupan ID (70.000 train + 30.000 test, tanpa duplikat), nama kolom terlarang, kolom konstan, nilai `inf`, beda tingkat NaN train vs test, beda distribusi train vs test (statistik KS dua sampel), dan AUC univariat terhadap target. Exit code 1 jika ada ERROR.
++Script memeriksa cakupan ID (70.000 train + 30.000 test, tanpa duplikat), nama kolom terlarang, kolom konstan, nilai `inf`, beda tingkat NaN train vs test, beda distribusi train vs test (statistik KS dua sampel), dan AUC univariat terhadap target. Exit code 1 jika ada ERROR; temuan level AUDIT tidak menghentikan script.
+ 
+ Cara membaca hasil:
+ 
+ | Temuan | Arti | Tindakan |
+ | --- | --- | --- |
+-| AUC univariat ≥ 0,80 | Lebih kuat dari fitur sah terkuat yang diketahui (`rp_share_dpd1` 0,784) | Berhenti. Cari jalur ke target atau ke masa depan sebelum lanjut |
++| AUC univariat ≥ 0,80 (level AUDIT) | **Pemicu audit wajib, bukan penghenti.** Fitur sah bisa sekuat ini (laju lewat-bayar rantai bayar `miss_post` 0,808), dan fitur berupa skor dari model lain memang wajar punya AUC tinggi | Jalankan audit wajib sebelum hasil CV dipercaya: (1) cek cutoff waktu di kode (Lapis 1 butir 1–2), (2) KS train vs test, (3) adversarial validation, (4) uji label acak bila fitur memakai target (Lapis 3). Lanjut bila keempatnya lolos |
+ | KS train vs test > 0,05 atau beda NaN > 2 poin | Fitur dihitung berbeda di train dan test | Cari cabang kode atau join yang beda |
+ | KS train vs test 0,02–0,05 | Bisa jadi wajar untuk fitur diskrit, bisa jadi bug | Periksa distribusinya |
+ | ID tidak lengkap / duplikat | Join salah | Perbaiki sebelum CV |
+--- a/.claude/skills/audit-leakage/scripts/audit_features.py
++++ b/.claude/skills/audit-leakage/scripts/audit_features.py
+@@ -25,7 +25,9 @@
+ 
+ PREFIXES = ("app_", "prof_", "pa_", "rp_", "bu_", "bp_", "ab_", "ec_", "x_")
+ 
+-AUC_ERR, AUC_WARN = 0.80, 0.75          # rp_share_dpd1 = 0,784 adalah fitur sah terkuat
++# AUC >= 0,80 memicu AUDIT wajib (bukan ERROR): fitur sah bisa sekuat itu (miss_post rantai bayar 0,808)
++# dan skor dari model lain wajar tinggi. Audit: cutoff waktu, KS train-test, adversarial, uji label acak bila bertarget.
++AUC_AUDIT, AUC_WARN = 0.80, 0.75
+ KS_ERR, KS_WARN = 0.05, 0.02            # noise KS 70k vs 30k ~ 0,009
+ NAN_DIFF_ERR = 0.02
+ 
+@@ -138,8 +140,9 @@
+             auc = roc_auc_score(y[ok_tr], a_tr[ok_tr])
+             auc = max(auc, 1 - auc)
+             row["auc_univariat"] = auc
+-            if auc >= AUC_ERR:
+-                add("ERROR", c, f"AUC univariat {auc:.3f} >= {AUC_ERR} - lebih kuat dari fitur sah terkuat; cari kebocoran")
++            if auc >= AUC_AUDIT:
++                add("AUDIT", c, f"AUC univariat {auc:.3f} >= {AUC_AUDIT} - audit wajib: cutoff waktu, KS train-test, "
++                                "adversarial, uji label acak bila memakai target")
+             elif auc >= AUC_WARN:
+                 add("WARN", c, f"AUC univariat {auc:.3f} - periksa jalur ke target/masa depan")
+         if 0.01 < nan_tr < 0.99:
+@@ -157,13 +160,21 @@
+         print("\nKolom dengan AUC univariat tertinggi:")
+         print(show.head(15).to_string(index=False, float_format=lambda v: f"{v:.4f}"))
+     errs = [i for i in issues if i[0] == "ERROR"]
++    audits = [i for i in issues if i[0] == "AUDIT"]
+     warns = [i for i in issues if i[0] == "WARN"]
+-    print(f"\nERROR {len(errs)}, WARN {len(warns)}")
+-    for lvl_, scope, msg in errs + warns[:40]:
++    print(f"\nERROR {len(errs)}, AUDIT {len(audits)}, WARN {len(warns)}")
++    for lvl_, scope, msg in errs + audits + warns[:40]:
+         print(f"  [{lvl_}] {scope}: {msg}")
+     if len(warns) > 40:
+         print(f"  ... {len(warns) - 40} WARN lain (lihat --report)")
+-    print("\nSTATUS: " + ("PERLU PERBAIKAN" if errs else "Lapis 2 aman (tetap lakukan Lapis 1 dan adversarial validation)"))
++    if errs:
++        status = "PERLU PERBAIKAN"
++    elif audits:
++        status = (f"Lapis 2 lolos, tetapi AUDIT WAJIB untuk {len(audits)} kolom (cutoff, KS train-test, adversarial, "
++                  "label acak bila bertarget) sebelum hasil CV dipercaya")
++    else:
++        status = "Lapis 2 aman (tetap lakukan Lapis 1 dan adversarial validation)"
++    print("\nSTATUS: " + status)
+     sys.exit(1 if errs else 0)
+ 
+ 
+--- a/CLAUDE.md
++++ b/CLAUDE.md
+@@ -70,14 +70,15 @@
+ ```
+ 
+ - `python refit.py --model lgb --fs b3 selb2 --rounds 15000 --tag _r15k` : latih ulang model tuned Fase 5 (batas iterasi/seed lain; seed yang sudah ada dilewati). `python e121.py --build` lalu `--cv` : fitur model level order e-commerce (nested).
+-- Skill proyek (`.claude/skills/`, lihat `README_SKILLS.md`): eksperimen apa pun → `run-experiment` (screen → CV 3 seed → `compare_oof.py` → catat Status); fitur baru/berubah atau fitur bertarget → `audit-leakage` sebelum CV penuh; sebelum upload Kaggle dan notebook final → `check-repro` (MD5, `lineterminator="\n"`, round(6)). Submission sejak 12 Okt malam ditulis dengan akhir baris LF.
++- Skill proyek (`.claude/skills/`, lihat `README_SKILLS.md`): eksperimen apa pun → `run-experiment` (screen sebagai jalur cepat → CV 3 seed → `compare_oof.py` → catat Status); fitur baru/berubah atau fitur bertarget → `audit-leakage` sebelum CV penuh; sebelum upload Kaggle dan notebook final → `check-repro` (MD5, `lineterminator="\n"`, round(6)). Submission sejak 12 Okt malam ditulis dengan akhir baris LF.
++- **Aturan keputusan (berlaku 17 Okt, menggantikan "+0,0005 dan ≥ 4/5 fold")**: kandidat vs acuan memakai OOF rata-rata ≥ 3 seed pada fold yang sama; Δ mean-fold AUC + bootstrap berpasangan berstrata per fold (1000×, seed 42) → P(Δ > 0) dan CI 95% (`compare_oof.py`, default). **Diterima**: P ≥ 0,95 dan Δ ≥ +0,0003. **Kandidat**: 0,80 ≤ P < 0,95, atau P ≥ 0,95 tetapi Δ < +0,0003 (simpan OOF/preds). **Ditolak**: P < 0,80. Jumlah fold naik hanya informasi (P ≥ 0,95 dengan 1–2 fold naik → cek fold anomali). Δ > +0,005 dari satu perubahan → audit kebocoran dulu. KS dicatat, keputusan memakai mean-fold AUC. Screen bukan gerbang: hipotesis dengan bukti data kuat tetap CV penuh. AUC univariat ≥ 0,80 di `audit_features.py` = pemicu audit wajib (cutoff, KS train-test, adversarial, label acak bila bertarget), bukan ERROR. ID eksperimen baru mulai E200; Status di file Riset bagian "## 11. Eksperimen 17 Okt+".
+ - Eksperimen baru: tambahkan builder ke `GROUPS` dan konfigurasi ke `EXPERIMENTS` di `run.py`. Ganti nama versi cache (`_v2`) setiap logika fitur berubah.
+-- Log otomatis: `experiments/log.csv` (aturan terima memakai **rata-rata AUC per fold**, bukan pooled OOF), `oof/<exp>.npy`, `preds/<exp>.npy`, `experiments/importance_<exp>.csv`. Catat submission manual di `submissions/LOG.md`.
++- Log otomatis: `experiments/log.csv` (keputusan memakai **rata-rata AUC per fold**, bukan pooled OOF; kolom `diterima` untuk eksperimen `e121.py`/`e141.py` selalu "kandidat", keputusan sebenarnya di CLAUDE.md/Riset), `oof/<exp>.npy`, `preds/<exp>.npy`, `experiments/importance_<exp>.csv`. Catat submission manual di `submissions/LOG.md`.
+ - Hasil Fase 1: E01 0,6471 → E02 0,6492 (ditolak; mean-fold turun) → **E03 0,8255 (B1, acuan saat ini)**. Noise antar seed E03: std 0,00013. Adversarial E04: AUC 0,503 (aman).
+ 
+ - Hasil Fase 2 (LightGBM dev, 1 seed): diterima E10 `rp_core` (+0,0010), E50 `ec_window` (+0,0039), E31 `pa_burden` (+0,0014) → **B2 = E31: mean-fold AUC 0,8318, OOF KS 0,5001, 331 fitur** (acuan saat ini). Ditolak: E11, E12, E13, E20, E21, E30, E40, E41, E51 (−0,0021), E60, E61. Pola: grup yang tumpang tindih dengan agregat naif cenderung sedikit menurunkan skor (dilusi), bukan tanpa sinyal. Ablation E62: semua grup di B2 berguna; kontributor terbesar `bu_naive` (−0,0065 jika dibuang), `ec_naive` (−0,0053), `ec_window` (−0,0037).
+ - Hasil Fase 3: **B3 = E71b** (`experiments/B3.json`): 176 kolom featset `sel_full` (null importance 40 run atas 528 kolom semua grup, termasuk 59 kolom dari grup yang ditolak di Fase 2). Rata-rata 3 seed: mean-fold AUC 0,8329, OOF KS 0,5066 (E31: 0,8312 / 0,4987). Set kedua untuk ensemble: E71c (`sel_b2`, 117 kolom, KS 0,5043). Ditolak: class weight (E72), monotone (E73, setelah uji 3 seed), encoding kategori alternatif (E74). Catatan: seleksi null importance memakai target seluruh train, jadi CV bisa sedikit optimis. Featset ada di `experiments/featsets/*.json`; eksperimen merujuknya lewat `cols=` dan `base="B3"`.
+-- Noise antar seed pada set besar (E31) std ±0,0006 AUC, lebih besar dari E03. Keputusan tipis (< 0,001) wajib dikonfirmasi 3 seed (contoh: `experiments/seed_check_b3.py`).
++- Noise antar seed pada set besar (E31) std ±0,0006 AUC, lebih besar dari E03. Sejak 17 Okt semua keputusan wajib memakai OOF rata-rata ≥ 3 seed (aturan keputusan di atas); penolakan Fase 2 (1 seed, selisih di dalam noise) adalah bukti lemah, bukan bukti "tanpa sinyal".
+ - Segmen terlemah (E75): customer tanpa riwayat (30%, KS 0,466 vs 0,518) dan yang belanja ≤2 hari sebelum cutoff (KS dalam segmen 0,428).
+ - Public LB: E03 0,5244 → E31 0,5380 → E71b 0,5408 (searah dengan CV; public konsisten ±0,035 di atas OOF KS).
+ - Hasil Fase 4 (semua di B3, seed 42; `src/models.py`, eksperimen `model=` + `blend_with=`): CatBoost E80 model tunggal terbaik (mean-fold AUC 0,8346, KS 0,5092, ~10 mnt/CV); LGB extra_trees E87 0,8337; XGBoost E81 0,8331; LogReg+binning E82 0,8231; MLP sklearn E83 0,8218; ExtraTrees E84 0,8190. Semua "kandidat" (blend dengan E71b naik ≥ 0,0003). Korelasi Spearman antar GBDT 0,97–0,98; LogReg/MLP ~0,92 (paling beragam). Pratinjau blend rank GBDT (CatBoost bobot 2): mean-fold AUC 0,8364, KS 0,5118 → `submissions/P4_blend_*.csv`. torch/autogluon tidak terpasang (E85 ditunda).

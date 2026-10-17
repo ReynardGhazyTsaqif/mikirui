@@ -6,7 +6,7 @@
 
 ## 0. Ringkasan satu halaman (selalu diperbarui)
 
-*Status 18 Okt: Langkah 1–3 selesai. Daftar 16 hipotesis diserahkan; menunggu daftar ide user (LAMPIRAN) dan jawaban batch #1–#2. Belum ada eksperimen baru yang dijalankan.*
+*Status 18 Okt: Langkah 1–3 selesai; ide eksternal sudah digabung (20 hipotesis, bagian 6.3); batch #3 terkirim (bagian 7); diff aturan baru menunggu persetujuan (bagian 8). Belum ada eksperimen baru yang diputuskan. Pekerjaan sekarang di checkout utama, branch `explore-17okt`.*
 
 - **Posisi**: public terbaik tercatat 0,55951 (`E122x1_E141_rank50`, 16 Okt; prompt menyebut 0,55858 → pertanyaan 2.1). CV terbaik: E141x mean-fold AUC 0,84516; acuan GBDT E122x1 0,84495.
 - **Target terverifikasi**: public 0,58 ≈ mean-fold AUC 0,857–0,860 → butuh **+0,012 s.d. +0,015**.
@@ -18,8 +18,9 @@
   5. Kejanggalan proyek: `src/features/` tidak ter-version; penolakan Fase 2 berbasis 1 seed di dalam noise; parameter tuned berasal dari set 176 kolom; tidak ada kebocoran ID/urutan baris.
 - **Hipotesis teratas** (bagian 5): H01 rantai bayar event (+0,0005–0,001), H02 model bantu PD pinjaman LOO (+0,001–0,003), H03 model sifat statis tanpa riwayat, H04 NN multi-tugas, H05 10-fold + refit. Jumlah jujur semua tuas berbukti ≈ +0,003–0,006.
 - **Kenaikan CV terkumpul**: +0,0000 (belum ada eksperimen; target +0,013).
-- **Rencana berikutnya**: gabung ide user → batch #3 → diff compare_oof/skill/CLAUDE.md → nilai ulang eksperimen lama → uji H01, H02, H05 → putaran penemuan berikutnya (mekanisme ramp & tier).
-- **Pertanyaan terbuka**: batch #1 (13 butir, bagian 2) dan batch #2 (5 butir, bagian 4).
+- **Ide eksternal**: 13 ide dicek dengan data → 2 sudah dikerjakan (kurva belajar, kasus salah), 1 audit bersih (ID/urutan baris tabel pendukung), 5 terbantah (GMM, artefak angka, tujuan↔belanja, pinjam-tutup-utang, kalender/gajian), 5 masuk daftar (H17 hazard event, H18 objektif ranking, H19 fitur otomatis, H20 KNN, plus penggabungan ke H02/H05/H06/H15).
+- **Rencana berikutnya**: setelah diff disetujui → nilai ulang eksperimen lama dengan aturan baru → E200 (H01, builder sudah siap) → E201 (H02) → E202 (H05) → putaran penemuan (mekanisme ramp & tier, H17).
+- **Pertanyaan terbuka**: batch #3 (bagian 7): 2 file final di notebook?, mesin panitia (menentukan nasib fitur GPU), porsi public, persetujuan diff, perbaikan skill audit-leakage Lapis 3 butir 3.
 
 ---
 
@@ -406,3 +407,91 @@ Skor = Bukti (1–5) × Dampak (1–5) × Kebaruan (1–3). Bukti: 5 = sinyal re
 | Bobot peluruhan waktu / jendela recency untuk perilaku bayar (E131) | laju lewat-bayar datar 23 bulan |
 | Efek kalender/musiman pada pembayaran | sd antar bulan ≈ sampling |
 | Fitur posisi baris / ID (cek kebocoran) | AUC 0,500–0,503 |
+
+---
+
+## 6. Jawaban user (batch #1–#2) dan gabungan dengan ide eksternal
+
+### 6.1 Jawaban yang mengubah rencana (`Jawaban_Pertanyaan.txt`, 17 Okt 21.51)
+
+- Leaderboard: #1 cupuu 0,57768 (21 entri), #2 0,57530, #3 0,57174, #8 0,56832, #10 0,56756. Skor kita tidak disebut ulang → dipakai angka LOG.md (0,55951).
+- Bobot nilai: public 45% + private 45% (porsi test untuk public **belum diketahui**). Final: **2 submission** boleh dipilih.
+- Data hanya dari `Dataset/`; tidak ada v1; Discussion/Code sudah dicek (tanpa catatan).
+- Notebook final **dijalankan ulang panitia**, tanpa batas waktu. Komposisi final belum diputuskan: "cari model yang lebih baik, jangan terpaku model lama".
+- Komputer lain dianggap kuat (atau Kaggle/Colab); kuota GPU Kaggle 40 jam; laptop bebas 24 jam.
+- Boleh kerja langsung di checkout utama, memperbaiki `.gitignore`, commit `src/features/`, push branch. Dikerjakan: branch `explore-17okt` (commit `382c256`, sudah di-push). Pengaman sesi latar dimatikan **hanya lokal** lewat `.claude/settings.local.json` (`worktree.bgIsolation = none`, di-gitignore).
+- Pinjaman lama milik customer test boleh dipakai (tidak melanggar guidebook: data dari panitia, target test tidak disentuh). Sinyal ramp boleh dipakai. Definisi "12 calendar months" tidak diketahui → diuji dengan data. Prioritas: **amankan kenaikan pasti dulu**, lalu eksperimen penemuan.
+
+### 6.2 Ide eksternal (`LAMPIRAN_ide_eksternal.md`) — status setelah dicek dengan data
+
+| # | Ide eksternal | Status | Bukti |
+|---|---|---|---|
+| 1 | Learning curve | **Sudah dikerjakan** (s18) | 14k 0,8351 → 56k 0,8421; asimtot ≈ 0,848; 2× data ≈ +0,002 |
+| 2 | Audit ID & urutan baris tabel pendukung | **Sudah dikerjakan, bersih** (s11, s22) | hex `installment_id`, `loan_id`, `order_id`, `order_item_id`, `bureau_observation_id`, posisi baris 6 tabel, urutan cicilan/pinjaman/provider: AUC 0,500–0,505, \|z\| ≤ 1,4 |
+| 3 | Model hazard level cicilan (label milik cicilan, kovariat as-of) | **Masuk daftar (H17)** | lewat-bayar per event bergantung pada guncangan bulanan (bulan dengan income rekening di bawah rata-rata customer: P(miss) 0,329 vs 0,205); q0 punya sinyal residual (z 4,0) |
+| 4 | Pinjaman lama sebagai data berlabel (as-of) | **Digabung ke H02/H06 dengan desain LOO** | as-of (E126) AUC 0,704 vs bukti LOO 0,825; varian as-of disimpan sebagai sub-varian |
+| 5 | Kelas laten (GMM) / KNN target mean | GMM **terbantah**; KNN → H20 (bukti lemah) | GMM 1–6 komponen: posterior \|z\| ≤ 1,6 (BIC turun hanya karena tier diskrit) |
+| 6 | Artefak angka / heaping | **Terbantah** | income kontinu (kelipatan 1.000 hanya 0,1%), digit terakhir seragam; requested/approved selalu kelipatan Rp100 rb; potongan lender tepat 80%/90%; \|z\| ≤ 1,2 |
+| 7 | Tujuan pinjaman ↔ belanja | **Terbantah** | selisih univariat besar (household + groceries 90 hari 16,0% vs 7,6%) tetapi hanya cerminan ramp; \|z\| ≤ 1,1 |
+| 8 | Pinjam untuk menutup utang (sisa pokok, hari ke due) | **Terbantah (lemah)** | sisa pokok z 1,84; rasio pinjaman/sisa pokok −1,77; hari ke due berikutnya −0,76; tunggakan sekarang −0,63 |
+| 9 | Kalender & proxy gajian | **Terbantah** | hari aplikasi, sisa hari bulan, jarak ke tanggal 25: \|z\| ≤ 0,53; tanggal bayar selalu ulang bulan pencairan → tidak bisa jadi proxy gajian |
+| 10 | Analisis kasus salah | **Sudah dikerjakan** (s17) | FN/FP tidak bisa dibedakan dari kasus benar berskor sama |
+| 11 | OpenFE / Featuretools | **Masuk daftar (H19)**, bukti lemah | 25+ agregat baru semua \|z\| < 2 (jenuh) |
+| 12 | Objektif ranking LightGBM | **Masuk daftar (H18)**, bukti lemah | tanpa bukti data; murah diuji |
+| 13 | Pseudo-label + refit 100% | **Digabung ke H15 dan H05** | — |
+
+### 6.3 Daftar gabungan, diurutkan ulang (Bukti × Dampak × Kebaruan; seri diurut bukti lalu dampak)
+
+| Urut | ID | Hipotesis (asal) | B | D | K | Skor | Δ AUC perkiraan | Tag |
+|---|---|---|---|---|---|---|---|---|
+| 1 | H01 | Rantai bayar bulanan level event (sendiri) | 5 | 3 | 3 | **45** | +0,0005–0,001 | CPU-det |
+| 2 | H02 | Model bantu PD pinjaman, bukti LOO, termasuk pinjaman customer test (sendiri + ide 4) | 4 | 4 | 2 | **32** | +0,001–0,003 | CPU-det |
+| 3 | H03 | Model "sifat statis" untuk segmen tanpa riwayat (sendiri) | 3 | 3 | 3 | **27** | +0,0005–0,0015 | CPU-det |
+| 4 | H04 | NN multi-tugas atas semua pinjaman (sendiri) | 3 | 3 | 3 | **27** | +0,0007–0,002 | GPU |
+| 5 | H05 | 10-fold bersarang + refit 100% (sendiri + ide 13) | 4 | 2 | 3 | **24** | +0,0003–0,0007 | CPU-det |
+| 6 | H06 | Pinjaman lama sebagai baris latih model utama (sendiri + ide 4) | 3 | 4 | 2 | **24** | +0,001–0,003 (tumpang tindih H02) | CPU-det |
+| 7 | H17 | Model hazard event bulanan, kovariat as-of, 1,4 jt label (ide 3) | 3 | 2 | 3 | **18** | +0,0003–0,001 | CPU-det |
+| 8 | H08 | Posterior tipe default pinjaman berjalan (sendiri) | 3 | 2 | 3 | **18** | +0,0002–0,0006 | CPU-det |
+| 9 | H09 | Status bulan kalender terakhir lintas pinjaman (sendiri) | 3 | 2 | 3 | **18** | +0,0002–0,0005 | CPU-det |
+| 10 | H07 | Sub-model per sumber bukti + stacking (sendiri) | 2 | 3 | 3 | **18** | +0,0005–0,002 | CPU-det |
+| 11 | H10 | GRU rantai event kalender (sendiri) | 3 | 2 | 2 | **12** | +0,0003–0,001 | GPU |
+| 12 | H11 | Ramp e-commerce per strata π (sendiri) | 2 | 2 | 3 | **12** | +0,0002–0,0007 | CPU-det |
+| 13 | H12 | Tuning Optuna 5 fold di set sekarang (sendiri) | 2 | 2 | 2 | **8** | +0,0003–0,001 | CPU-det |
+| 14 | H13 | Pangkas kolom + nilai ulang E130b (sendiri) | 2 | 2 | 2 | **8** | +0,0002–0,0005 | CPU-det |
+| 15 | H14 | Skor kontinu lender di balik tier (sendiri) | 2 | 2 | 2 | **8** | +0,0002–0,0007 | CPU-det |
+| 16 | H15 | Pseudo-label test nested (sendiri + ide 13) | 1 | 2 | 3 | **6** | 0 – +0,0005 | CPU-det |
+| 17 | H16 | Seed bag 5–10 + DART (sendiri) | 5 | 1 | 1 | **5** | +0,0001–0,0003 | CPU-det |
+| 18 | H19 | Fitur otomatis OpenFE / Featuretools (ide 11) | 1 | 2 | 2 | **4** | 0 – +0,0005 | CPU-det (berat: 4–10 jam, RAM 16+ GB → komputer lain) |
+| 19 | H18 | Objektif ranking LightGBM `rank_xendcg` / `lambdarank` (ide 12) | 1 | 1 | 3 | **3** | 0 – +0,0002 | CPU-det |
+| 20 | H20 | KNN target mean nested (ide 5, E127) | 1 | 1 | 3 | **3** | 0 – +0,0003 | CPU-det |
+
+**H17 — Model hazard event bulanan dengan kovariat as-of (ide eksternal 3).**
+- *Bukti*: lewat-bayar per event = kecenderungan customer (rasio korelasi 1,42 tetap sampai lag 12) + guncangan bulanan (rasio 1,60 di bulan sama; P(miss) 0,329 di bulan income rekening terendah relatif rata-rata customer vs 0,205 tertinggi); `q0` punya sinyal residual z 4,0; kurva belajar: model lapar data (1,4 jt event vs 70 rb target).
+- *Definisi*: baris = event bayar pinjaman lama (j = 1..J, < cutoff); label = lewat-bayar (X = 0 saat ada kewajiban). Kovariat **as-of tanggal event**: riwayat event customer sebelum tanggal itu (laju, tunggakan, jumlah pinjaman aktif), laporan biro dengan `available_datetime` < tanggal event, rekening bulan sebelumnya, e-commerce sebelum tanggal event, profil, ciri pinjaman. LightGBM, GroupKFold per customer. Diterapkan pada kondisi customer di cutoff (12 event hipotetis pinjaman baru) → `x_hazard_q`, `x_hazard_pd12`.
+- *Komputasi*: CPU; builder as-of 1–2 hari dev, run ±1–2 jam, RAM 6–10 GB → komputer lain.
+- *Kebocoran*: label milik event, bukan target sekarang → tidak perlu nested; kovariat wajib as-of event; uji label acak (acak label event) + adversarial.
+- *Kebaruan*: belum pernah (E126 level pinjaman as-of, bukan level event).
+
+**H18 — Objektif ranking LightGBM.** `rank_xendcg` (satu grup per fold) dan `lambdarank` (grup acak 1.000 baris). Bukti a priori lemah: logloss sudah hampir optimal untuk AUC; manfaat paling mungkin diversitas blend. Murah (±20 menit 3 seed).
+
+**H19 — Fitur otomatis (OpenFE / Featuretools, E123/E124).** Bukti lemah: 25+ agregat baru semua |z| < 2 dan kurva belajar menunjukkan batas representasi; OpenFE (interaksi aritmetika) paling mungkin menambah sedikit. Featuretools DFS dengan cutoff per aplikasi 4–10 jam, RAM 16+ GB → komputer lain.
+
+**H20 — KNN target mean (nested, E127).** Tanpa bukti spesifik; GBDT sudah menangkap kemiripan lokal. Murah.
+
+---
+
+## 7. Pertanyaan batch #3
+
+1. **Dua submission final**: apakah notebook final wajib menghasilkan **kedua** file (dua MD5 yang cocok dengan dua submisi terpilih), atau cukup satu? — *menentukan apakah final = 2 pipeline (best-CV + robust) dalam satu notebook.*
+2. **Mesin panitia untuk menjalankan ulang** (Kaggle CPU/GPU? laptop panitia? OS?). — *komponen GPU (GRU `seq_*`/`seqx_*` di E122x1, NN) tidak dijamin bit-identik antar mesin; kalau panitia menjalankan di mesin lain, MD5 bisa beda → risiko posisi diganti. Jawabannya menentukan apakah fitur GPU boleh masuk final.*
+3. **Porsi test untuk public LB** (tulisan "calculated with approximately X% of the test data" di halaman Leaderboard). Jawaban batch #1 berisi bobot nilai 45/45, bukan porsi test. — *hanya untuk membaca noise submission; kalau tidak tahu, saya pakai 30–50%.*
+4. **Persetujuan diff** perubahan aturan (`experiments/explore_17okt/diff_aturan_baru.patch`): `compare_oof.py`, skill run-experiment, skill audit-leakage + `audit_features.py`, CLAUDE.md. Boleh dipakai? — *wajib sebelum eksperimen baru pertama dan sebelum menilai ulang eksperimen lama.*
+5. **Usulan perbaikan skill lain yang menghambat temuan sah**: audit-leakage Lapis 3 butir 3 ("fitur model baris harus intrinsik milik baris") melarang fitur konteks customer pada **semua** model level baris, padahal H02/H04/H17 sah memakai bukti dari pinjaman/event lain milik customer karena labelnya **bukan target sekarang**. Usul: batasi butir itu ke model baris yang labelnya target customer (gaya E121); untuk model berlabel sendiri, konteks customer boleh asalkan baris itu sendiri (hasil dan jalurnya) dikecualikan (LOO) dan kovariat as-of untuk model hazard. Setuju?
+
+---
+
+## 8. Persiapan Langkah 4 (menunggu persetujuan diff)
+
+- **Diff siap ditinjau**: `experiments/explore_17okt/diff_aturan_baru.patch` (421 baris). Validasi kode: AUC berbobot cepat = `roc_auc_score(sample_weight)` persis (selisih 0); bootstrap 1000× pada 70 rb baris 4 detik; cek penyelarasan E122x1 vs E122x1 = 0,84495 (sama dengan log). Belum dipakai untuk keputusan apa pun.
+- **Builder H01 siap** (tidak memakai aturan baru): `src/features/events.py` → `features/rp_events_v1.parquet` (18 kolom `rp_ev_*`, 66,2% baris terisi, 0,7 menit). Terdaftar di `EXTRA_GROUPS` (bukan `GROUPS`, supaya set "all" 528 kolom tidak berubah); dibangun dengan `python build_extra.py rp_events_v1`; dipakai lewat `e121.py --extra rp_events_v1.parquet`.
+- **Urutan setelah disetujui**: (1) nilai ulang eksperimen lama berstatus kandidat/ditolak dengan Δ positif yang punya OOF ≥ 3 seed (E130b, E141, E122r, E122c, E122x1/2/3, E141x, E146, E150_xgb, …) → laporkan perubahan status, acuan tidak diganti sebelum lapor; (2) E200 = H01: audit → screen → CV 3 seed (±20 menit) → `compare_oof`; (3) E201 = H02; (4) E202 = H05.

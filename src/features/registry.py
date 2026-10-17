@@ -2,7 +2,7 @@
 
 Naikkan versi (_v2) setiap kali logika builder berubah agar cache lama tidak terpakai.
 """
-from . import account, app, bureau, cross, ecommerce, naive, previous, repayment
+from . import account, app, bureau, cross, ecommerce, events, naive, previous, repayment
 
 GROUPS = {
     # Fase 1
@@ -30,4 +30,11 @@ GROUPS = {
     "ec_mix_v1": ecommerce.build_ec_mix,
     "x_cross_v1": cross.build_x_cross,
     "x_rate_resid_v1": cross.build_x_rate_resid,
+}
+
+# Grup fitur eksperimen 17 Okt+ (E200+). Sengaja TIDAK masuk GROUPS supaya set acuan "all" (528 kolom,
+# `e121.py --basefs all`, kaggle X_all.parquet) tidak berubah; dipakai lewat `e121.py --extra <nama>.parquet`.
+# Bangun cache: python build_extra.py <nama>
+EXTRA_GROUPS = {
+    "rp_events_v1": events.build_rp_events,  # H01: rantai bayar bulanan level event
 }

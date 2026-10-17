@@ -7,3 +7,5 @@ __pycache__/
 *.pyc
 .ipynb_checkpoints/
 catboost_info/
+kaggle/dataset/
+kaggle/output/

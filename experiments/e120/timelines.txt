@@ -1,0 +1,127 @@
+==============================================================================================================
+[FN] C_a49b73956f238149 skor persentil 0.144 target 1 | keputusan 2025-08-18 pinjaman 27.3 jt, bunga 0.2, cicilan 2.53 jt, tujuan working_capital
+  profil: umur 46, salaried 52 bln, income 5.7 jt, tanggungan 3, rented, Region_A
+  biro sekarang: A skor 689.0 aktif 3 utang 5.5jt util 0.3275561291400827 inq 1 delinq 0; B skor 671.0 aktif 3 utang 7.7jt util - inq 1 delinq 0; C skor 692.0 aktif 2 utang 8.8jt util 0.2266516889582306 inq 2 delinq 0
+  e-commerce: 22 order total, 30 hari terakhir 0; 8 terakhir: -316h fashi 273rb e_wall comp | -306h fashi 126rb e_wall comp | -285h fashi 207rb e_wall comp | -280h perso 505rb e_wall comp | -262h groce 23rb e_wall comp | -231h fashi 244rb e_wall comp | -107h home 315rb e_wall comp | -48h fashi 122rb e_wall comp
+==============================================================================================================
+[FN] C_085debe71a3f6769 skor persentil 0.118 target 1 | keputusan 2025-12-04 pinjaman 45.6 jt, bunga 0.16, cicilan 4.14 jt, tujuan working_capital
+  profil: umur 41, salaried 55 bln, income 14.8 jt, tanggungan 3, rented, Region_C
+  biro sekarang: A skor 769.0 aktif 3 utang 0.0jt util - inq 0 delinq 0; B skor 787.0 aktif 0 utang 0.0jt util - inq 0 delinq 0; C skor 810.0 aktif 0 utang 0.0jt util - inq 0 delinq 0
+  lama 2025-01-10 (328h lalu) approved  minta 41.9jt 18bln cair 41.9jt bunga 0.16 | 10 cicilan, maxDPD per cicilan [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], DPD kini 0, bayar 1.00 | biro skor 767 delinq 0
+  lama 2025-01-11 (327h lalu) approved  minta 26.4jt 12bln cair 26.4jt bunga 0.16 | 10 cicilan, maxDPD per cicilan [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], DPD kini 0, bayar 1.00 | biro skor 788 delinq 1
+  lama 2025-08-01 (125h lalu) approved  minta 12.9jt 18bln cair 11.6jt bunga 0.16 | 4 cicilan, maxDPD per cicilan [0, 0, 0, 0], DPD kini 0, bayar 1.00 | biro skor 789 delinq 0
+  rekening 6 bln terakhir: 25-06 saldo 33.6 in 5.2 out 8.9 gaji 3.9 low 0 | 25-07 saldo 26.8 in 4.4 out 11.2 gaji 2.5 low 0 | 25-08 saldo 25.1 in 6.8 out 8.5 gaji 6.3 low 0 | 25-09 saldo 22.6 in 6.8 out 9.3 gaji 4.0 low 0 | 25-10 saldo 22.1 in 8.9 out 9.4 gaji 4.3 low 0 | 25-11 saldo 17.2 in 8.6 out 13.4 gaji 4.6 low 0
+  e-commerce: 29 order total, 30 hari terakhir 3; 8 terakhir: -166h healt 40rb e_wall comp | -146h groce 94rb COD comp | -142h groce 358rb COD comp | -136h home 888rb e_wall comp | -132h elect 432rb COD comp | -26h perso 61rb COD comp | -12h elect 1398rb COD comp | -8h elect 942rb COD comp
+==============================================================================================================
+[FN] C_8682289931012a26 skor persentil 0.102 target 1 | keputusan 2025-08-04 pinjaman 31.0 jt, bunga 0.16, cicilan 2.81 jt, tujuan home_improvement
+  profil: umur 52, salaried 33 bln, income 7.0 jt, tanggungan 3, rented, Region_E
+  biro sekarang: A skor 752.0 aktif 2 utang 7.2jt util 0.2499128573856209 inq 0 delinq 0; B skor 780.0 aktif 1 utang 9.6jt util 0.427500542249832 inq 0 delinq 1; C skor 734.0 aktif 2 utang 9.2jt util 0.1778701055597145 inq 2 delinq 0
+  e-commerce: 42 order total, 30 hari terakhir 0; 8 terakhir: -180h groce 117rb COD comp | -148h groce 107rb COD comp | -134h perso 111rb COD comp | -127h groce 30rb COD comp | -68h healt 622rb COD canc | -63h healt 97rb COD comp | -51h groce 146rb debit_ comp | -49h healt 512rb COD comp
+==============================================================================================================
+[FN] C_8ef604f518ca0fd9 skor persentil 0.205 target 1 | keputusan 2025-09-21 pinjaman 11.3 jt, bunga 0.16, cicilan 1.03 jt, tujuan household
+  profil: umur 34, variable_income 31 bln, income 7.2 jt, tanggungan 2, owned, Region_B
+  biro sekarang: A skor nan aktif 0 utang 0.0jt util - inq 1 delinq 0; B skor 767.0 aktif 0 utang 0.0jt util - inq 1 delinq 0; C skor 772.0 aktif 0 utang 0.0jt util - inq 2 delinq 0
+  e-commerce: 22 order total, 30 hari terakhir 1; 8 terakhir: -264h elect 1734rb e_wall comp | -204h elect 2379rb bank_t comp | -191h fashi 139rb e_wall comp | -184h groce 516rb bank_t comp | -90h elect 1396rb debit_ comp | -53h fashi 825rb bank_t comp | -45h fashi 1176rb debit_ comp | -6h elect 1261rb debit_ comp
+==============================================================================================================
+[FN] C_b9949f1ae3dfb171 skor persentil 0.264 target 1 | keputusan 2025-11-01 pinjaman 20.1 jt, bunga 0.16, cicilan 1.82 jt, tujuan home_improvement
+  profil: umur 32, salaried 6 bln, income 4.6 jt, tanggungan 1, owned, Region_D
+  biro sekarang: A skor 727.0 aktif 5 utang 5.9jt util 0.33310497405137 inq 0 delinq 0; B skor 779.0 aktif 4 utang 5.3jt util - inq 0 delinq 0; C skor 734.0 aktif 4 utang 7.0jt util 0.2243852281130295 inq 0 delinq 0
+  lama 2024-09-19 (408h lalu) approved  minta 18.9jt 12bln cair 18.9jt bunga 0.16 | 12 cicilan, maxDPD per cicilan [0, 0, 30, 30, 0, 0, 0, 0, 0, 30, 30, 0], DPD kini 0, bayar 1.00 | biro skor 751 delinq 0
+  lama 2025-07-03 (121h lalu) approved  minta 15.1jt 12bln cair 15.1jt bunga 0.16 | 3 cicilan, maxDPD per cicilan [0, 0, 0], DPD kini 0, bayar 1.00 | biro skor 778 delinq 0
+  lama 2025-08-20 (73h lalu) approved  minta 21.7jt 12bln cair 19.5jt bunga 0.16 | 2 cicilan, maxDPD per cicilan [0, 12], DPD kini 12, bayar 0.70 | biro skor 748 delinq 0
+  rekening 6 bln terakhir: 25-05 saldo 8.7 in 4.1 out 4.1 gaji 2.0 low 0 | 25-06 saldo 7.4 in 3.7 out 5.0 gaji 2.5 low 0 | 25-07 saldo 7.6 in 3.7 out 3.5 gaji 3.2 low 0 | 25-08 saldo 6.0 in 3.2 out 4.8 gaji 2.7 low 0 | 25-09 saldo 4.5 in 5.8 out 7.3 gaji 2.7 low 2 | 25-10 saldo 5.0 in 4.5 out 4.0 gaji 3.1 low 0
+  e-commerce: 38 order total, 30 hari terakhir 2; 8 terakhir: -146h fashi 145rb COD comp | -135h fashi 754rb credit comp | -114h home 188rb COD comp | -91h groce 62rb credit comp | -58h groce 31rb COD comp | -38h groce 10rb COD comp | -21h home 378rb credit canc | -9h groce 27rb COD comp
+==============================================================================================================
+[FN] C_92e9113808ab4592 skor persentil 0.271 target 1 | keputusan 2025-10-15 pinjaman 53.8 jt, bunga 0.16, cicilan 4.88 jt, tujuan working_capital
+  profil: umur 49, self_employed 37 bln, income 22.3 jt, tanggungan 2, owned, Region_B
+  biro sekarang: A skor 700.0 aktif 1 utang 20.0jt util - inq 1 delinq 0; B skor 752.0 aktif 0 utang 0.0jt util - inq 1 delinq 0; C skor 720.0 aktif 0 utang 0.0jt util - inq 0 delinq 1
+  e-commerce: 23 order total, 30 hari terakhir 0; 8 terakhir: -108h fashi 522rb COD comp | -102h elect 3338rb COD comp | -98h elect 1079rb credit comp | -86h perso 22rb credit comp | -79h fashi 455rb COD comp | -69h fashi 207rb COD comp | -38h fashi 327rb bank_t comp | -36h fashi 428rb bank_t comp
+==============================================================================================================
+[FP] C_59eefe61f08e41ed skor persentil 0.994 target 0 | keputusan 2025-04-09 pinjaman 54.5 jt, bunga 0.28, cicilan 5.26 jt, tujuan working_capital
+  profil: umur 38, variable_income 46 bln, income 22.9 jt, tanggungan 3, rented, Region_E
+  biro sekarang: A skor 560.0 aktif 4 utang 30.3jt util 0.74249373259447 inq 0 delinq 1; B skor 588.0 aktif 2 utang 29.4jt util 0.570060004866789 inq 1 delinq 0; C skor 573.0 aktif 4 utang 23.6jt util 0.689819419493942 inq 3 delinq 0
+  lama 2024-04-03 (371h lalu) approved  minta 31.3jt 18bln cair 28.1jt bunga 0.24 | 12 cicilan, maxDPD per cicilan [30, 60, 91, 91, 90, 91, 60, 61, 58, 27, 0, 6], DPD kini 6, bayar 0.98 | biro skor 572 delinq 2
+  lama 2024-10-31 (160h lalu) cancelled minta 16.1jt 18bln | biro skor 580 delinq 1
+  lama 2025-02-28 (40h lalu) approved  minta 39.7jt 12bln cair 39.7jt bunga 0.28 | 1 cicilan, maxDPD per cicilan [12], DPD kini 12, bayar 0.00 | biro skor 564 delinq 0
+  rekening 6 bln terakhir: 24-10 saldo 49.7 in 9.5 out 6.2 gaji 3.9 low 0 | 24-11 saldo 48.7 in 4.7 out 5.8 gaji 4.1 low 0 | 24-12 saldo 48.3 in 11.4 out 11.7 gaji 10.3 low 0 | 25-01 saldo 50.9 in 24.7 out 22.1 gaji 22.2 low 0 | 25-02 saldo 51.9 in 10.5 out 9.5 gaji 5.7 low 0 | 25-03 saldo 50.8 in 10.7 out 11.8 gaji 7.0 low 0
+  e-commerce: 25 order total, 30 hari terakhir 5; 8 terakhir: -42h groce 60rb debit_ comp | -42h healt 103rb debit_ comp | -40h healt 200rb debit_ comp | -26h fashi 750rb debit_ comp | -25h fashi 252rb debit_ comp | -23h healt 563rb debit_ comp | -9h fashi 310rb debit_ comp | -6h perso 87rb debit_ comp
+==============================================================================================================
+[FP] C_4046e6d30e1d3180 skor persentil 0.996 target 0 | keputusan 2025-11-23 pinjaman 12.6 jt, bunga 0.24, cicilan 1.19 jt, tujuan working_capital
+  profil: umur 25, salaried 18 bln, income 5.4 jt, tanggungan 0, owned, Region_E
+  biro sekarang: A skor 641.0 aktif 4 utang 6.7jt util 0.651030769133799 inq 1 delinq 1; B skor 598.0 aktif 3 utang 5.1jt util 0.4945073646453387 inq 0 delinq 2; C skor 655.0 aktif 3 utang 5.0jt util 0.4847699066516233 inq 1 delinq 0
+  lama 2024-02-12 (650h lalu) approved  minta 16.8jt 6bln cair 16.8jt bunga 0.24 | 6 cicilan, maxDPD per cicilan [91, 90, 60, 182, 183, 152], DPD kini 0, bayar 1.00 | biro skor 630 delinq 0
+  lama 2024-05-15 (557h lalu) rejected  minta 20.4jt 6bln | biro skor 644 delinq 1
+  lama 2024-10-11 (408h lalu) approved  minta 15.9jt 12bln cair 14.3jt bunga 0.24 | 12 cicilan, maxDPD per cicilan [60, 30, 150, 180, 257, 226, 196, 165, 135, 104, 73, 43], DPD kini 257, bayar 0.37 | biro skor 642 delinq 0
+  lama 2025-01-03 (324h lalu) approved  minta 23.8jt 18bln cair 19.0jt bunga 0.28 | 10 cicilan, maxDPD per cicilan [27, 0, 0, 30, 29, 0, 60, 60, 30, 20], DPD kini 20, bayar 0.91 | biro skor 628 delinq 0
+  lama 2025-07-21 (125h lalu) approved  minta 12.7jt 6bln cair 12.7jt bunga 0.24 | 4 cicilan, maxDPD per cicilan [60, 29, 30, 2], DPD kini 2, bayar 0.84 | biro skor 631 delinq 0
+  rekening 6 bln terakhir: 25-05 saldo 1.5 in 3.6 out 4.3 gaji 2.1 low 0 | 25-06 saldo 0.1 in 5.0 out 6.4 gaji 1.5 low 24 | 25-07 saldo 3.9 in 7.9 out 4.1 gaji 3.5 low 23 | 25-08 saldo 2.9 in 5.6 out 6.6 gaji 3.0 low 0 | 25-09 saldo 2.6 in 5.1 out 5.4 gaji 2.2 low 10 | 25-10 saldo 1.3 in 7.9 out 9.3 gaji 1.6 low 6
+  e-commerce: 32 order total, 30 hari terakhir 8; 8 terakhir: -20h fashi 158rb bank_t comp | -16h groce 46rb bank_t comp | -10h groce 160rb bank_t comp | -8h groce 109rb bank_t comp | -6h fashi 686rb bank_t comp | -2h home 494rb bank_t comp | -1h groce 220rb bank_t comp | -1h groce 216rb bank_t comp
+==============================================================================================================
+[FP] C_c5c7f17a1849aba1 skor persentil 0.996 target 0 | keputusan 2025-10-20 pinjaman 29.2 jt, bunga 0.28, cicilan 2.82 jt, tujuan education
+  profil: umur 23, self_employed 9 bln, income 7.3 jt, tanggungan 2, rented, Region_C
+  biro sekarang: A skor 555.0 aktif 5 utang 22.4jt util - inq 2 delinq 1; B skor 585.0 aktif 3 utang 25.6jt util - inq 2 delinq 0; C skor 565.0 aktif 3 utang 33.4jt util - inq 6 delinq 1
+  lama 2023-10-23 (728h lalu) approved  minta 31.0jt 12bln cair 27.9jt bunga 0.2 | 12 cicilan, maxDPD per cicilan [0, 0, 0, 28, 0, 121, 122, 152, 122, 121, 121, 122], DPD kini 0, bayar 1.00 | biro skor 616 delinq 1
+  lama 2024-05-10 (528h lalu) approved  minta 13.8jt 12bln cair 13.8jt bunga 0.24 | 12 cicilan, maxDPD per cicilan [29, 0, 0, 60, 91, 60, 89, 89, 88, 121, 182, 163], DPD kini 163, bayar 0.99 | biro skor 614 delinq 0
+  lama 2024-06-19 (488h lalu) rejected  minta 41.1jt 6bln | biro skor 584 delinq 0
+  lama 2024-09-15 (400h lalu) approved  minta 21.3jt 12bln cair 21.3jt bunga 0.28 | 12 cicilan, maxDPD per cicilan [91, 119, 120, 89, 119, 152, 182, 158, 127, 97, 66, 35], DPD kini 158, bayar 0.66 | biro skor 588 delinq 0
+  lama 2024-10-09 (376h lalu) cancelled minta 38.5jt 12bln | biro skor 583 delinq 1
+  lama 2025-07-06 (106h lalu) rejected  minta 17.2jt 6bln | biro skor 567 delinq 0
+  lama 2025-07-18 (94h lalu) approved  minta 23.6jt 6bln cair 23.6jt bunga 0.28 | 3 cicilan, maxDPD per cicilan [60, 29, 2], DPD kini 2, bayar 0.74 | biro skor 570 delinq 1
+  rekening 6 bln terakhir: 25-04 saldo 8.8 in 5.3 out 9.3 gaji 2.9 low 0 | 25-05 saldo 1.7 in 2.7 out 9.9 gaji 2.4 low 0 | 25-06 saldo 1.4 in 4.5 out 4.9 gaji 2.5 low 0 | 25-07 saldo 4.2 in 7.8 out 5.0 gaji 2.4 low 6 | 25-08 saldo 0.6 in 6.6 out 10.1 gaji 3.5 low 1 | 25-09 saldo 0.0 in 9.1 out 9.8 gaji 2.0 low 6
+  e-commerce: 25 order total, 30 hari terakhir 11; 8 terakhir: -23h groce 1481rb debit_ comp | -21h groce 52rb COD comp | -8h fashi 310rb e_wall comp | -5h groce 425rb debit_ comp | -4h fashi 82rb COD comp | -4h healt 496rb e_wall comp | -1h groce 302rb bank_t comp | -1h groce 266rb COD comp
+==============================================================================================================
+[FP] C_43f3676d2f2e3bc4 skor persentil 0.992 target 0 | keputusan 2025-07-15 pinjaman 26.1 jt, bunga 0.28, cicilan 2.52 jt, tujuan household
+  profil: umur 38, self_employed 33 bln, income 8.6 jt, tanggungan 1, family, Region_E
+  biro sekarang: A skor 576.0 aktif 5 utang 103.7jt util 0.7241172505347166 inq 2 delinq 1; C skor 585.0 aktif 2 utang 140.4jt util 0.4620995154533548 inq 3 delinq 0
+  lama 2024-08-06 (343h lalu) approved  minta 10.9jt 18bln cair 9.8jt bunga 0.2 | 11 cicilan, maxDPD per cicilan [60, 30, 29, 0, 89, 58, 121, 100, 70, 39, 9], DPD kini 100, bayar 0.70 | biro skor 614 delinq 0
+  lama 2024-11-07 (250h lalu) approved  minta 8.5jt 18bln cair 8.5jt bunga 0.24 | 8 cicilan, maxDPD per cicilan [0, 30, 58, 60, 29, 69, 38, 8], DPD kini 69, bayar 0.66 | biro skor 577 delinq 0
+  lama 2025-04-21 (85h lalu) approved  minta 7.6jt 18bln cair 6.0jt bunga 0.28 | 2 cicilan, maxDPD per cicilan [30, 24], DPD kini 24, bayar 0.94 | biro skor 582 delinq 0
+  rekening 6 bln terakhir: 25-01 saldo 11.8 in 3.9 out 2.9 gaji 0.8 low 0 | 25-02 saldo 11.6 in 2.4 out 2.6 gaji 1.6 low 0 | 25-03 saldo 13.2 in 3.6 out 2.0 gaji 0.9 low 0 | 25-04 saldo 13.3 in 5.4 out 5.4 gaji 3.0 low 0 | 25-05 saldo 14.2 in 5.8 out 4.8 gaji 2.4 low 0 | 25-06 saldo 15.3 in 4.6 out 3.5 gaji 2.6 low 0
+  e-commerce: 34 order total, 30 hari terakhir 2; 8 terakhir: -110h groce 21rb COD comp | -110h educa 253rb COD comp | -77h perso 39rb debit_ comp | -74h perso 83rb COD comp | -61h groce 104rb debit_ comp | -40h groce 135rb debit_ comp | -6h groce 26rb COD comp | -4h perso 230rb COD comp
+==============================================================================================================
+[FP] C_15629244d133f298 skor persentil 0.987 target 0 | keputusan 2025-02-21 pinjaman 59.6 jt, bunga 0.24, cicilan 5.64 jt, tujuan working_capital
+  profil: umur 45, self_employed 30 bln, income 18.8 jt, tanggungan 4, rented, Region_A
+  biro sekarang: A skor 593.0 aktif 3 utang 38.7jt util - inq 4 delinq 0; B skor 617.0 aktif 4 utang 46.6jt util - inq 1 delinq 2; C skor 613.0 aktif 1 utang 58.3jt util - inq 1 delinq 0
+  lama 2023-04-02 (691h lalu) approved  minta 51.3jt 12bln cair 51.3jt bunga 0.24 | 12 cicilan, maxDPD per cicilan [0, 0, 0, 30, 60, 91, 91, 151, 120, 89, 121, 90], DPD kini 0, bayar 1.00 | biro skor 620 delinq 0
+  lama 2023-08-09 (562h lalu) approved  minta 39.0jt 12bln cair 39.0jt bunga 0.24 | 12 cicilan, maxDPD per cicilan [0, 0, 0, 90, 151, 212, 183, 182, 152, 152, 122, 121], DPD kini 0, bayar 1.00 | biro skor 614 delinq 1
+  lama 2023-09-04 (536h lalu) rejected  minta 66.4jt 12bln | biro skor 620 delinq 1
+  lama 2024-12-16 (67h lalu) approved  minta 28.2jt 18bln cair 28.2jt bunga 0.24 | 2 cicilan, maxDPD per cicilan [0, 5], DPD kini 5, bayar 0.50 | biro skor 584 delinq 0
+  rekening 6 bln terakhir: 24-08 saldo 28.7 in 14.6 out 4.8 gaji 5.6 low 0 | 24-09 saldo 27.6 in 10.8 out 11.9 gaji 3.0 low 0 | 24-10 saldo 27.2 in 14.9 out 15.3 gaji 10.9 low 0 | 24-11 saldo 27.1 in 17.1 out 17.2 gaji 7.7 low 0 | 24-12 saldo 23.6 in 9.2 out 12.8 gaji 7.4 low 0 | 25-01 saldo 27.0 in 17.6 out 14.2 gaji 16.5 low 0
+  e-commerce: 23 order total, 30 hari terakhir 5; 8 terakhir: -65h elect 3773rb e_wall comp | -64h fashi 380rb e_wall comp | -40h elect 556rb debit_ comp | -19h groce 62rb debit_ comp | -8h perso 136rb e_wall canc | -3h educa 160rb e_wall comp | -2h perso 224rb e_wall comp | -1h fashi 492rb debit_ comp
+==============================================================================================================
+[FP] C_546af7c3c53c65ff skor persentil 0.986 target 0 | keputusan 2025-04-07 pinjaman 26.5 jt, bunga 0.24, cicilan 2.51 jt, tujuan working_capital
+  profil: umur 29, salaried 20 bln, income 7.1 jt, tanggungan 3, rented, Region_B
+  biro sekarang: A skor 618.0 aktif 3 utang 14.2jt util 0.6899231021564507 inq 0 delinq 0; B skor 632.0 aktif 2 utang 11.7jt util 0.5215242994209931 inq 3 delinq 0; C skor 611.0 aktif 2 utang 13.7jt util 0.6263939962955082 inq 0 delinq 0
+  lama 2024-01-24 (439h lalu) cancelled minta 12.7jt 12bln | biro skor 614 delinq 0
+  lama 2024-06-11 (300h lalu) approved  minta 25.5jt 6bln cair 20.4jt bunga 0.28 | 6 cicilan, maxDPD per cicilan [61, 60, 60, 60, 91, 89], DPD kini 0, bayar 1.00 | biro skor 599 delinq 1
+  lama 2024-10-18 (171h lalu) approved  minta 4.4jt 18bln cair 4.4jt bunga 0.24 | 5 cicilan, maxDPD per cicilan [29, 61, 79, 48, 20], DPD kini 79, bayar 0.43 | biro skor 611 delinq 1
+  rekening 6 bln terakhir: 24-10 saldo 43.9 in 9.6 out 7.8 gaji 5.0 low 0 | 24-11 saldo 41.4 in 7.5 out 10.1 gaji 4.4 low 0 | 24-12 saldo 41.9 in 5.9 out 5.4 gaji 3.9 low 0 | 25-01 saldo 45.8 in 9.6 out 5.7 gaji 5.1 low 0 | 25-02 saldo 44.0 in 4.9 out 6.7 gaji 4.3 low 0 | 25-03 saldo 44.9 in 9.1 out 8.1 gaji 6.1 low 0
+  e-commerce: 33 order total, 30 hari terakhir 5; 8 terakhir: -67h fashi 598rb credit comp | -45h fashi 684rb COD comp | -35h educa 1264rb credit comp | -27h groce 312rb COD comp | -22h groce 107rb credit comp | -8h educa 892rb COD comp | -7h groce 378rb credit comp | -2h groce 50rb COD comp
+==============================================================================================================
+[TP(benar)] C_815d19b3856766dd skor persentil 0.999 target 1 | keputusan 2025-11-22 pinjaman 95.3 jt, bunga 0.28, cicilan 9.20 jt, tujuan medical
+  profil: umur 42, variable_income 25 bln, income 22.0 jt, tanggungan 1, owned, Region_C
+  biro sekarang: A skor 600.0 aktif 1 utang 20.4jt util - inq 1 delinq 0; B skor 609.0 aktif 3 utang 25.4jt util - inq 2 delinq 0; C skor 688.0 aktif 2 utang 22.5jt util - inq 1 delinq 1
+  lama 2024-12-09 (348h lalu) approved  minta 45.0jt 12bln cair 45.0jt bunga 0.2 | 11 cicilan, maxDPD per cicilan [119, 180, 183, 227, 197, 166, 136, 105, 74, 44, 13], DPD kini 227, bayar 0.35 | biro skor 702 delinq 1
+  lama 2025-01-16 (310h lalu) cancelled minta 54.7jt 18bln | biro skor 683 delinq 0
+  lama 2025-06-17 (158h lalu) approved  minta 54.1jt 18bln cair 54.1jt bunga 0.24 | 5 cicilan, maxDPD per cicilan [61, 30, 29, 36, 5], DPD kini 36, bayar 0.70 | biro skor 630 delinq 1
+  rekening 6 bln terakhir: 25-05 saldo 579.1 in 34.9 out 8.5 gaji 11.7 low 0 | 25-06 saldo 609.6 in 40.5 out 10.0 gaji 15.8 low 0 | 25-07 saldo 629.5 in 33.2 out 13.2 gaji 29.2 low 0 | 25-08 saldo 655.1 in 41.9 out 16.3 gaji 28.0 low 0 | 25-09 saldo 683.0 in 55.9 out 27.9 gaji 39.2 low 0 | 25-10 saldo 710.3 in 37.9 out 10.6 gaji 10.3 low 0
+  e-commerce: 24 order total, 30 hari terakhir 9; 8 terakhir: -20h perso 1174rb bank_t comp | -20h groce 50rb e_wall comp | -18h groce 189rb debit_ comp | -8h fashi 1158rb bank_t comp | -3h fashi 310rb bank_t comp | -3h fashi 451rb bank_t comp | -1h groce 252rb e_wall canc | -1h elect 5619rb e_wall comp
+==============================================================================================================
+[TP(benar)] C_0d10cba6f41027cb skor persentil 0.999 target 1 | keputusan 2025-05-08 pinjaman 44.9 jt, bunga 0.24, cicilan 4.25 jt, tujuan household
+  profil: umur 51, salaried 50 bln, income 9.0 jt, tanggungan 3, family, Region_B
+  biro sekarang: A skor 599.0 aktif 6 utang 12.3jt util - inq 1 delinq 1; B skor 605.0 aktif 5 utang 19.1jt util 0.593592902145767 inq 1 delinq 0; C skor 623.0 aktif 5 utang 19.1jt util 0.3406694801339249 inq 3 delinq 2
+  lama 2023-10-04 (582h lalu) approved  minta 8.6jt 18bln cair 8.6jt bunga 0.24 | 18 cicilan, maxDPD per cicilan [0, 0, 0, 89, 152, 152, 152, 121, 152, 121, 121, 91, 119, 120, 89, 93, 65, 34], DPD kini 93, bayar 0.88 | biro skor 614 delinq 0
+  lama 2024-02-02 (461h lalu) approved  minta 18.9jt 18bln cair 15.1jt bunga 0.24 | 15 cicilan, maxDPD per cicilan [60, 29, 0, 0, 30, 60, 60, 60, 91, 61, 58, 95, 67, 36, 6], DPD kini 95, bayar 0.78 | biro skor 611 delinq 1
+  lama 2024-10-19 (201h lalu) rejected  minta 27.7jt 18bln | biro skor 630 delinq 0
+  lama 2025-03-05 (64h lalu) approved  minta 26.9jt 18bln cair 26.9jt bunga 0.24 | 2 cicilan, maxDPD per cicilan [29, 3], DPD kini 3, bayar 0.50 | biro skor 579 delinq 2
+  lama 2025-04-07 (31h lalu) rejected  minta 14.9jt 18bln | biro skor 608 delinq 0
+  rekening 6 bln terakhir: 24-11 saldo 1.1 in 3.1 out 5.3 gaji 1.7 low 8 | 24-12 saldo 1.4 in 5.9 out 5.6 gaji 1.6 low 20 | 25-01 saldo 4.2 in 6.5 out 3.7 gaji 2.6 low 20 | 25-02 saldo 1.7 in 6.9 out 9.5 gaji 2.3 low 4 | 25-03 saldo 4.0 in 7.3 out 4.9 gaji 4.4 low 1 | 25-04 saldo 0.0 in 11.1 out 15.1 gaji 1.9 low 7
+  e-commerce: 38 order total, 30 hari terakhir 17; 8 terakhir: -7h elect 1888rb bank_t comp | -5h fashi 449rb COD comp | -4h fashi 639rb COD comp | -3h fashi 579rb COD comp | -3h perso 74rb COD comp | -3h groce 164rb bank_t comp | -2h elect 2933rb bank_t comp | -2h fashi 569rb COD comp
+==============================================================================================================
+[TP(benar)] C_176d7eacca22f9db skor persentil 0.999 target 1 | keputusan 2025-02-07 pinjaman 24.1 jt, bunga 0.28, cicilan 2.33 jt, tujuan household
+  profil: umur 46, self_employed 66 bln, income 7.9 jt, tanggungan 4, rented, Region_C
+  biro sekarang: A skor 617.0 aktif 1 utang 19.9jt util - inq 2 delinq 1; B skor nan aktif 2 utang 13.3jt util - inq 3 delinq 0; C skor 603.0 aktif 1 utang 15.7jt util - inq 1 delinq 1
+  lama 2024-03-21 (323h lalu) approved  minta 9.7jt 18bln cair 9.7jt bunga 0.2 | 10 cicilan, maxDPD per cicilan [90, 91, 60, 91, 91, 121, 109, 78, 48, 17], DPD kini 109, bayar 0.61 | biro skor 628 delinq 1
+  lama 2024-05-03 (280h lalu) approved  minta 9.0jt 12bln cair 8.1jt bunga 0.2 | 9 cicilan, maxDPD per cicilan [152, 152, 183, 152, 127, 96, 66, 35, 4], DPD kini 127, bayar 0.45 | biro skor 643 delinq 1
+  rekening 6 bln terakhir: 24-08 saldo 32.7 in 9.5 out 4.0 gaji 5.3 low 0 | 24-09 saldo 35.2 in 7.4 out 4.9 gaji 6.8 low 0 | 24-10 saldo 35.4 in 7.3 out 7.1 gaji 4.6 low 0 | 24-11 saldo 38.8 in 10.6 out 7.2 gaji 5.5 low 0 | 24-12 saldo 32.7 in 5.5 out 11.6 gaji 3.2 low 0 | 25-01 saldo 35.9 in 14.7 out 11.5 gaji 10.1 low 0
+  e-commerce: 40 order total, 30 hari terakhir 12; 8 terakhir: -10h perso 1165rb COD comp | -9h home 934rb COD comp | -6h home 2369rb COD comp | -4h home 1841rb COD comp | -4h home 1112rb COD comp | -3h groce 185rb COD comp | -3h healt 320rb COD comp | -1h groce 637rb bank_t comp

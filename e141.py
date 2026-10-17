@@ -46,6 +46,7 @@ def main():
     ap.add_argument("--seeds", nargs="+", type=int, default=[42])
     ap.add_argument("--name", default="E141")
     ap.add_argument("--submit", action="store_true")
+    ap.add_argument("--use", default="e121_ordermodel_v1.npz", help="fitur nested format e121, digabung '+'")
     a = ap.parse_args()
 
     apps = load_apps()
@@ -57,8 +58,9 @@ def main():
     test_ids = apps.loc[~m, "application_id"].values
     del X, apps
     gc.collect()
-    z = np.load(FEATURES_DIR / "e121_ordermodel_v1.npz", allow_pickle=True)
-    cols = [f"{c}0" for c in z["cols"]]
+    zs = [np.load(FEATURES_DIR / f, allow_pickle=True) for f in a.use.split("+")]
+    cols = [f"{c}{i}" for i, z_ in enumerate(zs) for c in z_["cols"]]  # nama kolom sama dengan e121.py
+    z = {key: np.hstack([z_[key] for z_ in zs]) for key in zs[0].files if key not in ("cols", "ids_train", "ids_test")}
     tuned = optuna.load_study(study_name="tune_lgb", storage=STORAGE).best_trial.params
     params = {**full_params("lgb", tuned, a.lr), "boosting": "dart", "drop_rate": a.drop,
               "skip_drop": a.skip, "max_drop": 50, "metric": "auc"}

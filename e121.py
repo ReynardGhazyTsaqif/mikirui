@@ -193,7 +193,11 @@ def build(shuffle=False, tag="", item=False):
     log(f"fitur disimpan {path.name}")
 
 
-def cv(rounds, seeds, submit, featfile, name=None, basefs="b3", study="lgb", extra=""):
+def cv(rounds, seeds, submit, featfile, name=None, basefs="b3", study="lgb", extra="", subfolds=1):
+    """subfolds > 1 (H05): tiap fold asli k dibelah `subfolds` bagian bertingkat (seed 42); model dilatih pada semua baris
+    kecuali satu bagian (90% data untuk subfolds=2) dan divalidasi di bagian itu. Fitur nested: baris fold j != k memakai
+    tr{k}, baris fold k memakai va{k} (model luar fold k tidak pernah melihat label fold k), test te{k}. Mean-fold AUC
+    tetap dihitung pada 5 fold asli supaya sebanding dengan CV 5-fold."""
     from tune import Ctx, best_tuned
     from src.tuning import FINAL_LR, full_params
     ctx = Ctx(Namespace(smoke=False, stop_at=None))
@@ -247,12 +251,29 @@ def cv(rounds, seeds, submit, featfile, name=None, basefs="b3", study="lgb", ext
                                   pd.DataFrame(z[f"va{k}"], columns=cols)], axis=1)
                 X_te = pd.concat([ctx.X_te, pd.DataFrame(z[f"te{k}"], columns=cols)], axis=1)
                 from src.tuning import fit_fold
-                p_va, p_te, it = fit_fold(model, params, X_tr, ctx.y[tr], X_va, ctx.y[va], X_te, s,
-                                          rounds=rounds)
-                oof[va] = p_va
-                pred += p_te / N_FOLDS
+                if subfolds <= 1:
+                    p_va, p_te, it = fit_fold(model, params, X_tr, ctx.y[tr], X_va, ctx.y[va], X_te, s,
+                                              rounds=rounds)
+                    oof[va] = p_va
+                    pred += p_te / N_FOLDS
+                    iters.append(it)
+                else:
+                    from sklearn.model_selection import StratifiedKFold
+                    yk, idx_k = ctx.y[va], np.flatnonzero(va)
+                    part = np.zeros(len(yk), dtype=int)
+                    for h, (_, ix) in enumerate(StratifiedKFold(subfolds, shuffle=True, random_state=SEED).split(
+                            np.zeros(len(yk)), yk)):
+                        part[ix] = h
+                    for h in range(subfolds):
+                        vm = part == h
+                        X_fit = pd.concat([X_tr, X_va[~vm]], ignore_index=True)
+                        y_fit = np.concatenate([ctx.y[tr], yk[~vm]])
+                        p_v, p_t, it = fit_fold(model, params, X_fit, y_fit, X_va[vm].reset_index(drop=True),
+                                                yk[vm], X_te, s, rounds=rounds)
+                        oof[idx_k[vm]] = p_v
+                        pred += p_t / (N_FOLDS * subfolds)
+                        iters.append(it)
                 aucs.append(roc_auc_score(ctx.y[va], oof[va]))
-                iters.append(it)
         np.save(path, oof)
         np.save(ROOT / "preds" / f"{name}_s{s}.npy", pred)
         log(f"{name} seed {s}: AUC mean-fold {np.mean(aucs):.5f} KS {ks_score(ctx.y, oof):.4f} iter {iters} "
@@ -269,7 +290,9 @@ def cv(rounds, seeds, submit, featfile, name=None, basefs="b3", study="lgb", ext
         sub = p.name
         log(f"submission {sub} md5 {md5}")
     log_experiment(name, f"{model} tuned + 7 fitur model order e-commerce nested, batas iterasi {rounds}, "
-                   f"bag {all_s}, basis {basefs}", f"{basefs}+ecm", ctx.X_tr.shape[1] + len(cols), f"{model}_tuned_bag", params, aucs,
+                   f"bag {all_s}, basis {basefs}" + (f", extra {extra}" if extra else "")
+                   + (f", subfolds {subfolds} ({N_FOLDS * subfolds} model/seed)" if subfolds > 1 else ""),
+                   f"{basefs}+ecm", ctx.X_tr.shape[1] + len(cols), f"{model}_tuned_bag", params, aucs,
                    roc_auc_score(ctx.y, oof), 0, "kandidat", ks_score(ctx.y, oof), kss,
                    submission_file=sub, md5_hash=md5)
 
@@ -294,6 +317,7 @@ def main():
     ap.add_argument("--aggx", action="store_true", help="E121e: agregat waktu tambahan saat --build")
     ap.add_argument("--extra", default="", help="parquet tambahan di features/ untuk --cv, digabung '+'")
     ap.add_argument("--name", default=None, help="nama eksperimen untuk --cv (default E121<tag>)")
+    ap.add_argument("--subfolds", type=int, default=1, help="H05: belah tiap fold jadi n bagian (2 = 10 model/seed)")
     a = ap.parse_args()
     ROW_P.update(num_leaves=a.leaves, min_child_samples=a.minchild, learning_rate=a.lr)
     if a.item:
@@ -304,7 +328,8 @@ def main():
         build(a.shuffle, a.tag, a.item)
     if a.cv:
         cv(a.rounds, a.seeds, a.submit,
-           a.use or f"e121_ordermodel_v1{a.tag}{'_shuffle' if a.shuffle else ''}.npz", a.name, a.basefs, a.study, a.extra)
+           a.use or f"e121_ordermodel_v1{a.tag}{'_shuffle' if a.shuffle else ''}.npz", a.name, a.basefs, a.study, a.extra,
+           a.subfolds)
 
 
 if __name__ == "__main__":

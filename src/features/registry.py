@@ -2,7 +2,9 @@
 
 Naikkan versi (_v2) setiap kali logika builder berubah agar cache lama tidak terpakai.
 """
-from . import account, app, bureau, cross, ecommerce, events, naive, previous, repayment
+from functools import partial
+
+from . import account, app, auxpd, bureau, cross, ecommerce, events, naive, previous, repayment
 
 GROUPS = {
     # Fase 1
@@ -37,4 +39,6 @@ GROUPS = {
 # Bangun cache: python build_extra.py <nama>
 EXTRA_GROUPS = {
     "rp_events_v1": events.build_rp_events,  # H01: rantai bayar bulanan level event
+    "x_auxpd_v1": auxpd.build_x_auxpd,  # H02: model bantu PD pinjaman lama, bukti leave-one-loan-out
+    "x_auxpd_v1_shuffle": partial(auxpd.build_x_auxpd, shuffle=True),  # audit label acak H02
 }

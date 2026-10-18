@@ -1,0 +1,12 @@
+kandidat,acuan,catatan,status_lama,seed,auc_acuan,auc_kandidat,delta,ci95,p_delta_pos,fold_naik,ks_acuan,ks_kandidat,keputusan_baru
+E130b,E130a,null importance ulang 333 kolom,"ditolak (+0,00036, 3/5)",3/3,0.84314,0.8435,0.00036,[+0.00007; +0.00065],0.996,3/5,0.5255,0.5248,DITERIMA
+E141,E130a,"LGB DART 5000 ronde, set E130a","kandidat (+0,00038, P 0,97)",3/3,0.84314,0.84352,0.00038,[-0.00000; +0.00078],0.973,5/5,0.5255,0.5246,DITERIMA
+E122r,E122,seq_gru persentil per blok,"kandidat (+0,00019, P 0,97)",3/3,0.84411,0.84429,0.00019,[-0.00003; +0.00040],0.954,4/5,0.526,0.5265,KANDIDAT
+E122m,E122,rata-rata 3 varian urutan (1 kolom),kandidat,3/3,0.84411,0.84433,0.00023,[-0.00002; +0.00048],0.962,4/5,0.526,0.5277,KANDIDAT
+E122c,E122,3 kolom urutan gru/bigru/tf,"kandidat (+0,00044, P 1,00)",3/3,0.84411,0.84454,0.00044,[+0.00017; +0.00071],0.999,5/5,0.526,0.5256,DITERIMA
+E122x1,E122c,+ seqx_rp/ab/pa,"kandidat (+0,00041, P 0,99)",3/3,0.84454,0.84495,0.00041,[+0.00009; +0.00072],0.992,4/5,0.5256,0.5266,DITERIMA
+E122x2,E122c,+ seqx_all,"kandidat (+0,00033)",3/3,0.84454,0.84487,0.00033,[+0.00004; +0.00063],0.985,5/5,0.5256,0.5263,DITERIMA
+E122x3,E122c,+ seqx_rp/ab/pa + seqx_all,"kandidat (+0,00041)",3/3,0.84454,0.84495,0.00041,[+0.00001; +0.00084],0.979,5/5,0.5256,0.5263,DITERIMA
+E141x,E122x1,DART pada set E122x1,"kandidat (+0,00020, P 0,85)",3/3,0.84495,0.84516,0.0002,[-0.00015; +0.00056],0.857,3/5,0.5266,0.5277,KANDIDAT
+T_lgb_b3_4f3c7f_r15k,T_lgb_b3_4f3c7f,E140a: batas iterasi 15000 (B3),"ditolak (+0,00009, 3/5) tapi dipakai default",3/3,0.83788,0.83798,9e-05,[+0.00005; +0.00014],1.0,3/5,0.516,0.5163,KANDIDAT
+T_lgb_selb2_4f3c7f_r15k,T_lgb_selb2_4f3c7f,E140a: batas iterasi 15000 (sel_b2),"ditolak (+0,00041, 4/5)",3/3,0.83687,0.83728,0.00041,[+0.00030; +0.00054],1.0,4/5,0.5148,0.5159,DITERIMA

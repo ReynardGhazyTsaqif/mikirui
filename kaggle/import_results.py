@@ -73,6 +73,23 @@ def main():
         dst = "oof" if m[2] == "oof" else "preds"
         shutil.copy2(q, ROOT / dst / f"E142_{m[1]}_s{m[3]}.npy")
         print(f"{q.name} -> {dst}/E142_{m[1]}_s{m[3]}.npy")
+    for q in sorted(SRC.glob("*_*_s*.npy")):  # PROMPT 3 runner (kaggle/p3_runner.py): <NAME>_oof|test_s<seed>
+        m = re.fullmatch(r"((?:E2\d\d\w*|NF_\w+?))_(oof|test)_s(\d+)", q.stem)
+        if not m:
+            continue
+        arr = np.load(q)
+        assert len(arr) == (len(ids_tr) if m[2] == "oof" else len(ids_te))
+        assert not np.isnan(arr).any(), f"{q.name} berisi NaN"
+        dst = "oof" if m[2] == "oof" else "preds"
+        shutil.copy2(q, ROOT / dst / f"{m[1]}_s{m[3]}.npy")
+        print(f"{q.name} -> {dst}/{m[1]}_s{m[3]}.npy")
+    for q in sorted(SRC.glob("e215_*_*.npy")):  # AutoGluon E215: satu "seed" (s0)
+        m = re.fullmatch(r"e215_(\w+?)_(oof|test)", q.stem)
+        if not m:
+            continue
+        dst = "oof" if m[2] == "oof" else "preds"
+        shutil.copy2(q, ROOT / dst / f"E215_{m[1]}_s0.npy")
+        print(f"{q.name} -> {dst}/E215_{m[1]}_s0.npy")
 
 
 if __name__ == "__main__":

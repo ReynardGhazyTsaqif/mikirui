@@ -47,11 +47,17 @@ def main():
     ap.add_argument("--name", default="E141")
     ap.add_argument("--submit", action="store_true")
     ap.add_argument("--use", default="e121_ordermodel_v1.npz", help="fitur nested format e121, digabung '+'")
+    ap.add_argument("--extra", default="", help="parquet tambahan di features/ (seperti e121.py), digabung '+'")
     a = ap.parse_args()
 
     apps = load_apps()
     m = apps["is_test"].eq(0).values
     X = run.build_matrix(list(GROUPS), apps)
+    if a.extra:  # urutan kolom sama dengan e121.py: basis, parquet tambahan, lalu fitur nested
+        E = pd.concat([pd.read_parquet(FEATURES_DIR / f).reindex(apps["application_id"])
+                       for f in a.extra.split("+")], axis=1)
+        X = pd.concat([X, E], axis=1)
+        del E
     X_tr, X_te = X[m].reset_index(drop=True), X[~m].reset_index(drop=True)
     y = apps.loc[m, "target"].astype(int).values
     fold = make_folds(apps[m])["fold"].values
@@ -108,7 +114,8 @@ def main():
         p, md5 = write_submission(test_ids, pred, f"{a.name}_bag{len(seeds)}")
         sub = p.name
         log(f"submission {sub} md5 {md5}")
-    log_experiment(a.name, f"LGB DART lr {a.lr} ronde {a.rounds} drop {a.drop} skip {a.skip}, set E130a, bag {seeds}",
+    log_experiment(a.name, f"LGB DART lr {a.lr} ronde {a.rounds} drop {a.drop} skip {a.skip}, all + {a.use}"
+                   + (f" + {a.extra}" if a.extra else "") + f", bag {seeds}",
                    "all+ecm", X_tr.shape[1] + len(cols), "lgb_dart_bag", params, aucs,
                    roc_auc_score(y, oof), 0, "kandidat", ks_score(y, oof), kss, submission_file=sub, md5_hash=md5)
 

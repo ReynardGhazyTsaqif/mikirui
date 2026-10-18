@@ -6,7 +6,7 @@
 
 ## 0. Ringkasan satu halaman (selalu diperbarui)
 
-*Status 18 Okt siang: Langkah 1–3 selesai; diff aturan baru disetujui dan dipakai; Langkah 4 berjalan (bagian 9): E200 diterima, E201 ditolak, E202 diterima; E203 (sensitivitas parameter) dan E204 (H21) sedang berjalan. Pekerjaan di checkout utama, branch `explore-17okt`.*
+*Status 18 Okt sore: Langkah 1–3 selesai; diff aturan baru disetujui dan dipakai; Langkah 4 berjalan (bagian 9): E200 diterima, E201 ditolak, E202 diterima, E203 (parameter tuned tetap optimal), E204 kandidat, E205 (set CPU saja) diterima vs E130a; s27 = model jenuh; s29 = masih lapar data. Berjalan: s31 (H07), s32 (H14), E207 (DART set CPU), lalu s33. Pekerjaan di checkout utama, branch `explore-17okt`.*
 
 - **Posisi**: public terbaik tercatat 0,55951 (`E122x1_E141_rank50`, 16 Okt). CV terbaik sekarang: **E202 mean-fold AUC 0,84710** (set E200 = E122x1 + rantai bayar event, dilatih 10-fold bersarang); sebelum eksplorasi: E122x1 0,84495.
 - **Target terverifikasi**: public 0,58 ≈ mean-fold AUC 0,857–0,860 → butuh **+0,012 s.d. +0,015**.
@@ -17,9 +17,10 @@
   4. **Data berlabel tambahan**: 81.745 pinjaman lama lengkap berlabel dari mekanisme yang sama; bukti LOO AUC 0,825 vs 0,817 untuk target; 2× data ≈ +0,002. E126 gagal karena desain as-of.
   5. Kejanggalan proyek: `src/features/` tidak ter-version; penolakan Fase 2 berbasis 1 seed di dalam noise; parameter tuned berasal dari set 176 kolom; tidak ada kebocoran ID/urutan baris.
 - **Hipotesis teratas** (bagian 5): H01 rantai bayar event (+0,0005–0,001), H02 model bantu PD pinjaman LOO (+0,001–0,003), H03 model sifat statis tanpa riwayat, H04 NN multi-tugas, H05 10-fold + refit. Jumlah jujur semua tuas berbukti ≈ +0,003–0,006.
-- **Kenaikan CV terkumpul (18 Okt)**: **+0,00214** (0,84495 → 0,84710): E200 = H01 rantai bayar level event +0,00163 (P 1,000, 5/5) dan E202 = H05 10-fold bersarang +0,00051 (P 0,999, 4/5). Keduanya diterima; E200 diusulkan jadi acuan baru (menunggu konfirmasi user). E201 (H02 model bantu pinjaman lama) ditolak (−0,00032); H08/H09 ditolak di screen. Target 0,857–0,860 → sisa **+0,010 s.d. +0,013**. Sedang berjalan: E203 (sensitivitas parameter), E204 (H21).
+- **Kenaikan CV terkumpul (18 Okt)**: **+0,00214** (0,84495 → 0,84710): E200 = H01 rantai bayar level event +0,00163 (P 1,000, 5/5) dan E202 = H05 10-fold bersarang +0,00051 (P 0,999, 4/5). Keduanya diterima; E200 diusulkan jadi acuan baru (menunggu konfirmasi user). E204 (H21 inflow non-gaji) kandidat (+0,00019, P 0,88). E201 (H02) ditolak (−0,00032); H08/H09 ditolak di screen; E203: parameter tuned tetap optimal. **Kandidat CPU-saja E205 = 0,84517** (setara E122x1 GPU 0,84495; Spearman 0,989). Target 0,857–0,860 → sisa **+0,010 s.d. +0,013**.
+- **Diagnosis jenuh (18 Okt)**: residual boosting dengan pohon depth 8 di atas OOF E200 berhenti di iterasi 1 (s27) → tidak ada interaksi tersisa; kurva belajar masih naik (+0,0030 dari 28k → 56k; asimtot 0,847–0,857) → kenaikan berikutnya hanya dari representasi yang lebih hemat data (seperti rp_ev, setara > 2× data), refit/ensemble, atau informasi baru.
 - **Ide eksternal**: 13 ide dicek dengan data → 2 sudah dikerjakan (kurva belajar, kasus salah), 1 audit bersih (ID/urutan baris tabel pendukung), 5 terbantah (GMM, artefak angka, tujuan↔belanja, pinjam-tutup-utang, kalender/gajian), 5 masuk daftar (H17 hazard event, H18 objektif ranking, H19 fitur otomatis, H20 KNN, plus penggabungan ke H02/H05/H06/H15).
-- **Rencana berikutnya**: hasil E203 → bila ada ruang parameter, Optuna 5 fold di set E200 (>3 jam → minta izin atau pindah ke Kaggle) → keputusan E204 (H21) → uji kapasitas residual `s27` → putaran penemuan 2 (H07 sub-model bila ada kapasitas, H13 pruning nested, H14 skor lender) → PROMPT 3 Langkah 2–7 (±22/23–25 Okt).
+- **Rencana berikutnya**: s31 (H07 stacking per sumber) dan s32 (H14 mekanisme tier) ±14.00 → E207 DART di set CPU E205 (±16.00) → s33 kurva belajar per grup (±16.40; menunjuk grup tempat model masih belajar lambat) → rekayasa representasi untuk grup itu → PROMPT 3 Langkah 2–7 (±22/23–25 Okt).
 - **Pertanyaan terbuka**: konfirmasi E200 sebagai acuan baru (dengan skema latih 10-fold E202 untuk model akhir).
 
 ---
@@ -536,3 +537,32 @@ Skor = Bukti (1–5) × Dampak (1–5) × Kebaruan (1–3). Bukti: 5 = sinyal re
 **Catatan desain E201/H02 (`auxpd.py`)** — anti-bocor-lintas-pinjaman: event pinjaman lain di jendela 12 bulan pinjaman P dikecualikan; hasil pinjaman lain hanya yang jendelanya tidak tumpang tindih; pinjaman yang berjalan saat keputusan P hanya dilihat tunggakannya sebelum t; laporan biro as-of keputusan P; sifat e-commerce/rekening di luar zona ramp (90 hari / 3 bulan terakhir). Label = DPD ≥ 90 dalam 12 bulan kalender sejak pencairan. Target sekarang tidak dibaca. Tag: **CPU-deterministik**.
 
 **E202 = H05 (10-fold bersarang) hasil CV** (rantai job dimulai ulang 11.44 setelah terputus `^C`; seed yang sudah ada dilewati): `e121.py --cv --use <7 npz> --basefs all --extra rp_events_v1.parquet --subfolds 2 --name E202` — tiap fold asli dibelah 2 (StratifiedKFold seed 42), model dilatih pada 4 fold + separuh fold validasi (≈90% data), baris fold k memakai fitur nested va{k}, test = rata-rata 10 model × 3 seed. **Bag 0,84710**, KS 0,5306 vs E200 0,84659 / 0,5296 → Δ **+0,00051**, CI 95% [+0,00022; +0,00079], P 0,999, naik 4/5 (per fold +0,00073 / +0,00099 / +0,00041 / −0,00006 / +0,00050) → **DITERIMA** (`cmp_E202.json`). Sesuai prediksi kurva belajar (+0,0005). Pemakaian: skema latih model akhir; eksperimen fitur tetap dibandingkan 5-fold terhadap E200 (2× lebih cepat). Biaya: ±2× waktu latih. Tag: **CPU-deterministik**.
+
+**E203 = H12 pendahuluan (sensitivitas parameter, set E200, lr 0,05, 1 seed, 5 fold; `experiments/e203_sens.csv`)**:
+
+| konfigurasi | mean-fold AUC | iterasi |
+|---|---|---|
+| tuned (Fase 5) | **0,84594** | 995 |
+| feature_fraction 0,30 | 0,84578 | 602 |
+| depth 5 | 0,84557 | 815 |
+| feature_fraction 0,20 | 0,84552 | 1010 |
+| feature_fraction 0,08 | 0,84543 | 1117 |
+| depth 6, 63 daun | 0,84537 | 674 |
+| min_child 100 | 0,84526 | 821 |
+| tanpa extra_trees | 0,84457 | 403 |
+
+Parameter tuned tetap optimal walau dipilih di set 176 kolom; semua variasi turun (kecuali tanpa extra_trees, selisihnya di dalam noise 1 seed). Kesimpulan: **H12 (Optuna 5 fold ulang) tidak diprioritaskan** — ruang perbaikannya kecil dibanding biaya >3 jam. Kapasitas pohon (depth 5–6) juga tidak membantu → menguatkan dugaan jenuh representasi (dikonfirmasi `s27`).
+
+**Probe murah putaran 2 (`s30_misc_probes.py`, residual E202)**: fase aplikasi dalam siklus jatuh tempo pinjaman aktif (hari ke due berikutnya, due dalam 3/7 hari, due di antara aplikasi dan keputusan) |z| ≤ 0,7 — target memang 16,9% vs 14,0% antar kuintil hari ke due, tetapi residual datar (sudah tertangkap); inkonsistensi profil (masa kerja > umur kerja: 0 kasus; rasio masa kerja/umur kerja, income per tanggungan) |z| ≤ 1,5 → **terbantah semua**. Ramp e-commerce berjangkar waktu aplikasi (bukan keputusan) sudah diuji di s11 (`ec_last_vs_app_h`, `ec_n_after_app`, |z| < 2).
+
+**Rantai berikutnya** (`experiments/run_s27_s29.cmd`, otomatis setelah E204): E205 = set E200 **versi CPU saja** (528 + ecm + rp_ev, tanpa fitur GRU dari GPU; acuan kandidat A PROMPT 3 dan uji tumpang tindih rp_ev ↔ seqx_rp) → `s27` uji kapasitas residual → `s29` kurva belajar set E200 (syarat refit PROMPT 3 Langkah 8). `e141.py` diberi opsi `--extra` untuk DART di set E200.
+
+**E204 = H21 (inflow non-gaji / income)**: bag 0,84677 vs E200 0,84659 → Δ +0,00019, CI 95% [−0,00011; +0,00050], P 0,884, naik 4/5; KS 0,5296 → 0,5293 → **KANDIDAT** (`cmp_E204.json`). Audit Lapis 2 bersih (ERROR 0, AUDIT 0, KS train-test ≤ 0,009, AUC univariat ≤ 0,52); Lapis 1: bulan rekening selalu berakhir sebelum bulan keputusan, tanpa target. Builder masih skrip eksplorasi → dipindah ke `src/features/` bila dipakai PROMPT 3. Tag: **CPU-deterministik**.
+
+**E205 = set E200 versi CPU saja** (528 + ecm + rp_ev; `e121.py --cv --use e121_ordermodel_v1.npz --basefs all --extra rp_events_v1.parquet --name E205`): seed 0,84494 / 0,84470 / 0,84503, **bag 0,84517**, KS OOF 0,5230 (mean-fold 0,5263). Bootstrap: vs E130a **+0,00203** (CI [+0,00150; +0,00261], P 1,000 → diterima); vs E122x1 +0,00022 (P 0,75; Spearman 0,9891); E205 → E200 (+ fitur GPU) +0,00141 (P 1,000). Artinya: (1) **kandidat A (CPU-deterministik) kini setara model GPU terbaik lama** dan bisa direproduksi identik di notebook; (2) fitur GPU masih bernilai +0,0014 di atasnya; (3) rp_ev dan seqx_rp sebagian tumpang tindih.
+
+**s27 (kapasitas residual)**: residual boosting di atas logit OOF E200 dengan semua kolom (528 + rp_ev + fitur nested versi OOF), lr 0,03, depth 3/7 daun, depth 6/63 daun, depth 8/255 daun → **berhenti di iterasi 1 di semua konfigurasi**, Δ −0,00002 / −0,00005 / −0,00006. Tidak ada struktur interaksi yang bisa dipelajari di atas model sekarang → model jenuh terhadap representasi; kenaikan berikutnya hanya dari **informasi baru**, **bias induktif yang lebih hemat data**, atau **lebih banyak data/variansi lebih kecil**.
+
+**s29 (kurva belajar set E200, lr 0,05, 1 seed)**: 14k 0,84058 → 28k 0,84293 → 42k 0,84520 → 56k 0,84594 (s18 set E130a: 0,83507 / 0,83924 / 0,84137 / 0,84211). Δ 50% → 100% = +0,0030 (sd antar fold 0,0013) → **syarat refit PROMPT 3 Langkah 8 terpenuhi**. Asimtot dengan eksponen tetap 0,3 / 0,589 / 1,0: 0,8565 / 0,8500 / 0,8473 (E130a: 0,8564 / 0,8479 / 0,8443); proyeksi 70k (refit) 0,8459–0,8466, 140k 0,8466–0,8484 (versi bag lr kecil ±+0,0007). Selisih set E130a → E200 (fitur urutan GPU + rantai bayar) +0,0055 di 14k dan +0,0037–0,0038 di 28k–56k: set E200 dengan 28k baris (0,84293) sudah melampaui set E130a dengan 56k (0,84211) → representasi yang lebih baik setara > 2× data.
+
+**Implikasi (18 Okt sore)**: target 0,857–0,860 hanya tercapai pada asimtot optimistis (data tak hingga). Sumber kenaikan yang masih terbuka: (a) fitur yang "menghitung duluan" apa yang dipelajari model secara lambat dari data (seperti rp_ev = setara ±2× data); (b) refit 100% (+0,0003), seed/ensemble GBDT+DART (+0,0003–0,001), H21 (+0,0002); (c) informasi baru — belum ada bukti tersisa setelah ±40 uji sinyal. Uji berikutnya: `s31` (H07 stacking per sumber = bias induktif aditif), `s32` (H14 mekanisme tier), lalu E207 (DART di set CPU E205).

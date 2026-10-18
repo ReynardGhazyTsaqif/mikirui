@@ -586,3 +586,16 @@ Parameter tuned tetap optimal walau dipilih di set 176 kolom; semua variasi turu
 | E204 = E200 + H21 (0,5) | 0,9972 | +0,00004 | 0,66 |
 
 E202 mendominasi; pasangan yang lebih lemah ±0,002 AUC menurunkan skor walau lebih beragam. Resep public lama "GBDT + DART lemah 50:50" (E122x1 + E141, public terbaik 0,55951) kini berharga ±−0,001 di CV → untuk kandidat final, pasangan DART harus dilatih di set dan skema yang sama kuatnya (set E200/E204, 10-fold). Untuk kandidat A (CPU), pasangannya E205-10fold + E207.
+
+**Public 18 Okt** (diunggah user): `E202_single_auc0.84711.csv` **0,55754**, `E202_E141_rank50_auc0.84614.csv` **0,55852** (rekor tetap E122x1 + E141 0,55951). **s34 (noise public, 2000 subset OOF)**: sd KS satu model di 9.000 baris 0,0116–0,0117 (21.000 baris: 0,0069–0,0070). Selisih terhadap rekor:
+
+| model | harapan OOF | sd 9k | P(>rekor) public | teramati public | z | P(>rekor) private 21k |
+|---|---|---|---|---|---|---|
+| E202 | +0,0037 | 0,0038 | 0,83 | −0,0020 | −1,48 | 0,94 |
+| E202 + E141 | +0,0020 | 0,0025 | 0,79 | −0,0010 | −1,18 | 0,90 |
+| E130a + E141 | −0,0014 | 0,0027 | 0,30 | −0,0009 | +0,18 | 0,26 |
+| E122c | −0,0006 | 0,0029 | 0,43 | −0,0022 | −0,54 | 0,36 |
+
+Public 9 rb baris tidak bisa menunjukkan kenaikan +0,002 AUC dengan andal (peluang terlihat ±0,8 walau nyata); E202 kurang beruntung (z −1,5) tetapi masih dalam noise. Pola "GBDT + DART 50:50 selalu tertinggi" = satu pengamatan (DART E141 yang sama di ketiga blend). Kerangka pemilihan final: nilai = 45% public (sudah diketahui untuk file yang pernah diunggah) + 45% private (diprediksi dari CV).
+
+**Probe putaran 2 lanjutan (semua negatif)**: jumlah bukti order (Σ logit order terpusat = n × (ecm_mean − c), juga versi 30 hari dan √n): AUC 0,72–0,74 tetapi |z| ≤ 1,13 (sudah tertangkap ecm + jumlah order). `s35`: pembayaran parsial (2,0% baris cicilan dibayar sebagian, median 53%; porsi, jumlah, nilai terakhir, parsial di cicilan terbaru, total kekurangan) |z| ≤ 1,25 → tertangkap rasio bayar agregat; utang eksternal (saldo biro − sisa kewajiban internal, akun biro − pinjaman aktif internal) |z| ≤ 0,89 — saldo biro hampir tidak terkait sisa pinjaman internal (korelasi 0,24) → dibangkitkan terpisah. Total ±50 uji sinyal sejak 17 Okt; hanya rantai bayar event yang lolos.

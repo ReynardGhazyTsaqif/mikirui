@@ -33,3 +33,28 @@ Ditolak sejak 17 Okt (tidak masuk gabungan): E201 (model bantu PD pinjaman lama)
 ## Langkah 2 — rencana
 
 F* = set E122x1 (528 + ecm + seq_gru/bigru/tf + seqx_rp/ab/pa) + rp_ev (E200) + ab_nonin (E204). LGB GBDT tuned 5-fold 3 seed (= E208, sebanding dengan E200/E122x1), lalu versi 10-fold untuk model akhir.
+
+**Langkah 2 — hasil**: F* sudah terukur sebagai **E204** (5-fold, 3 seed): **0,84677** vs E122x1 0,84495 → Δ **+0,00182**, CI 95% [+0,00133; +0,00232], P 1,000, naik 5/5; KS mean-fold 0,5266 → 0,5293 (`cmp_Fstar_E204_vs_E122x1.json`). Versi 10-fold (E210) dan F*-CPU (E209/E211) dijadwalkan.
+
+## Langkah 3 — Ablation (rencana dan sumber screen)
+
+Screen leave-one-group-out 1 seed = `s33` (kontribusi grup rp, rp_ev, bu+bp, pa, ab, ec, app+prof, x, ecm, seq_ec, seqx pada 28k dan 56k baris; set E200). ab_nonin: membuangnya = E204 → E200, turun −0,00019 dengan P(turun) 0,884 ≥ 0,80 → **dipertahankan**. Grup dengan penurunan screen < 0,0005 dicek ulang 3 seed + bootstrap.
+
+## Langkah 4 — antrean (launcher, masing-masing < 3 jam, berurutan)
+
+| ID | model | set | skema | perkiraan |
+|---|---|---|---|---|
+| E210 | LGB GBDT tuned | F* | 10-fold bersarang, 3 seed | 40 mnt |
+| E209 | LGB GBDT tuned | F*-CPU (528 + ecm + rp_ev + ab_nonin) | 5-fold, 3 seed | 15 mnt |
+| E211 | LGB GBDT tuned | F*-CPU | 10-fold, 3 seed | 30 mnt |
+| E212 | LGB DART 5000 ronde (setting E141) | F* | 5-fold, 3 seed | 2,3 jam |
+| E213 | XGB tuned (setting E150_xgb) | F* | 5-fold, 3 seed | 1 jam |
+| H22 | LGB/XGB/CatBoost tuned, fitur hampir mentah (239 kolom naif) | — | 5-fold, 1 seed | 1,5 jam |
+| E214 | CatBoost tuned (setting E150c) | F* | 5-fold, 3 seed | 2,8 jam |
+| E207 | LGB DART 5000 ronde | E205 (CPU, tanpa ab_nonin) | 5-fold, 3 seed | berjalan |
+
+AutoGluon `best_quality` (H22, mentor ide 14): `kaggle/e215_autogluon_fstar.ipynb` (2 jam/fold) dan `kaggle/e215_autogluon_naive.ipynb` (1 jam/fold), CPU Kaggle, OOF selaras fold; perlu dataset versi baru (`rp_events_v1.parquet`, `ab_nonin_v1.parquet`, `naive_cols.json` sudah disalin ke `kaggle/dataset/`).
+
+## Langkah 7 — alat pemilihan (pendahuluan)
+
+`experiments/prompt3/p3_select.py` → `nilai_harapan.md`. Regresi diperbarui dengan 22 submission: **public = −0,693 + 1,479 × AUC** (sd residual 0,0026); koreksi jenis (disusutkan n/(n+3)): blend dengan DART +0,0008, blend dengan NN −0,0011. Teratas sekarang: E202 + E141 (nilai harapan 0,50292), E202 tunggal (0,50273), E122x1 + E141 (0,50248) — selisih ≤ 0,0005, dan **semuanya GPU**. Kandidat CPU terbaik yang sudah punya public: E130a + E141 (public 0,55858, nilai harapan 0,50121). → prioritas submission berikutnya: kandidat CPU baru (E205 + E207 DART, E211) supaya kandidat yang bisa direproduksi punya public terukur.

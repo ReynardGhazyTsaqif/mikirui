@@ -566,3 +566,23 @@ Parameter tuned tetap optimal walau dipilih di set 176 kolom; semua variasi turu
 **s29 (kurva belajar set E200, lr 0,05, 1 seed)**: 14k 0,84058 → 28k 0,84293 → 42k 0,84520 → 56k 0,84594 (s18 set E130a: 0,83507 / 0,83924 / 0,84137 / 0,84211). Δ 50% → 100% = +0,0030 (sd antar fold 0,0013) → **syarat refit PROMPT 3 Langkah 8 terpenuhi**. Asimtot dengan eksponen tetap 0,3 / 0,589 / 1,0: 0,8565 / 0,8500 / 0,8473 (E130a: 0,8564 / 0,8479 / 0,8443); proyeksi 70k (refit) 0,8459–0,8466, 140k 0,8466–0,8484 (versi bag lr kecil ±+0,0007). Selisih set E130a → E200 (fitur urutan GPU + rantai bayar) +0,0055 di 14k dan +0,0037–0,0038 di 28k–56k: set E200 dengan 28k baris (0,84293) sudah melampaui set E130a dengan 56k (0,84211) → representasi yang lebih baik setara > 2× data.
 
 **Implikasi (18 Okt sore)**: target 0,857–0,860 hanya tercapai pada asimtot optimistis (data tak hingga). Sumber kenaikan yang masih terbuka: (a) fitur yang "menghitung duluan" apa yang dipelajari model secara lambat dari data (seperti rp_ev = setara ±2× data); (b) refit 100% (+0,0003), seed/ensemble GBDT+DART (+0,0003–0,001), H21 (+0,0002); (c) informasi baru — belum ada bukti tersisa setelah ±40 uji sinyal. Uji berikutnya: `s31` (H07 stacking per sumber = bias induktif aditif), `s32` (H14 mekanisme tier), lalu E207 (DART di set CPU E205).
+
+**s31 = H07 pendahuluan (sub-model per sumber + stacking)**: LightGBM per sumber (5-fold, kolom berawalan sama dari set E200, tanpa fitur nested): rp 0,7499 (123 kolom), e-commerce 0,7463 (95), biro 0,6871 (123), aplikasi+profil 0,6543 (24), aplikasi lama 0,6507 (79), rekening 0,6227 (90). Semua |z| residual E202 ≤ 0,96. Stacking logistik lintas fold (logit E202 + 6 logit sumber): 0,84710 → 0,84697 (Δ −0,00013, naik 1/5; koefisien sumber −0,07…+0,05, E202 1,05) walau OOF sub-model sedikit optimis → **H07 ditolak** tanpa perlu versi nested. Model utama sudah memadukan bukti antarsumber secara optimal (juga dalam bentuk aditif).
+
+**s32 = H14 (mekanisme tier), hasil sementara**: tier sekarang dapat diprediksi dari fitur lain dengan akurasi 0,874 (R² ordinal 0,857); prediktor utama skor biro (rata-rata dan bobot kesegaran) dan bunga pinjaman lama. Semua turunan "kejutan tier" (residual, kejutan −log p, peringkat dalam tier) |z| ≤ 1,36. **Catatan**: 4 kolom `pa_` ternyata memakai bunga/cicilan pinjaman sekarang (`pa_rate_minus_last/mean`, `pa_inst_vs_last`, `pa_total_inst_with_current`) dan ikut menjadi prediktor tier → akurasi terlalu optimis dan uji residual untuk customer berriwayat lemah. Diulang tanpa kolom itu setelah E207 (`run_s33.cmd`). (Kolom tersebut sah sebagai fitur model utama; hanya tidak boleh dipakai untuk memprediksi tier.)
+
+**Builder H21 dipindah**: `src/features/account_extra.py` (`build_ab_nonin`), `EXTRA_GROUPS["ab_nonin_v1"]`, `python build_extra.py ab_nonin_v1` → `features/ab_nonin_v1.parquet` **identik** dengan `cand_h21_v1.parquet` yang dipakai E204. Tag: **CPU-deterministik**.
+
+**E207 berjalan** (13.53, ±2 jam): DART 5000 ronde × 3 seed di set E205 (CPU saja). Setelahnya otomatis `run_s33.cmd`: s32 ulang → s33 (kontribusi grup di 28k vs 56k).
+
+**Analisis blend OOF di atas E202 (18 Okt, semua komponen bag 3 seed, rank average; masukan PROMPT 3 Langkah 5)**:
+
+| pasangan (bobot pasangan) | Spearman ke E202 | Δ mean-fold vs E202 | P(Δ>0) |
+|---|---|---|---|
+| E205 set CPU (0,3 / 0,5) | 0,9928 | −0,00018 / −0,00049 | 0,03 / 0,00 |
+| E141 DART set E130a (0,3 / 0,5) | 0,9873 | −0,00038 / −0,00097 | 0,00 / 0,00 |
+| E141x DART set E122x1 (0,3) | 0,9932 | −0,00018 | 0,02 |
+| E122x1 (0,3) | 0,9948 | −0,00032 | 0,00 |
+| E204 = E200 + H21 (0,5) | 0,9972 | +0,00004 | 0,66 |
+
+E202 mendominasi; pasangan yang lebih lemah ±0,002 AUC menurunkan skor walau lebih beragam. Resep public lama "GBDT + DART lemah 50:50" (E122x1 + E141, public terbaik 0,55951) kini berharga ±−0,001 di CV → untuk kandidat final, pasangan DART harus dilatih di set dan skema yang sama kuatnya (set E200/E204, 10-fold). Untuk kandidat A (CPU), pasangannya E205-10fold + E207.

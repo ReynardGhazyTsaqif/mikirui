@@ -37,6 +37,9 @@ tiers = np.sort(np.unique(rate))
 lab = np.searchsorted(tiers, rate)
 drop = [c for c in X.columns if re.search("rate|inst|pti|interest|residual_income", c)
         and not c.startswith(("pa_", "rp_", "bp_"))]
+# kolom pa_ yang memakai bunga/cicilan pinjaman SEKARANG (previous.py: cur_rate, cur_inst) juga dibuang
+drop += [c for c in ["pa_rate_minus_last", "pa_rate_minus_mean", "pa_inst_vs_last", "pa_total_inst_with_current"]
+         if c in X.columns]
 print("kolom dibuang (turunan bunga/cicilan sekarang):", drop)
 X = X.drop(columns=drop)
 cid = apps.customer_id.values

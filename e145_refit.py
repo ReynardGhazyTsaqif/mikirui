@@ -33,6 +33,7 @@ def main():
     ap.add_argument("--seeds", nargs="+", type=int, default=[42, 43, 44])
     ap.add_argument("--name", required=True)
     ap.add_argument("--cv_name", default=None, help="eksperimen CV pembanding (preds/<cv_name>_s*.npy)")
+    ap.add_argument("--extra", default="", help="parquet tambahan di features/ (seperti e121.py), digabung '+'")
     a = ap.parse_args()
 
     from tune import Ctx, best_tuned
@@ -45,6 +46,11 @@ def main():
     m = apps["is_test"].eq(0).values
     X = run.build_matrix(list(GROUPS), apps)
     assert a.basefs == "all"
+    if a.extra:  # urutan kolom sama dengan e121.py: basis, parquet tambahan, lalu fitur nested
+        E = pd.concat([pd.read_parquet(FEATURES_DIR / f).reindex(apps["application_id"])
+                       for f in a.extra.split("+")], axis=1)
+        X = pd.concat([X, E], axis=1)
+        del E
     ctx.X_tr, ctx.X_te = X[m].reset_index(drop=True), X[~m].reset_index(drop=True)
     del X, apps
     gc.collect()

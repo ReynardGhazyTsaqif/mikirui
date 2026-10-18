@@ -6,9 +6,9 @@
 
 ## 0. Ringkasan satu halaman (selalu diperbarui)
 
-*Status 18 Okt: Langkah 1–3 selesai; ide eksternal sudah digabung (20 hipotesis, bagian 6.3); batch #3 terkirim (bagian 7); diff aturan baru menunggu persetujuan (bagian 8). Belum ada eksperimen baru yang diputuskan. Pekerjaan sekarang di checkout utama, branch `explore-17okt`.*
+*Status 18 Okt siang: Langkah 1–3 selesai; diff aturan baru disetujui dan dipakai; Langkah 4 berjalan (bagian 9): E200 diterima, E201 ditolak, E202 diterima; E203 (sensitivitas parameter) dan E204 (H21) sedang berjalan. Pekerjaan di checkout utama, branch `explore-17okt`.*
 
-- **Posisi**: public terbaik tercatat 0,55951 (`E122x1_E141_rank50`, 16 Okt; prompt menyebut 0,55858 → pertanyaan 2.1). CV terbaik: E141x mean-fold AUC 0,84516; acuan GBDT E122x1 0,84495.
+- **Posisi**: public terbaik tercatat 0,55951 (`E122x1_E141_rank50`, 16 Okt). CV terbaik sekarang: **E202 mean-fold AUC 0,84710** (set E200 = E122x1 + rantai bayar event, dilatih 10-fold bersarang); sebelum eksplorasi: E122x1 0,84495.
 - **Target terverifikasi**: public 0,58 ≈ mean-fold AUC 0,857–0,860 → butuh **+0,012 s.d. +0,015**.
 - **Temuan terpenting**:
   1. **Cara data dibangkitkan**: tiap customer punya risiko default laten π yang **stabil**; target sekarang berperilaku persis seperti "satu pinjaman lagi" (ICC label antarpinjaman 0,40). Pembayaran hanya terjadi di ulang bulan due (rantai Markov bulanan); laju lewat-bayar datar 23 bulan (0,35 vs 0,15). E-commerce & rekening punya **ramp khusus sebelum keputusan sekarang yang bergantung langsung pada target**. Biro = laten stabil + noise per laporan.
@@ -17,10 +17,10 @@
   4. **Data berlabel tambahan**: 81.745 pinjaman lama lengkap berlabel dari mekanisme yang sama; bukti LOO AUC 0,825 vs 0,817 untuk target; 2× data ≈ +0,002. E126 gagal karena desain as-of.
   5. Kejanggalan proyek: `src/features/` tidak ter-version; penolakan Fase 2 berbasis 1 seed di dalam noise; parameter tuned berasal dari set 176 kolom; tidak ada kebocoran ID/urutan baris.
 - **Hipotesis teratas** (bagian 5): H01 rantai bayar event (+0,0005–0,001), H02 model bantu PD pinjaman LOO (+0,001–0,003), H03 model sifat statis tanpa riwayat, H04 NN multi-tugas, H05 10-fold + refit. Jumlah jujur semua tuas berbukti ≈ +0,003–0,006.
-- **Kenaikan CV terkumpul (18 Okt)**: **+0,00163** (E200 = H01 rantai bayar level event, 0,84495 → 0,84659, P 1,000, 5/5; diusulkan acuan baru). E201 (H02 model bantu pinjaman lama) ditolak (−0,00032); H08/H09 ditolak di screen. Target +0,013 → sisa ±+0,011. Sedang berjalan: E202 (10-fold), E203 (sensitivitas parameter), E204 (H21).
+- **Kenaikan CV terkumpul (18 Okt)**: **+0,00214** (0,84495 → 0,84710): E200 = H01 rantai bayar level event +0,00163 (P 1,000, 5/5) dan E202 = H05 10-fold bersarang +0,00051 (P 0,999, 4/5). Keduanya diterima; E200 diusulkan jadi acuan baru (menunggu konfirmasi user). E201 (H02 model bantu pinjaman lama) ditolak (−0,00032); H08/H09 ditolak di screen. Target 0,857–0,860 → sisa **+0,010 s.d. +0,013**. Sedang berjalan: E203 (sensitivitas parameter), E204 (H21).
 - **Ide eksternal**: 13 ide dicek dengan data → 2 sudah dikerjakan (kurva belajar, kasus salah), 1 audit bersih (ID/urutan baris tabel pendukung), 5 terbantah (GMM, artefak angka, tujuan↔belanja, pinjam-tutup-utang, kalender/gajian), 5 masuk daftar (H17 hazard event, H18 objektif ranking, H19 fitur otomatis, H20 KNN, plus penggabungan ke H02/H05/H06/H15).
-- **Rencana berikutnya**: setelah diff disetujui → nilai ulang eksperimen lama dengan aturan baru → E200 (H01, builder sudah siap) → E201 (H02) → E202 (H05) → putaran penemuan (mekanisme ramp & tier, H17).
-- **Pertanyaan terbuka**: batch #3 (bagian 7): 2 file final di notebook?, mesin panitia (menentukan nasib fitur GPU), porsi public, persetujuan diff, perbaikan skill audit-leakage Lapis 3 butir 3.
+- **Rencana berikutnya**: hasil E203 → bila ada ruang parameter, Optuna 5 fold di set E200 (>3 jam → minta izin atau pindah ke Kaggle) → keputusan E204 (H21) → uji kapasitas residual `s27` → putaran penemuan 2 (H07 sub-model bila ada kapasitas, H13 pruning nested, H14 skor lender) → PROMPT 3 Langkah 2–7 (±22/23–25 Okt).
+- **Pertanyaan terbuka**: konfirmasi E200 sebagai acuan baru (dengan skema latih 10-fold E202 untuk model akhir).
 
 ---
 
@@ -521,4 +521,18 @@ Skor = Bukti (1–5) × Dampak (1–5) × Kebaruan (1–3). Bukti: 5 = sinyal re
 - Rekening × pinjaman (s26): pencairan pinjaman internal **tidak** masuk rekening (inflow non-gaji bulan pencairan 0,488× income vs 0,495× bulan lain; median 16% nominal pencairan) → rekening hanya terhubung lewat cicilan. Lonjakan inflow tak terjelaskan (indikasi utang lembaga lain) z −1,7; ramp outflow/saldo/belanja relatif baseline sendiri |z| ≤ 1,5 → tidak bersinyal.
 - **H21 (baru): rasio inflow non-gaji terhadap income deklarasi** (`features/cand_h21_v1.parquet`, 5 kolom): z residual maks **4,55** (lolos screen), tetapi boosting hanya +0,00006 (3/5) → CV penuh antre prioritas rendah (perkiraan < +0,0003).
 
-**Persiapan berikutnya**: `experiments/run_e202.cmd` (H05, 10-fold bersarang, ±33 mnt; basis disesuaikan dengan keputusan E201) dan `experiments/run_e203.cmd` (H12 pendahuluan: 8 konfigurasi parameter, lr 0,05, 1 seed, ±30–50 mnt) untuk menilai apakah Optuna 5 fold (>3 jam, perlu izin) layak. Desain anti-bocor-lintas-pinjaman: event pinjaman lain di jendela 12 bulan pinjaman P dikecualikan; hasil pinjaman lain hanya yang jendelanya tidak tumpang tindih; pinjaman yang berjalan saat keputusan P hanya dilihat tunggakannya sebelum t; laporan biro as-of keputusan P; sifat e-commerce/rekening di luar zona ramp (90 hari / 3 bulan terakhir). Label = DPD ≥ 90 dalam 12 bulan kalender sejak pencairan. Target sekarang tidak dibaca. Tag: **CPU-deterministik**.
+**Persiapan berikutnya**: `experiments/run_e202.cmd` (H05, 10-fold bersarang, ±33 mnt; basis disesuaikan dengan keputusan E201) dan `experiments/run_e203.cmd` (H12 pendahuluan: 8 konfigurasi parameter, lr 0,05, 1 seed, ±30–50 mnt) untuk menilai apakah Optuna 5 fold (>3 jam, perlu izin) layak.
+
+**E201 hasil CV**: seed 42/43/44 = 0,84628 / 0,84571 / 0,84593, bag 0,84627 vs E200 0,84659 → Δ −0,00032, P 0,086, naik 0/5 → **DITOLAK**. Pelajaran: model utama sudah menaksir risiko customer dari riwayat hampir sebaik model yang dilatih dengan 82 rb label tambahan; "lapar data" di kurva belajar bukan berasal dari pemetaan riwayat → risiko. Konsekuensi: H06 (pinjaman lama sebagai baris latih), H03 (sifat statis), H04 (NN multi-tugas), H17 (hazard event) turun prioritas — mekanismenya sama (menaksir π dari bukti riwayat/sifat stabil).
+
+**Rantai job 18 Okt 11.14** (`experiments/run_e202_e204.cmd`, Start-Process): E202 (H05 10-fold) → E203 (sensitivitas parameter) → E204 (H21). Acuan tetap **E200**.
+
+**Putaran penemuan 2 (18 Okt, ringan)**:
+- Pola tanggal kalender e-commerce (hari dalam bulan/minggu, tanggal lonjakan, ramp × kalender): porsi sama untuk kedua target, tidak ada tanggal z > 3 → terbantah.
+- Ramp nominal order relatif rata-rata jangka panjang customer (3/7/30 hari, maks/rata-rata, jumlah item): |z| ≤ 2,05 → sudah tertangkap (model order ecm + GRU).
+- Rekening × pinjaman (s26): lihat di atas; H21 (inflow non-gaji/income) satu-satunya sisa lemah.
+- Disiapkan `s27_residual_capacity.py`: residual boosting di atas OOF E200 dengan semua kolom dan pohon lebih dalam (depth 3/6/8) untuk menjawab "masih adakah interaksi/kapasitas yang belum dipakai?" — dijalankan setelah rantai job (RAM).
+
+**Catatan desain E201/H02 (`auxpd.py`)** — anti-bocor-lintas-pinjaman: event pinjaman lain di jendela 12 bulan pinjaman P dikecualikan; hasil pinjaman lain hanya yang jendelanya tidak tumpang tindih; pinjaman yang berjalan saat keputusan P hanya dilihat tunggakannya sebelum t; laporan biro as-of keputusan P; sifat e-commerce/rekening di luar zona ramp (90 hari / 3 bulan terakhir). Label = DPD ≥ 90 dalam 12 bulan kalender sejak pencairan. Target sekarang tidak dibaca. Tag: **CPU-deterministik**.
+
+**E202 = H05 (10-fold bersarang) hasil CV** (rantai job dimulai ulang 11.44 setelah terputus `^C`; seed yang sudah ada dilewati): `e121.py --cv --use <7 npz> --basefs all --extra rp_events_v1.parquet --subfolds 2 --name E202` — tiap fold asli dibelah 2 (StratifiedKFold seed 42), model dilatih pada 4 fold + separuh fold validasi (≈90% data), baris fold k memakai fitur nested va{k}, test = rata-rata 10 model × 3 seed. **Bag 0,84710**, KS 0,5306 vs E200 0,84659 / 0,5296 → Δ **+0,00051**, CI 95% [+0,00022; +0,00079], P 0,999, naik 4/5 (per fold +0,00073 / +0,00099 / +0,00041 / −0,00006 / +0,00050) → **DITERIMA** (`cmp_E202.json`). Sesuai prediksi kurva belajar (+0,0005). Pemakaian: skema latih model akhir; eksperimen fitur tetap dibandingkan 5-fold terhadap E200 (2× lebih cepat). Biaya: ±2× waktu latih. Tag: **CPU-deterministik**.

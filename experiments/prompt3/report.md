@@ -58,3 +58,21 @@ AutoGluon `best_quality` (H22, mentor ide 14): `kaggle/e215_autogluon_fstar.ipyn
 ## Langkah 7 — alat pemilihan (pendahuluan)
 
 `experiments/prompt3/p3_select.py` → `nilai_harapan.md`. Regresi diperbarui dengan 22 submission: **public = −0,693 + 1,479 × AUC** (sd residual 0,0026); koreksi jenis (disusutkan n/(n+3)): blend dengan DART +0,0008, blend dengan NN −0,0011. Teratas sekarang: E202 + E141 (nilai harapan 0,50292), E202 tunggal (0,50273), E122x1 + E141 (0,50248) — selisih ≤ 0,0005, dan **semuanya GPU**. Kandidat CPU terbaik yang sudah punya public: E130a + E141 (public 0,55858, nilai harapan 0,50121). → prioritas submission berikutnya: kandidat CPU baru (E205 + E207 DART, E211) supaya kandidat yang bisa direproduksi punya public terukur.
+
+**E207 (DART di set CPU E205)**: seed 0,84496 / 0,84507 / 0,84500, **bag 0,84536** vs E205 GBDT 0,84517 → Δ +0,00018, CI [−0,00019; +0,00057], P 0,834 → **Kandidat** (Spearman 0,9974). Submission kandidat A: `E205_E207_rank50_auc0.84545.csv` (MD5 afc487f6…, KS OOF 0,5242) — menunggu diunggah user.
+
+---
+
+## STATUS & CARA MELANJUTKAN (disimpan 18 Okt 16.15 — sesi dihentikan karena limit Claude)
+
+**Berjalan di laptop (mandiri, tanpa Claude)**: `experiments/run_s33.cmd` (s32 ulang → s33; log `experiments/explore_17okt/s33_stdout.log`) lalu `experiments/run_laptop_queue.cmd` (menunggu "launcher s33 selesai", lalu berurutan `run_p3_chain1.cmd` → `run_p3_step8.cmd` → `run_p3_step6a.cmd` → `run_h22.cmd`; perkiraan selesai ±22.30). Log: `experiments/e121_stdout.log` (E210, E209, E211, E210n, E122x1n), `experiments/p3_stdout.log` (refit check, E216 pseudo-label, NF_gbdt, penanda "antrean laptop selesai"), `experiments/h22_stdout.log`.
+
+**Menunggu user (Kaggle, CPU, Internet On)**: unggah `kaggle/dataset/` sebagai versi baru dataset privat `dsc-logika-exp` (baru: `rp_events_v1.parquet`, `ab_nonin_v1.parquet`, `naive_cols.json`, `p3_params.json`); jalankan paralel `kaggle/p3_E214.ipynb` (CatBoost F*, ±3 jam), `kaggle/p3_E212.ipynb` (DART F*, ±2,5 jam), `kaggle/p3_NF_dart.ipynb` (DART fold baru, ±2,5 jam), `kaggle/p3_E213.ipynb` (XGB F*, ±1 jam), `kaggle/e215_autogluon_fstar.ipynb` (±10 jam) dan `kaggle/e215_autogluon_naive.ipynb` (±5 jam); taruh semua `*.npy` keluaran di `kaggle/output/`. Runner sudah diuji lokal: fold 0 AUC 0,84596 = E204 seed 42 (0,845957). Submission `E205_E207_rank50_auc0.84545.csv` belum diunggah (isi public di `submissions/LOG.md` setelah keluar).
+
+**Langkah berikutnya saat sesi dilanjutkan** (urut):
+1. Baca hasil s32 ulang (H14, tier) dan s33 (`experiments/explore_17okt/group_learning.csv` + `s33_stdout.log`): grup dengan penurunan screen < 0,0005 → cek 3 seed + bootstrap (Langkah 3) → tetapkan F** (dugaan: F** = F*).
+2. `python kaggle/import_results.py` setelah file Kaggle ada → `compare_oof.py` untuk E210 (vs E204/E202), E209/E211 (F*-CPU), E212/E213/E214 (vs E204), E216 (pseudo-label vs E204), E210n/E122x1n (seed baru: Δ harus tetap positif), NF_gbdt vs NF_dart (fold baru), H22, E215.
+3. Langkah 5: `python experiments/prompt3/p3_ensemble.py --models E210 E212 E213 E214 --tag gbdt` (+ versi CPU: E211 E207); NN hanya terpisah, bobot ≤ 0,2.
+4. Langkah 6: simulasi public (`experiments/explore_17okt/s34_public_noise.py`, tambah kandidat), CI bootstrap kandidat final.
+5. Langkah 7: `python experiments/prompt3/p3_select.py` → `nilai_harapan.md`; kandidat A (CPU) dan B (GPU, hanya jika reproducible); usul 3 submission/hari via `experiments/make_sub.py` + `verify_submission.py --log`.
+6. Langkah 8: refit 100% (`e145_refit.py --extra ...`) bila cek aturan iterasi lolos (|selisih| ≤ 0,0002); pseudo-label bila E216 diterima.

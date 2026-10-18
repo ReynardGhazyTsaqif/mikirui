@@ -6,7 +6,7 @@
 
 ## 0. Ringkasan satu halaman (selalu diperbarui)
 
-*Status 18 Okt sore: Langkah 1–3 selesai; diff aturan baru disetujui dan dipakai; Langkah 4 berjalan (bagian 9): E200 diterima, E201 ditolak, E202 diterima, E203 (parameter tuned tetap optimal), E204 kandidat, E205 (set CPU saja) diterima vs E130a; s27 = model jenuh; s29 = masih lapar data. Berjalan: s31 (H07), s32 (H14), E207 (DART set CPU), lalu s33. Pekerjaan di checkout utama, branch `explore-17okt`.*
+*Status 18 Okt 16.15 (sesi dihentikan karena limit Claude): eksplorasi PROMPT UTAMA + semua masukan user/mentor selesai (bagian 9–10; hanya rantai bayar event yang lolos); E200 + 10-fold (E202) = acuan resmi. PROMPT 3 sedang berjalan — titik lanjut: `experiments/prompt3/report.md` bagian "STATUS & CARA MELANJUTKAN".*
 
 - **Posisi**: public terbaik tercatat 0,55951 (`E122x1_E141_rank50`, 16 Okt). CV terbaik sekarang: **E202 mean-fold AUC 0,84710** (set E200 = E122x1 + rantai bayar event, dilatih 10-fold bersarang); sebelum eksplorasi: E122x1 0,84495.
 - **Target terverifikasi**: public 0,58 ≈ mean-fold AUC 0,857–0,860 → butuh **+0,012 s.d. +0,015**.

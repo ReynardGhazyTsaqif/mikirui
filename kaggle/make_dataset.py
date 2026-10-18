@@ -7,6 +7,8 @@ Isi (semua turunan data panitia, tanpa data luar):
   e121_ordermodel_v1.npz    7 fitur ecm_* nested per fold (format e121.py)
   seq_rp|ab|pa_v1.parquet   tabel urutan E122x (dibuat terpisah: python kaggle/make_seq_tables.py)
   e122_gru_v1*r.npz         seq_gru/seq_bigru/seq_tf nested, persentil per blok (kaggle/rank_blocks.py)
+  rp_events_v1.parquet      18 kolom rp_ev_* (E200), index application_id
+  ab_nonin_v1.parquet       5 kolom ab_nonin_* (E204), index application_id
 
   python kaggle/make_dataset.py
 """
@@ -45,7 +47,8 @@ def main():
     X.to_parquet(OUT / "X_all.parquet", index=False)
     for f in ("ec_orders_v1.parquet", "e121_ordermodel_v1.npz",
               "e122_gru_v1r.npz", "e122_gru_v1_bigrur.npz", "e122_gru_v1_tfr.npz",  # seq_* persentil (E122c)
-              "e122x_rp_v1r.npz", "e122x_ab_v1r.npz", "e122x_pa_v1r.npz"):  # seqx_* persentil (E122x1)
+              "e122x_rp_v1r.npz", "e122x_ab_v1r.npz", "e122x_pa_v1r.npz",  # seqx_* persentil (E122x1)
+              "rp_events_v1.parquet", "ab_nonin_v1.parquet"):  # rantai bayar event (E200), inflow non-gaji (E204)
         shutil.copy2(FEATURES_DIR / f, OUT / f)
     print(f"kolom kategori dikodekan: {cat}")
     for p in sorted(OUT.iterdir()):

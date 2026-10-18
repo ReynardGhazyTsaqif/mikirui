@@ -615,3 +615,42 @@ User: "pasti ada informasi yang belum kita gali" + 6 masukan (baseline minim-pre
 | Customer ganda (profil, aplikasi, rekening, sidik jari order) | (inline) | profil identik 0; rekening identik 0; sidik jari order 0; tabrakan lain setara kebetulan |
 
 Kesimpulan: residual model E202 tidak bisa dibedakan dari undian Bernoulli terhadap semua struktur yang diuji (±60 uji + 10.760 kandidat otomatis + residual boosting depth 8). Masukan 2–3 dikerjakan penuh, hasil negatif; masukan 4 (fitur masuk akal) sebagian besar sudah ada di 528 kolom Fase 2 dan pasangan rasio s38. Sisa tuas: konsolidasi (PROMPT 3), portofolio submission beragam untuk public (masukan 1 dan 5), XAI untuk notebook (masukan 6, 10% nilai).
+
+---
+
+## 10. Lampiran v2 (masukan mentor 14–19) + PROMPT 3 v2 — 18 Okt sore
+
+User mengubah `LAMPIRAN_ide_eksternal.md` (tambah ide 14–19 dari mentor) dan `PROMPT_3_gabungan_kenaikan_kecil.md` (kuota 3/hari untuk kandidat kuat; aturan pemilihan final `nilai_harapan = 0,45 × public_terlihat + 0,45 × perkiraan_private`). Perintah: baca dan lakukan. Dikerjakan di sesi ini.
+
+### 10.1 Penggabungan dengan bukti yang sudah ada
+
+| ID | Ide mentor | Bukti yang sudah ada | B | D | K | Skor | Rencana |
+|---|---|---|---|---|---|---|---|
+| H27 | (19) Pascaproses khusus KS: kalibrasi ulang per segmen (nested) + model pengurut ulang zona ambang KS (nested) | E170 (16 Okt, 1 seed): KS +0,0010 di w 0,3 (3/5), AUC turun; kalibrasi per segmen belum pernah diuji. KS adalah metrik resmi | 2 | 2 | 3 | **12** | `s40` (OOF saja, murah) → bila P ≥ 0,8 dibangun versi nested 3 seed |
+| H22 | (14) Kebun model preprocessing minimal + AutoGluon kualitas tertinggi, fold sama | Fase 4: CatBoost/XGB ≈ LGB, blend kecil; E03 (agregat naif) 0,8255 jauh di bawah set rekayasa | 2 | 2 | 3 | **12** | lokal: LGB/CatBoost/XGB di fitur hampir mentah (grup `*_naive`) 1 seed; AutoGluon: notebook Kaggle per fold luar (CPU 30 GB RAM), OOF selaras fold kita |
+| H26 | (18) SHAP: FN/FP terbesar, nilai interaksi, plot dependence (cari tangga/ambang = aturan pembangkit) | s27: tidak ada interaksi tersisa; E120/s17: FN/FP = undian | 2 | 1 | 3 | **6** (+ nilai notebook/presentasi) | `pred_contrib` LightGBM pada model set E205 (CPU) + interaksi di venv terpisah |
+| H24 | (16) Loop fitur berbantuan LLM gaya CAAFE, beberapa putaran | ±60 uji terarah + s38 negatif | 1 | 2 | 3 | **6** | 2–3 putaran × 15–20 fitur domain, saring z residual fold 0–2 + konfirmasi fold 3–4 |
+| H23 | (15) Pola missing lintas tabel, nilai nol/maks/terpotong, pelanggaran rumus | s36/s37: semua pelanggaran rumus 0 kasus (closing = opening + in − out, order_total = Σ item, utilisasi = ro/limit) | 1 | 1 | 2 | **2** | sisa: kombinasi pola missing lintas tabel, nilai nol/maks/terpotong, approved > requested (`s41`, murah) |
+| H25 | (17) Fitur aneh massal: rasio/selisih pasangan, rank dalam kelompok, frekuensi nilai, jarak ke median kelompok | s38: 10.760 kandidat, 0 lolos | 1 | 1 | 2 | **2** | sisa: frekuensi nilai dan jarak ke median kelompok (`s41`) |
+
+Ide lampiran 1–13 sudah digabung di bagian 6.3 (hasil: 1 dikerjakan s18/s29, 2 bersih s11, 3 → H17, 4 → E201 ditolak, 5 → s39 KNN negatif dan GMM terbantah, 6 → s36 negatif, 7–9 terbantah, 10 → s17, 11 → s38 negatif, 12 → H18, 13 → PROMPT 3 Langkah 8).
+
+### 10.2 Urutan kerja
+
+1. Murah, jalan bersamaan dengan E207 (RAM): `s40` H27 kalibrasi per segmen di OOF, `s41` H23/H25 sisa, PROMPT 3 Langkah 1 (inventaris).
+2. Setelah rantai E207 → s32 → s33: PROMPT 3 Langkah 2 (F* = set E122x1 + rp_ev + ab_nonin, 3 seed) → Langkah 3 (ablation) → H22 lokal → SHAP (H26) → CAAFE (H24) bergantian dengan job panjang Langkah 4 (DART/XGB/CatBoost di F** dan F**-CPU, tiap launcher < 3 jam).
+3. Notebook Kaggle AutoGluon disiapkan untuk dijalankan user.
+4. PROMPT 3 Langkah 5–8 dan tabel `nilai_harapan` semua submission; usulan submission harian (3/hari) untuk kandidat kuat.
+
+### 10.3 Hasil masukan mentor (18 Okt sore)
+
+| ID | uji | hasil | keputusan |
+|---|---|---|---|
+| H27 | `s40`: kalibrasi ulang per segmen (logistik/isotonik; riwayat × tier) dan geser skor per segmen yang memaksimalkan KS, nested 4→1 fold, OOF E202 | semua varian AUC turun (−0,00007 s.d. −0,00125); KS terbaik geser-KS per riwayat +0,0007 (3/5, P 0,57, CI [−0,0020; +0,0030]) | **Ditolak** (model global sudah terkalibrasi antarsegmen; pengurut ulang zona KS = E170, ditolak 16 Okt) |
+| H23 | `s41`: pola missing lintas tabel (hanya 4 pola: tanpa riwayat 30%, riwayat lengkap 66%, aplikasi lama tanpa pinjaman 3,5%, pinjaman tanpa cicilan 0,4%), nilai batas min/maks, nilai nol, approved > requested | residual per pola \|z\| ≤ 0,5; approved > requested 0 dari 159.323; batas/nol \|z\| ≤ 1,3 (satu \|z\| 2,7 dari 1 customer) | **Ditolak** |
+| H25 | `s41`: frekuensi nilai (loan_amount, umur, masa kerja, income, tujuan × tier, nominal × tier) | \|z\| ≤ 1,5 | **Ditolak** (rasio/selisih/rank kelompok sudah di s38) |
+| H24 | CAAFE putaran 1 (`s42`, 17 fitur domain: guncangan cicilan, lunas → aplikasi, penumpukan pinjaman, inquiry/tunggakan eksternal, runway saldo, belanja vs outflow, kartu kredit × utilisasi, usia kredit pertama, DTI total + utang eksternal, nominal vs median tujuan/tier, bunga vs income, beruntun penolakan, belanja malam 7 hari) | 0 lolos; maks \|z_sel\| 2,33 berbalik di konfirmasi | umpan balik: konsep domain sudah jenuh |
+| H24 | CAAFE putaran 2 (`s43`, 22 fitur ramp terhadap baseline sendiri: LLR change-point Poisson order w 3–60 hari, rasio laju belanja, z-score rekening 1/3 bulan terakhir vs volatilitas sendiri, ramp gabungan, jarak order terakhir) | 0 lolos; pola tanda berbalik sistematis antar kelompok fold (ramp gabungan +2,09 / −3,13; arus bersih −2,63 / +2,55) = kalibrasi pemakaian ramp beda per fold (variansi fitur nested), bukan sinyal baru | **Ditolak**; menguatkan bahwa variansi (bagging) adalah tuas tersisa |
+| H26 | `s44` SHAP (TreeSHAP LightGBM, model fold 0 set F*, AUC 0,84568): kepentingan, bentuk dependence 20 fitur teratas, FN/FP vs TP/TN, interaksi dari struktur pohon | teratas `seq_bigru2` (mean \|SHAP\| 0,367), seqx_rp, ecm, seq_gru, rp_ev_miss_post, x_rate_pred, rp_ev_pd_struct; bentuk hampir semua monoton (0–4 pergantian arah dari 18); FN−TN dan FP−TP kecil searah (= undian); interaksi terkuat urutan e-commerce × tier/tunggakan. Satu pola: `app_month` berbentuk U (SHAP +0,066 Jan–Feb, −0,054 Mei) | Tidak ada aturan bertangga yang terlewat; hasil disimpan untuk notebook/presentasi |
+
+**Efek bulan keputusan (dari H26)**: target per bulan Jan–Feb 2025 14,3–14,7%, Mei 12,0%, Sep 12,7%, Okt–Des 13,9–14,4% → χ² ±34 (11 db, p ≈ 0,0004): **nyata** (koreksi atas catatan Langkah 2 yang menyebutnya rata), tetapi sudah ditangkap model lewat `app_month` dan residual per minggu/hari datar (s39). Laju order populasi per minggu kalender berbentuk U (0,53 → 0,46 → 0,74 per customer aktif) = artefak jendela riwayat yang berjangkar di tanggal keputusan (ramp), bukan musim belanja → tidak perlu normalisasi musiman.

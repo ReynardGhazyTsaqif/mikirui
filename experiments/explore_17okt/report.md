@@ -599,3 +599,19 @@ E202 mendominasi; pasangan yang lebih lemah ±0,002 AUC menurunkan skor walau le
 Public 9 rb baris tidak bisa menunjukkan kenaikan +0,002 AUC dengan andal (peluang terlihat ±0,8 walau nyata); E202 kurang beruntung (z −1,5) tetapi masih dalam noise. Pola "GBDT + DART 50:50 selalu tertinggi" = satu pengamatan (DART E141 yang sama di ketiga blend). Kerangka pemilihan final: nilai = 45% public (sudah diketahui untuk file yang pernah diunggah) + 45% private (diprediksi dari CV).
 
 **Probe putaran 2 lanjutan (semua negatif)**: jumlah bukti order (Σ logit order terpusat = n × (ecm_mean − c), juga versi 30 hari dan √n): AUC 0,72–0,74 tetapi |z| ≤ 1,13 (sudah tertangkap ecm + jumlah order). `s35`: pembayaran parsial (2,0% baris cicilan dibayar sebagian, median 53%; porsi, jumlah, nilai terakhir, parsial di cicilan terbaru, total kekurangan) |z| ≤ 1,25 → tertangkap rasio bayar agregat; utang eksternal (saldo biro − sisa kewajiban internal, akun biro − pinjaman aktif internal) |z| ≤ 0,89 — saldo biro hampir tidak terkait sisa pinjaman internal (korelasi 0,24) → dibangkitkan terpisah. Total ±50 uji sinyal sejak 17 Okt; hanya rantai bayar event yang lolos.
+
+### 9.x Putaran masukan user 18 Okt sore (peringkat 41; target peringkat 8 = public 0,57)
+
+User: "pasti ada informasi yang belum kita gali" + 6 masukan (baseline minim-preprocessing, data aneh/missing berpola, fitur aneh ala AutoML, fitur masuk akal, pascaproses, XAI). Dikerjakan berurutan menurut peluang menemukan informasi baru:
+
+| uji | skrip | hasil |
+|---|---|---|
+| Kebocoran urutan file test / sample_submission, pola hex ID test | (inline) | Spearman posisi vs prediksi E202 +0,0003 / −0,0071 (\|z\| ≤ 1,24); hex ID ±0,008 → tidak ada |
+| Anomali 5 tabel: digit/pembulatan nominal, detik/menit timestamp, inkonsistensi antar kolom (utilisasi vs saldo/limit, saldo awal vs akhir bulan lalu, arus kas, DPD vs tanggal, bayar sebelum due, saldo negatif, akun 0 bersaldo, tunggakan > akun), duplikat, missing | `s36_anomaly_scan.py` (±70 pola) | semua cek konsistensi **0 kasus** (data sintetis bersih); pola digit/detik \|z\| ≤ 1,7; pola langka (cicilan kelipatan 1.000: 49 customer) setara kebetulan |
+| Anomali e-commerce (order_total vs jumlah item, harga satuan, kuantitas, item 0, kategori ganda, status × metode) | `s37_ec_anomaly.py` | order_total selalu = jumlah item, harga satuan selalu kelipatan Rp1.000; status × metode \|z\| ≤ 2,4 (setara kebetulan dari ±25 uji) |
+| Fitur otomatis ala OpenFE: 80 fitur terpenting → 9.480 pasangan (a/b, selisih rank, perkalian rank) + 1.280 transformasi kelompok (selisih dari rata-rata dan rank di dalam tier/wilayah/pekerjaan/rumah/tujuan/riwayat/desil umur/desil income) | `s38_auto_fe.py` | 10.760 kandidat: sebaran z seleksi sd 0,967 (= noise), maks \|z\| 3,6, **0 kandidat \|z\| ≥ 4, 0 lolos konfirmasi fold 3–4**; interaksi yang tampak (z +3,2) berbalik tanda di fold konfirmasi (z −2,8) |
+| Struktur lokal (H20 KNN, 28 fitur, 50 tetangga lintas fold) | `s39_knn_time.py` | z −1,17 / −0,50 |
+| Pengelompokan waktu keputusan (minggu, hari, 50 tetangga waktu) | `s39_knn_time.py` | χ² minggu 62,4 vs 52 ± 10,2; hari 344,7 vs 336 ± 25,9; tetangga waktu z +0,11 |
+| Customer ganda (profil, aplikasi, rekening, sidik jari order) | (inline) | profil identik 0; rekening identik 0; sidik jari order 0; tabrakan lain setara kebetulan |
+
+Kesimpulan: residual model E202 tidak bisa dibedakan dari undian Bernoulli terhadap semua struktur yang diuji (±60 uji + 10.760 kandidat otomatis + residual boosting depth 8). Masukan 2–3 dikerjakan penuh, hasil negatif; masukan 4 (fitur masuk akal) sebagian besar sudah ada di 528 kolom Fase 2 dan pasangan rasio s38. Sisa tuas: konsolidasi (PROMPT 3), portofolio submission beragam untuk public (masukan 1 dan 5), XAI untuk notebook (masukan 6, 10% nilai).

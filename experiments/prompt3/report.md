@@ -140,3 +140,11 @@ Tidak ada job yang berjalan. Belum dijalankan dari antrean `experiments/run_cpu_
 | NF_dart | DART fold baru seed 2026, non-nested | (3 seed tersimpan) | menunggu NF_gbdt (laptop) | Langkah 6 |
 
 Ensemble (Langkah 5, `p3_ensemble.py --models E211 E219 E220 E221`): rata-rata sederhana 0,84615, bobot nested 0,84621 (E219 0,60 / E211 0,26 / XGB 0,09 / Cat 0,05), Caruana 0,84621 → tidak lebih baik dari E219 sendiri (0,84623) → pilih yang paling sederhana. Submission: **`E211_E219_rank50_auc0.84628.csv`** (GBDT + DART, keduanya 10-fold; MD5 a8a95dbe…; KS OOF 0,5260 tertinggi di keluarga CPU) — menunggu public.
+
+
+### 19 Okt malam — public E211 + E219 = 0,56386 dan diagnosis "kenapa public tidak naik"
+
+- Keluarga CPU (4 submission, Spearman test antar-mereka 0,997–0,998) = 0,5630–0,5643: model praktis sama; kenaikan CV di dalam keluarga (+0,0008) ≈ +0,001 public → tidak terlihat. Menyetel keluarga yang sama tidak akan mencapai 0,57.
+- Regresi public ~ CV + komponen (19 submission, sd residual 0,0017): CV koef 0,46 ± 0,98 (hampir tidak menjelaskan di rentang ini); **GRU −0,0031 (t −1,6)**, NN −0,0017 (t −0,9), DART +0,0014 (t +0,8), **rp_ev +0,0031 (t +1,3)**.
+- Pola sepanjang lomba: lompatan public datang dari **representasi baru yang meniru mekanisme pembangkit data** (model level order e-commerce +0,009 di E121; rantai bayar bulanan +0,005 di keluarga CPU), bukan dari fitur hasil belajar mesin (GRU/NN: naik di CV, turun di public).
+- **Arah**: uji di public paket fitur mekanisme yang dulu ditolak karena CV-nya netral (CV terbukti buruk menilai jenis fitur ini): **E222** = F*-CPU + x_auxpd (model bantu PD pinjaman lama, LOO) + H08/H09 (hazard pinjaman berjalan) + ramp change-point (`features/cand_ramp_v1.parquet`, s45), 10-fold 3 seed; audit Lapis 2 bersih. Submission uji: E222 + E219. Diagnostik tambahan: `E219_single` (DART saja).

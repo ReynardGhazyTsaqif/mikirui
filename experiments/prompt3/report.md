@@ -114,3 +114,16 @@ Tidak ada job yang berjalan. Belum dijalankan dari antrean `experiments/run_cpu_
 3. Kaggle (user): unggah `kaggle/dataset/` versi baru; jalankan `kaggle/p3_E219.ipynb`, `p3_E218`, `p3_E221`, `p3_E220`, `p3_NF_dart` (CPU); keluaran `*.npy` ke `kaggle/output/` → `python kaggle/import_results.py` → `compare_oof.py` (E219 vs E207, E218 vs E207, E220/E221 vs E209) → `experiments/prompt3/p3_ensemble.py --models E211 E219 ...`.
 4. Submission: usulan hari ini E211 + E207 (utama) dan E209 + E207 (cadangan); isi public di `submissions/LOG.md`; perbarui `experiments/prompt3/p3_select.py` (nilai_harapan).
 5. Sisa Langkah 6/8: refit check + E216c set CPU, seed baru 101–103 (E211n), fold baru GBDT/DART.
+
+
+### 19 Okt sore — public keluarga CPU dan arahan user
+
+**Public**: `E209_E207_rank50` **0,56351**, `E211_E207_rank50` **0,56302** (rekor tetap `E205_E207_rank50` 0,56428). Keluarga CPU (GBDT + DART tanpa fitur GRU) kini 3 dari 3 submission di 0,5630–0,5643, sedangkan keluarga ber-GRU 0,5553–0,5595 (8+ submission) — berlawanan dengan CV (fitur GRU +0,0014). Ini **pola konsisten yang belum terjelaskan** dan menjadi petunjuk utama sesi berikutnya.
+
+**Arahan user (19 Okt)**: (1) notebook final **jangan dikerjakan dulu** — user menyelesaikannya sendiri dalam 1 hari menjelang tenggat; (2) target public **minimal 0,58**; (3) jangan menjelaskan hasil sebagai "keberuntungan" — cari penyebab dan cara menaikkan; pertanyaan user: kenapa tim lain bisa 0,57+.
+
+**Rencana sesi berikutnya** (belum dikerjakan):
+1. Bedah pola public keluarga CPU vs GRU: submission diagnostik yang memisahkan komponen (mis. set CPU + seq e-commerce saja, set CPU + seqx saja, GBDT CPU tanpa DART) untuk menemukan komponen yang menurunkan public; cek ulang cara pembuatan fitur GRU untuk baris test (persentil per blok, model mana yang dipakai untuk te{k}) dan pertimbangkan membuang/merekonstruksi fitur yang merugikan.
+2. Perkuat keluarga CPU yang terbukti di public: pasangan DART 10-fold (E219), CatBoost/XGB set CPU (E220/E221), ensemble nested — notebook Kaggle sudah siap (`kaggle/p3_*.ipynb`).
+3. Cari sumber kenaikan besar baru dengan sudut pandang tim lain (pipeline agregat sederhana + ensemble kuat): bandingkan model "sederhana kuat" (mis. CatBoost/LGB di fitur mentah + target encoding) dengan pipeline kita di public, karena public keluarga sederhana (tanpa GRU) justru lebih tinggi.
+4. Sisa antrean lokal: cek aturan refit + E216c (pseudo-label) set CPU, E210, H22, AutoGluon.

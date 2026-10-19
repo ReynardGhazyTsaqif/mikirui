@@ -93,3 +93,24 @@ AutoGluon `best_quality` (H22, mentor ide 14): `kaggle/e215_autogluon_fstar.ipyn
 **Keputusan arah (pakai aturan Langkah 7)**: nilai_harapan E205 + E207 = 0,45 × 0,56428 + 0,45 × ±0,5574 ≈ **0,5048** > E202 ±0,5029, dan E205 + E207 **CPU-deterministik** → **jalur utama = keluarga CPU (kandidat A)**: perkuat (ab_nonin, 10-fold, pasangan DART 10-fold, model ketiga), buat beberapa varian kuat untuk portofolio public, dan bangun notebook final kandidat A sekarang (jalur kritis). Kandidat B (set GPU) tetap pembanding.
 
 **Antrean 19 Okt**: laptop `experiments/run_cpu_19okt.cmd` (10.47): E209 → E211 → cek refit set CPU → E216c (pseudo-label set CPU) → E210 (set GPU 10-fold) → H22. Kaggle (user): `kaggle/p3_E219.ipynb` (DART set CPU 10-fold, ±5 jam), `p3_E218` (DART set CPU 5-fold, ±2,5 jam), `p3_E221` (CatBoost set CPU, ±3 jam), `p3_E220` (XGB set CPU, ±1 jam), `p3_NF_dart` (DART fold baru, ±2,5 jam); notebook set GPU (E212–E214) dihapus. Catatan: antrean laptop 18 Okt tidak jalan (laptop berhenti, s32 ulang terputus di fold 2).
+
+### 19 Okt siang — hasil set CPU
+
+| ID | isi | bag 3 seed | vs acuan | keputusan |
+|---|---|---|---|---|
+| E209 | GBDT F*-CPU (528 + ecm + rp_ev + ab_nonin), 5-fold | 0,84537 (KS OOF 0,5229) | vs E205 +0,00019, CI [−0,00016; +0,00052], P 0,854 | Kandidat (H21 konsisten dengan set GPU) |
+| E211 | GBDT F*-CPU, 10-fold bersarang | **0,84595** (KS OOF 0,5243) | vs E209 **+0,00059**, CI [+0,00026; +0,00092], P 1,000 | **Diterima** |
+
+Submission baru (CPU-deterministik, lolos `verify_submission.py`, tercatat di LOG): **`E211_E207_rank50_auc0.84601.csv`** (MD5 9a88b413…, KS OOF 0,5247) = usulan utama; `E209_E207_rank50_auc0.84562.csv` (MD5 c06ad87d…, KS OOF 0,5244) = cadangan. Pasangan DART yang setara kuat (E219 = DART F*-CPU 10-fold, Kaggle) diharapkan menaikkan blend lebih jauh (E207 5-fold 0,84535 lebih lemah dari E211).
+
+**Notebook final kandidat A** dirakit: `final/build_notebook.py` → `final/NomorPeserta_NamaTim_Notebook.ipynb` (43 sel, kode sumber yang sama; target MD5 E205 + E207 afc487f6…). Verifikasi persis terhadap cache (`final/verify_notebook.py --train-check`) **belum dijalankan** (laptop dimatikan user).
+
+## STATUS & CARA MELANJUTKAN (diperbarui 19 Okt ±12.00 — laptop dimatikan user)
+
+Tidak ada job yang berjalan. Belum dijalankan dari antrean `experiments/run_cpu_19okt_b.cmd`: verifikasi notebook, cek aturan refit set CPU, E216c (pseudo-label set CPU), E210 (set GPU 10-fold), H22. Untuk melanjutkan semuanya cukup jalankan launcher baru yang menghapus baris tunggu E209/E211 (E209 dan E211 sudah selesai), atau langsung:
+
+1. `python final/verify_notebook.py final/NomorPeserta_NamaTim_Notebook.ipynb --train-check` (±30 mnt) — harus "identik" untuk semua grup, matriks, ecm, dan prediksi fold 0. Bila beda: perbaiki bundler, lalu Run All penuh (±3,5 jam) dan cocokkan MD5 dengan afc487f6….
+2. Notebook final perlu diperbarui ke konfigurasi kandidat terbaik saat itu (mis. E211 + E219: tambah `ab_nonin`, 10-fold untuk GBDT dan DART) — parameterkan `build_notebook.py`.
+3. Kaggle (user): unggah `kaggle/dataset/` versi baru; jalankan `kaggle/p3_E219.ipynb`, `p3_E218`, `p3_E221`, `p3_E220`, `p3_NF_dart` (CPU); keluaran `*.npy` ke `kaggle/output/` → `python kaggle/import_results.py` → `compare_oof.py` (E219 vs E207, E218 vs E207, E220/E221 vs E209) → `experiments/prompt3/p3_ensemble.py --models E211 E219 ...`.
+4. Submission: usulan hari ini E211 + E207 (utama) dan E209 + E207 (cadangan); isi public di `submissions/LOG.md`; perbarui `experiments/prompt3/p3_select.py` (nilai_harapan).
+5. Sisa Langkah 6/8: refit check + E216c set CPU, seed baru 101–103 (E211n), fold baru GBDT/DART.

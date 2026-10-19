@@ -40,7 +40,7 @@ NAME = "E212"
 MODEL = "dart"  # "lgb" | "dart" | "xgb" | "cat"
 FEATSET = "fstar"  # "fstar" | "fstar_cpu" | "newfold" (non-nested, fold seed 2026)
 SEEDS = [42, 43, 44]
-SUBFOLDS = 1  # 2 = 10-fold bersarang seperti e121.py --subfolds 2 (hanya MODEL "lgb")
+SUBFOLDS = 1  # 2 = 10-fold bersarang seperti e121.py --subfolds 2 (lgb dan dart)
 SMOKE = os.environ.get("P3_SMOKE") == "1"  # uji lokal: 1 seed, fold 0 saja
 if os.environ.get("P3_MODEL"):
     MODEL, NAME = os.environ["P3_MODEL"], "SMOKE_" + os.environ["P3_MODEL"]

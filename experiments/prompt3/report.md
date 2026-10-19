@@ -76,3 +76,20 @@ AutoGluon `best_quality` (H22, mentor ide 14): `kaggle/e215_autogluon_fstar.ipyn
 4. Langkah 6: simulasi public (`experiments/explore_17okt/s34_public_noise.py`, tambah kandidat), CI bootstrap kandidat final.
 5. Langkah 7: `python experiments/prompt3/p3_select.py` → `nilai_harapan.md`; kandidat A (CPU) dan B (GPU, hanya jika reproducible); usul 3 submission/hari via `experiments/make_sub.py` + `verify_submission.py --log`.
 6. Langkah 8: refit 100% (`e145_refit.py --extra ...`) bila cek aturan iterasi lolos (|selisih| ≤ 0,0002); pseudo-label bila E216 diterima.
+
+
+---
+
+## 19 Okt — public E205 + E207 = 0,56428 (rekor baru) dan arah baru
+
+**Public**: `E205_E207_rank50_auc0.84545.csv` (CPU saja, GBDT + DART, set 528 + ecm + rp_ev) **0,56428** — +0,0048 dari rekor lama E122x1 + E141 (0,55951) dan +0,0067 dari E202 (0,55754) walau CV-nya lebih rendah (0,84545 vs 0,84711).
+
+**Diagnosis** (semua dari OOF/preds, tanpa melatih ulang):
+- Fitur GRU (seq_*, seqx_*) sehat di test: Spearman antar model di test selalu > di OOF (GRU vs tanpa GRU +0,0018 s.d. +0,0028; tanpa vs tanpa +0,0010 s.d. +0,0013); korelasi fitur GRU dengan prediksi E205 di test ≥ di OOF (seq_bigru 0,735 vs 0,726). Tidak ada salah urutan atau pergeseran.
+- Notebook GRU (`e122_gru.py`, `e122x_seq.py`) bersih: early stopping di holdout 10% data latih, nested benar → tidak ada optimisme CV seperti kasus NN E142.
+- Simulasi 2000 subset 9.000 baris (s34): E205 + E207 − E202: harapan −0,0030, sd 0,0037, teramati +0,0067 → **z +2,62** (P 0,005); − (E202 + E141) z +2,27; − (E122x1 + E141) z +1,16; − (E130a + E141) z +1,06.
+- Tafsiran: E205 + E207 adalah maksimum dari 23 submission (efek pemenang) → sebagian lonjakan = keberuntungan; sebagian nyata (rp_ev di set CPU +0,0019 CV vs E130a + E141). E202 kurang beruntung di subset public (pola "model ber-GRU di bawah garis regresi" = satu undian subset public yang sama, bukan bukti independen berulang).
+
+**Keputusan arah (pakai aturan Langkah 7)**: nilai_harapan E205 + E207 = 0,45 × 0,56428 + 0,45 × ±0,5574 ≈ **0,5048** > E202 ±0,5029, dan E205 + E207 **CPU-deterministik** → **jalur utama = keluarga CPU (kandidat A)**: perkuat (ab_nonin, 10-fold, pasangan DART 10-fold, model ketiga), buat beberapa varian kuat untuk portofolio public, dan bangun notebook final kandidat A sekarang (jalur kritis). Kandidat B (set GPU) tetap pembanding.
+
+**Antrean 19 Okt**: laptop `experiments/run_cpu_19okt.cmd` (10.47): E209 → E211 → cek refit set CPU → E216c (pseudo-label set CPU) → E210 (set GPU 10-fold) → H22. Kaggle (user): `kaggle/p3_E219.ipynb` (DART set CPU 10-fold, ±5 jam), `p3_E218` (DART set CPU 5-fold, ±2,5 jam), `p3_E221` (CatBoost set CPU, ±3 jam), `p3_E220` (XGB set CPU, ±1 jam), `p3_NF_dart` (DART fold baru, ±2,5 jam); notebook set GPU (E212–E214) dihapus. Catatan: antrean laptop 18 Okt tidak jalan (laptop berhenti, s32 ulang terputus di fold 2).

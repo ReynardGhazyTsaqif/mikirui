@@ -127,3 +127,16 @@ Tidak ada job yang berjalan. Belum dijalankan dari antrean `experiments/run_cpu_
 2. Perkuat keluarga CPU yang terbukti di public: pasangan DART 10-fold (E219), CatBoost/XGB set CPU (E220/E221), ensemble nested — notebook Kaggle sudah siap (`kaggle/p3_*.ipynb`).
 3. Cari sumber kenaikan besar baru dengan sudut pandang tim lain (pipeline agregat sederhana + ensemble kuat): bandingkan model "sederhana kuat" (mis. CatBoost/LGB di fitur mentah + target encoding) dengan pipeline kita di public, karena public keluarga sederhana (tanpa GRU) justru lebih tinggi.
 4. Sisa antrean lokal: cek aturan refit + E216c (pseudo-label) set CPU, E210, H22, AutoGluon.
+
+
+### 19 Okt malam — hasil Kaggle set CPU (diimpor `kaggle/import_results.py`)
+
+| ID | model (set F*-CPU = 528 + ecm + rp_ev + ab_nonin) | bag 3 seed | pembanding | keputusan |
+|---|---|---|---|---|
+| **E219** | LGB DART 5000 ronde, **10-fold** | **0,84623** (KS OOF 0,5293) | vs E207 +0,00087 (CI [+0,00046; +0,00128], P 1,000); vs E211 +0,00027 (P 0,928) | **Diterima** vs E207; model tunggal CPU terbaik |
+| E218 | LGB DART 5000 ronde, 5-fold | 0,84565 | vs E207 +0,00029, P 0,957 | Kandidat |
+| E220 | XGB tuned, 5-fold | 0,84505 | vs E209 −0,00032, P 0,118 | Ditolak (sendiri) |
+| E221 | CatBoost tuned, 5-fold | 0,84290 | vs E209 −0,00247 | Ditolak (sendiri; Spearman 0,980 = paling beragam) |
+| NF_dart | DART fold baru seed 2026, non-nested | (3 seed tersimpan) | menunggu NF_gbdt (laptop) | Langkah 6 |
+
+Ensemble (Langkah 5, `p3_ensemble.py --models E211 E219 E220 E221`): rata-rata sederhana 0,84615, bobot nested 0,84621 (E219 0,60 / E211 0,26 / XGB 0,09 / Cat 0,05), Caruana 0,84621 → tidak lebih baik dari E219 sendiri (0,84623) → pilih yang paling sederhana. Submission: **`E211_E219_rank50_auc0.84628.csv`** (GBDT + DART, keduanya 10-fold; MD5 a8a95dbe…; KS OOF 0,5260 tertinggi di keluarga CPU) — menunggu public.

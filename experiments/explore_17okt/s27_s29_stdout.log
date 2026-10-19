@@ -1,0 +1,212 @@
+[18/10/2026 12:28:11,50] mulai s27 
+  fitur app_raw_v1          4 kolom  (0.0 mnt)
+  fitur prof_raw_v1         7 kolom  (0.0 mnt)
+  fitur app_ratios_v1      13 kolom  (0.0 mnt)
+  fitur pa_naive_v1        35 kolom  (0.0 mnt)
+  fitur rp_naive_v1        34 kolom  (0.0 mnt)
+  fitur bu_naive_v1        65 kolom  (0.0 mnt)
+  fitur bp_naive_v1        28 kolom  (0.0 mnt)
+  fitur ab_naive_v1        42 kolom  (0.0 mnt)
+  fitur ec_naive_v1        24 kolom  (0.0 mnt)
+  fitur rp_core_v1         21 kolom  (0.0 mnt)
+  fitur rp_window_v1       26 kolom  (0.0 mnt)
+  fitur rp_loan_v1         17 kolom  (0.0 mnt)
+  fitur rp_trend_v1         7 kolom  (0.0 mnt)
+  fitur bu_extra_v1        17 kolom  (0.0 mnt)
+  fitur bp_trend_v1        13 kolom  (0.0 mnt)
+  fitur pa_window_v1       30 kolom  (0.0 mnt)
+  fitur pa_burden_v1       14 kolom  (0.0 mnt)
+  fitur ab_window_v1       36 kolom  (0.0 mnt)
+  fitur ab_income_v1       12 kolom  (0.0 mnt)
+  fitur ec_window_v1       44 kolom  (0.0 mnt)
+  fitur ec_mix_v1          27 kolom  (0.0 mnt)
+  fitur x_cross_v1         10 kolom  (0.0 mnt)
+  fitur x_rate_resid_v1     2 kolom  (0.0 mnt)
+  depth3_l7 fold 0: delta -0.00002 iter 1
+  depth3_l7 fold 1: delta +0.00001 iter 1
+  depth3_l7 fold 2: delta -0.00002 iter 1
+  depth3_l7 fold 3: delta -0.00003 iter 1
+  depth3_l7 fold 4: delta -0.00001 iter 1
+depth3_l7: delta mean-fold -0.00002, naik 1/5
+  depth6_l63 fold 0: delta -0.00005 iter 1
+  depth6_l63 fold 1: delta -0.00004 iter 1
+  depth6_l63 fold 2: delta -0.00008 iter 1
+  depth6_l63 fold 3: delta -0.00005 iter 1
+  depth6_l63 fold 4: delta -0.00004 iter 1
+depth6_l63: delta mean-fold -0.00005, naik 0/5
+  depth8_l255 fold 0: delta -0.00006 iter 1
+  depth8_l255 fold 1: delta -0.00002 iter 1
+  depth8_l255 fold 2: delta -0.00008 iter 1
+  depth8_l255 fold 3: delta -0.00008 iter 1
+  depth8_l255 fold 4: delta -0.00007 iter 1
+depth8_l255: delta mean-fold -0.00006, naik 0/5
+[18/10/2026 12:30:27,94] mulai s29 
+  fitur app_raw_v1          4 kolom  (0.0 mnt)
+  fitur prof_raw_v1         7 kolom  (0.0 mnt)
+  fitur app_ratios_v1      13 kolom  (0.0 mnt)
+  fitur pa_naive_v1        35 kolom  (0.0 mnt)
+  fitur rp_naive_v1        34 kolom  (0.0 mnt)
+  fitur bu_naive_v1        65 kolom  (0.0 mnt)
+  fitur bp_naive_v1        28 kolom  (0.0 mnt)
+  fitur ab_naive_v1        42 kolom  (0.0 mnt)
+  fitur ec_naive_v1        24 kolom  (0.0 mnt)
+  fitur rp_core_v1         21 kolom  (0.0 mnt)
+  fitur rp_window_v1       26 kolom  (0.0 mnt)
+  fitur rp_loan_v1         17 kolom  (0.0 mnt)
+  fitur rp_trend_v1         7 kolom  (0.0 mnt)
+  fitur bu_extra_v1        17 kolom  (0.0 mnt)
+  fitur bp_trend_v1        13 kolom  (0.0 mnt)
+  fitur pa_window_v1       30 kolom  (0.0 mnt)
+  fitur pa_burden_v1       14 kolom  (0.0 mnt)
+  fitur ab_window_v1       36 kolom  (0.0 mnt)
+  fitur ab_income_v1       12 kolom  (0.0 mnt)
+  fitur ec_window_v1       44 kolom  (0.0 mnt)
+  fitur ec_mix_v1          27 kolom  (0.0 mnt)
+  fitur x_cross_v1         10 kolom  (0.0 mnt)
+  fitur x_rate_resid_v1     2 kolom  (0.0 mnt)
+{'fold': 0, 'frac': 0.25, 'n_train': 14000, 'auc': 0.8388079164010711, 'iters': 417}
+{'fold': 0, 'frac': 0.5, 'n_train': 28000, 'auc': 0.842573622949958, 'iters': 444}
+{'fold': 0, 'frac': 0.75, 'n_train': 42000, 'auc': 0.8443360424838064, 'iters': 813}
+{'fold': 0, 'frac': 1.0, 'n_train': 56000, 'auc': 0.8466082402156608, 'iters': 809}
+{'fold': 1, 'frac': 0.25, 'n_train': 14000, 'auc': 0.8438901332984121, 'iters': 343}
+{'fold': 1, 'frac': 0.5, 'n_train': 28000, 'auc': 0.8461465050802386, 'iters': 578}
+{'fold': 1, 'frac': 0.75, 'n_train': 42000, 'auc': 0.8496019099660834, 'iters': 1291}
+{'fold': 1, 'frac': 1.0, 'n_train': 56000, 'auc': 0.8501150359612107, 'iters': 1129}
+{'fold': 2, 'frac': 0.25, 'n_train': 14000, 'auc': 0.8497175176614777, 'iters': 636}
+{'fold': 2, 'frac': 0.5, 'n_train': 28000, 'auc': 0.8531910963031234, 'iters': 1073}
+{'fold': 2, 'frac': 0.75, 'n_train': 42000, 'auc': 0.8553175126876075, 'iters': 1207}
+{'fold': 2, 'frac': 1.0, 'n_train': 56000, 'auc': 0.854773604350119, 'iters': 964}
+{'fold': 3, 'frac': 0.25, 'n_train': 14000, 'auc': 0.8390298889249885, 'iters': 510}
+{'fold': 3, 'frac': 0.5, 'n_train': 28000, 'auc': 0.8401794128184495, 'iters': 632}
+{'fold': 3, 'frac': 0.75, 'n_train': 42000, 'auc': 0.842303496211017, 'iters': 577}
+{'fold': 3, 'frac': 1.0, 'n_train': 56000, 'auc': 0.8417998108333294, 'iters': 894}
+{'fold': 4, 'frac': 0.25, 'n_train': 14000, 'auc': 0.8314365819692977, 'iters': 468}
+{'fold': 4, 'frac': 0.5, 'n_train': 28000, 'auc': 0.8325645503884418, 'iters': 456}
+{'fold': 4, 'frac': 0.75, 'n_train': 42000, 'auc': 0.834420189900252, 'iters': 350}
+{'fold': 4, 'frac': 1.0, 'n_train': 56000, 'auc': 0.836419633977616, 'iters': 1182}
+            n      auc  iters
+frac                         
+0.25  14000.0  0.84058  474.8
+0.50  28000.0  0.84293  636.6
+0.75  42000.0  0.84520  847.6
+1.00  56000.0  0.84594  995.6
+kurva pangkat: AUC = 9.0570 - 8.255 * n^-0.000
+  n=63000: 0.8465
+  n=70000: 0.8469
+  n=112000: 0.8488
+  n=140000: 0.8497
+[18/10/2026 12:34:17,82] mulai s31 
+  fitur app_raw_v1          4 kolom  (0.0 mnt)
+  fitur prof_raw_v1         7 kolom  (0.0 mnt)
+  fitur app_ratios_v1      13 kolom  (0.0 mnt)
+  fitur pa_naive_v1        35 kolom  (0.0 mnt)
+  fitur rp_naive_v1        34 kolom  (0.0 mnt)
+  fitur bu_naive_v1        65 kolom  (0.0 mnt)
+  fitur bp_naive_v1        28 kolom  (0.0 mnt)
+  fitur ab_naive_v1        42 kolom  (0.0 mnt)
+  fitur ec_naive_v1        24 kolom  (0.0 mnt)
+  fitur rp_core_v1         21 kolom  (0.0 mnt)
+  fitur rp_window_v1       26 kolom  (0.0 mnt)
+  fitur rp_loan_v1         17 kolom  (0.0 mnt)
+  fitur rp_trend_v1         7 kolom  (0.0 mnt)
+  fitur bu_extra_v1        17 kolom  (0.0 mnt)
+  fitur bp_trend_v1        13 kolom  (0.0 mnt)
+  fitur pa_window_v1       30 kolom  (0.0 mnt)
+  fitur pa_burden_v1       14 kolom  (0.0 mnt)
+  fitur ab_window_v1       36 kolom  (0.0 mnt)
+  fitur ab_income_v1       12 kolom  (0.0 mnt)
+  fitur ec_window_v1       44 kolom  (0.0 mnt)
+  fitur ec_mix_v1          27 kolom  (0.0 mnt)
+  fitur x_cross_v1         10 kolom  (0.0 mnt)
+  fitur x_rate_resid_v1     2 kolom  (0.0 mnt)
+Traceback (most recent call last):
+  File "C:\Users\USER\AppData\Roaming\Python\Python312\site-packages\pandas\core\arrays\categorical.py", line 592, in astype
+    new_cats = new_cats.astype(dtype=dtype, copy=copy)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: could not convert string to float: 'education'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\Unand\Sems 7\Lomba\DSC\dsc-logika\experiments\explore_17okt\s31_source_submodels.py", line 37, in <module>
+    X = pd.concat([X, E], axis=1)[m].reset_index(drop=True).astype("float32")
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python312\site-packages\pandas\core\generic.py", line 6662, in astype
+    new_data = self._mgr.astype(dtype=dtype, copy=copy, errors=errors)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python312\site-packages\pandas\core\internals\managers.py", line 430, in astype
+    return self.apply(
+           ^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python312\site-packages\pandas\core\internals\managers.py", line 363, in apply
+    applied = getattr(b, f)(**kwargs)
+              ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python312\site-packages\pandas\core\internals\blocks.py", line 784, in astype
+    new_values = astype_array_safe(values, dtype, copy=copy, errors=errors)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python312\site-packages\pandas\core\dtypes\astype.py", line 237, in astype_array_safe
+    new_values = astype_array(values, dtype, copy=copy)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python312\site-packages\pandas\core\dtypes\astype.py", line 179, in astype_array
+    values = values.astype(dtype, copy=copy)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python312\site-packages\pandas\core\arrays\categorical.py", line 603, in astype
+    raise ValueError(msg)
+ValueError: Cannot cast object dtype to float32
+[18/10/2026 12:34:23,43] mulai s32 
+  fitur app_raw_v1          4 kolom  (0.0 mnt)
+  fitur prof_raw_v1         7 kolom  (0.0 mnt)
+  fitur app_ratios_v1      13 kolom  (0.0 mnt)
+  fitur pa_naive_v1        35 kolom  (0.0 mnt)
+  fitur rp_naive_v1        34 kolom  (0.0 mnt)
+  fitur bu_naive_v1        65 kolom  (0.0 mnt)
+  fitur bp_naive_v1        28 kolom  (0.0 mnt)
+  fitur ab_naive_v1        42 kolom  (0.0 mnt)
+  fitur ec_naive_v1        24 kolom  (0.0 mnt)
+  fitur rp_core_v1         21 kolom  (0.0 mnt)
+  fitur rp_window_v1       26 kolom  (0.0 mnt)
+  fitur rp_loan_v1         17 kolom  (0.0 mnt)
+  fitur rp_trend_v1         7 kolom  (0.0 mnt)
+  fitur bu_extra_v1        17 kolom  (0.0 mnt)
+  fitur bp_trend_v1        13 kolom  (0.0 mnt)
+  fitur pa_window_v1       30 kolom  (0.0 mnt)
+  fitur pa_burden_v1       14 kolom  (0.0 mnt)
+  fitur ab_window_v1       36 kolom  (0.0 mnt)
+  fitur ab_income_v1       12 kolom  (0.0 mnt)
+  fitur ec_window_v1       44 kolom  (0.0 mnt)
+  fitur ec_mix_v1          27 kolom  (0.0 mnt)
+  fitur x_cross_v1         10 kolom  (0.0 mnt)
+  fitur x_rate_resid_v1     2 kolom  (0.0 mnt)
+Traceback (most recent call last):
+  File "C:\Users\USER\AppData\Roaming\Python\Python312\site-packages\pandas\core\arrays\categorical.py", line 592, in astype
+    new_cats = new_cats.astype(dtype=dtype, copy=copy)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: could not convert string to float: 'education'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\Unand\Sems 7\Lomba\DSC\dsc-logika\experiments\explore_17okt\s32_tier_mechanism.py", line 32, in <module>
+    X = pd.concat([X, E], axis=1).reset_index(drop=True).astype("float32")
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python312\site-packages\pandas\core\generic.py", line 6662, in astype
+    new_data = self._mgr.astype(dtype=dtype, copy=copy, errors=errors)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python312\site-packages\pandas\core\internals\managers.py", line 430, in astype
+    return self.apply(
+           ^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python312\site-packages\pandas\core\internals\managers.py", line 363, in apply
+    applied = getattr(b, f)(**kwargs)
+              ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python312\site-packages\pandas\core\internals\blocks.py", line 784, in astype
+    new_values = astype_array_safe(values, dtype, copy=copy, errors=errors)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python312\site-packages\pandas\core\dtypes\astype.py", line 237, in astype_array_safe
+    new_values = astype_array(values, dtype, copy=copy)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python312\site-packages\pandas\core\dtypes\astype.py", line 179, in astype_array
+    values = values.astype(dtype, copy=copy)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python312\site-packages\pandas\core\arrays\categorical.py", line 603, in astype
+    raise ValueError(msg)
+ValueError: Cannot cast object dtype to float32
+[18/10/2026 12:34:28,06] launcher E205-s27-s29 selesai 

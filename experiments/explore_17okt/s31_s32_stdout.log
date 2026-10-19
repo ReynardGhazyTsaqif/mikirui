@@ -1,0 +1,87 @@
+[18/10/2026 13:33:10,17] mulai s31 
+  fitur app_raw_v1          4 kolom  (0.0 mnt)
+  fitur prof_raw_v1         7 kolom  (0.0 mnt)
+  fitur app_ratios_v1      13 kolom  (0.0 mnt)
+  fitur pa_naive_v1        35 kolom  (0.0 mnt)
+  fitur rp_naive_v1        34 kolom  (0.0 mnt)
+  fitur bu_naive_v1        65 kolom  (0.0 mnt)
+  fitur bp_naive_v1        28 kolom  (0.0 mnt)
+  fitur ab_naive_v1        42 kolom  (0.0 mnt)
+  fitur ec_naive_v1        24 kolom  (0.0 mnt)
+  fitur rp_core_v1         21 kolom  (0.0 mnt)
+  fitur rp_window_v1       26 kolom  (0.0 mnt)
+  fitur rp_loan_v1         17 kolom  (0.0 mnt)
+  fitur rp_trend_v1         7 kolom  (0.0 mnt)
+  fitur bu_extra_v1        17 kolom  (0.0 mnt)
+  fitur bp_trend_v1        13 kolom  (0.0 mnt)
+  fitur pa_window_v1       30 kolom  (0.0 mnt)
+  fitur pa_burden_v1       14 kolom  (0.0 mnt)
+  fitur ab_window_v1       36 kolom  (0.0 mnt)
+  fitur ab_income_v1       12 kolom  (0.0 mnt)
+  fitur ec_window_v1       44 kolom  (0.0 mnt)
+  fitur ec_mix_v1          27 kolom  (0.0 mnt)
+  fitur x_cross_v1         10 kolom  (0.0 mnt)
+  fitur x_rate_resid_v1     2 kolom  (0.0 mnt)
+sumber rp: 123 kolom, mean-fold AUC 0.7499
+sumber bu: 123 kolom, mean-fold AUC 0.6871
+sumber pa: 79 kolom, mean-fold AUC 0.6507
+sumber ab: 90 kolom, mean-fold AUC 0.6227
+sumber ec: 95 kolom, mean-fold AUC 0.7463
+sumber ap: 24 kolom, mean-fold AUC 0.6543
+ fitur     n    auc arah     z  resid_desil_min  resid_desil_max
+src_pa 70000 0.6499    + -0.96          -0.0059           0.0086
+src_ap 70000 0.6527    + -0.45          -0.0054           0.0048
+src_ab 70000 0.6212    +  0.39          -0.0047           0.0061
+src_ec 70000 0.7463    + -0.38          -0.0045           0.0033
+src_rp 70000 0.7485    + -0.35          -0.0039           0.0072
+src_bu 70000 0.6869    + -0.26          -0.0040           0.0061
+stacking E202 + 6 sumber: mean-fold 0.84710 -> 0.84697, delta -0.00013, naik 1/5, per fold [-1e-05, -7e-05, -0.00031, 1e-05, -0.00028]
+koefisien (fold terakhir): {'E202': np.float64(1.052), 'rp': np.float64(-0.013), 'bu': np.float64(0.012), 'pa': np.float64(-0.073), 'ab': np.float64(0.05), 'ec': np.float64(-0.033), 'ap': np.float64(-0.003)}
+[18/10/2026 13:35:11,70] mulai s32 
+  fitur app_raw_v1          4 kolom  (0.0 mnt)
+  fitur prof_raw_v1         7 kolom  (0.0 mnt)
+  fitur app_ratios_v1      13 kolom  (0.0 mnt)
+  fitur pa_naive_v1        35 kolom  (0.0 mnt)
+  fitur rp_naive_v1        34 kolom  (0.0 mnt)
+  fitur bu_naive_v1        65 kolom  (0.0 mnt)
+  fitur bp_naive_v1        28 kolom  (0.0 mnt)
+  fitur ab_naive_v1        42 kolom  (0.0 mnt)
+  fitur ec_naive_v1        24 kolom  (0.0 mnt)
+  fitur rp_core_v1         21 kolom  (0.0 mnt)
+  fitur rp_window_v1       26 kolom  (0.0 mnt)
+  fitur rp_loan_v1         17 kolom  (0.0 mnt)
+  fitur rp_trend_v1         7 kolom  (0.0 mnt)
+  fitur bu_extra_v1        17 kolom  (0.0 mnt)
+  fitur bp_trend_v1        13 kolom  (0.0 mnt)
+  fitur pa_window_v1       30 kolom  (0.0 mnt)
+  fitur pa_burden_v1       14 kolom  (0.0 mnt)
+  fitur ab_window_v1       36 kolom  (0.0 mnt)
+  fitur ab_income_v1       12 kolom  (0.0 mnt)
+  fitur ec_window_v1       44 kolom  (0.0 mnt)
+  fitur ec_mix_v1          27 kolom  (0.0 mnt)
+  fitur x_cross_v1         10 kolom  (0.0 mnt)
+  fitur x_rate_resid_v1     2 kolom  (0.0 mnt)
+kolom dibuang (turunan bunga/cicilan sekarang): ['ab_all_avgbal_vs_inst', 'ab_all_inst_vs_income', 'ab_all_minbal_vs_inst', 'ab_all_netflow_vs_inst', 'ab_w3_avgbal_vs_inst', 'ab_w3_inst_vs_income', 'ab_w3_minbal_vs_inst', 'ab_w3_netflow_vs_inst', 'app_annual_interest_rate', 'app_proposed_monthly_installment', 'app_pti', 'app_pti_per_member', 'app_residual_income', 'app_total_interest', 'x_rate_pred', 'x_rate_resid', 'x_rate_x_pti', 'x_rate_x_score', 'x_total_inst_vs_acct_income', 'x_total_pti']
+fold 0: iter reg 193, multiclass 168
+fold 1: iter reg 190, multiclass 173
+fold 2: iter reg 157, multiclass 201
+fold 3: iter reg 211, multiclass 168
+fold 4: iter reg 213, multiclass 171
+prediksi tier dari fitur lain: akurasi multiclass 0.874, R2 ordinal 0.857
+matriks tier asli (baris) x prediksi (kolom), porsi baris:
+col_0      0      1      2      3      4
+row_0                                   
+0      0.842  0.153  0.005  0.000  0.000
+1      0.029  0.904  0.066  0.000  0.000
+2      0.001  0.109  0.877  0.012  0.000
+3      0.000  0.010  0.207  0.782  0.001
+4      0.000  0.000  0.065  0.288  0.648
+10 kolom terpenting untuk tier: {'bu_score_mean': 0.23, 'bu_score_fresh_weighted': 0.226, 'pa_rate_minus_mean': 0.207, 'pa_annual_interest_rate_mean': 0.087, 'bu_score_max': 0.043, 'pa_annual_interest_rate_min': 0.036, 'bu_score_A': 0.029, 'pa_rate_minus_last': 0.025, 'pa_annual_interest_rate_max': 0.017, 'bu_fresh_score': 0.016}
+         fitur     n    auc arah     z  resid_desil_min  resid_desil_max
+       t_resid 70000 0.5187    - -1.36          -0.0045           0.0088
+   t_resid_exp 70000 0.5302    + -1.35          -0.0039           0.0042
+t_rank_in_tier 70000 0.5811    +  0.94          -0.0080           0.0103
+    t_surprise 70000 0.5374    + -0.53          -0.0061           0.0073
+         t_exp 70000 0.6714    + -0.26          -0.0058           0.0040
+        t_pred 70000 0.6735    + -0.24          -0.0043           0.0058
+[18/10/2026 13:53:19,29] s31-s32 selesai 

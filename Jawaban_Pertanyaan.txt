@@ -1,0 +1,117 @@
+Pertanyaan batch #1
+
+A. Posisi dan leaderboard
+1. Public terbaik sekarang 0,55858 (prompt) atau 0,55951 (E122x1_E141_rank50, LOG.md 16 Okt)? Berapa skor #1, #8, #10 terbaru? — menentukan gap nyata.
+#
+Team
+Members
+Score
+Entries
+Last
+Join
+1
+cupuu
+0.57768
+21
+1d
+2
+Datadataan
+0.57530
+15
+2d
+3
+Magang Bareng Afiq
+0.57174
+15
+2h
+4
+abis bantai filkom geser mipa
+0.57137
+21
+7h
+5
+puncak dingin
+0.57067
+22
+4h
+6
+BCC mau ke kopdes depok
+0.57065
+11
+2h
+7
+Hypomonē
+0.57015
+13
+5h
+8
+1000ShotsEspresso
+0.56832
+16
+3d
+9
+BATMAN PACIL
+0.56801
+21
+7h
+10
+depok sejuk dsj
+0.56756
+24
+11h
+
+2. Berapa persen test untuk public LB (tertulis di halaman Leaderboard)? — noise public dan beda private.
+45 persen public, 45 persen private. itninya kejar skor leaderboard 1 dan tertinggi
+3. Berapa submission final yang boleh dipilih (1 atau 2)? Jika 2, mana yang dicocokkan dengan notebook? — strategi best-CV vs robust. 2
+
+B. Data
+4. Apakah panitia pernah menyebut asal data (simulasi/sintetis atau data nyata dianonimkan)? — kalau sintetis, struktur pembangkitnya bisa direkonstruksi dari data panitia sendiri.
+ data hanya dari dataset yang diberikan dan sudah saya letakkan di folder /dataset
+5. Dictionary bertuliskan "v2": pernah ada v1/update data, dan apa yang berubah? — perubahan versi biasanya menutup kebocoran; petunjuk struktur pembangkit.
+tidak ada
+6. Sejak 12 Okt, tab Discussion/Code sudah dicek lagi (pengumuman host, notebook publik skor tinggi)? — hanya untuk arah, tidak disalin.
+sudah 
+
+C. Notebook final
+7. Apakah panitia menjalankan ulang notebook, atau hanya mencocokkan output yang tersimpan di .ipynb? Jika dijalankan ulang: mesin apa, ada batas waktu? — menentukan boleh tidaknya komponen GPU/berat.
+panitia jalankan ulang, namun tidak perlu khawatir tentang batas Waktu, kita sebebsasnya buat kdoe seperti apa
+8. Komposisi notebook final sudah diputuskan (dengan/tanpa fitur GRU dari GPU)? — acuan yang saya tingkatkan harus pipeline yang masuk final; tanpa GRU acuannya E130a/E141, bukan E122x1.
+belum ada. kamu cari tau sendiri. cari dulu model yang lebih baik, jangan terpaku pada model lama
+
+D. Komputasi dan cara kerja
+9. Spesifikasi "komputer lain" (CPU, RAM, GPU, OS) dan kapan tersedia? — tag komputasi; LightGBM bisa beda hasil antar OS/thread → MD5.
+anggap saja bagus, atau bisa saj di Kaggle atau google colab kalua tidak cukup
+10. Sisa kuota GPU Kaggle minggu ini?
+masih banyak, 40 jam
+11. Untuk Langkah 4 (menulis oof/, preds/, log.csv, Riset, CLAUDE.md), boleh saya bekerja langsung di checkout utama? Sekarang saya terisolasi di worktree, sedangkan checkout utama punya perubahan belum di-commit. — supaya tidak menimpa pekerjaan Anda.
+ya lakukan
+12. Boleh saya ubah .gitignore (features/ → /features/) dan commit src/features/? Apakah repo GitHub mikirui privat (boleh push branch)?
+ya boleh
+13. Ada anggota tim yang sedang/akan memakai laptop untuk job? Jam berapa laptop bebas? — RAM 7,7 GB.
+bebas 24jam.
+
+Pertanyaan batch #2
+
+1. Bolehkah pinjaman lama milik customer test (18.415 pinjaman; labelnya dari repayment_history, bukan target test) dipakai sebagai baris latih model bantu? Ini pemakaian data test secara transduktif.
+jika tidak menyalahi aturan guidebook maka tidak apa apa
+2. Ramp e-commerce dan rekening bergantung langsung pada target. Saya menilainya bukan kebocoran: informasinya tersedia sebelum keputusan, dan e-commerce dipotong 24 jam sebelum keputusan. Setuju tetap dipakai?
+bole tetap dipakai jika memang hal itu dapat menaikkan skor nantinya
+3. Apakah tim tahu titik awal "12 calendar months" versi panitia? Kalau tidak tahu, saya uji varian definisinya dengan data.
+tidak
+4. Prioritas: amankan kenaikan pasti dulu (H01/H02/H05), atau langsung paralel dengan eksperimen penemuan yang berisiko?
+amankan kenaikan baru nanti eksperimen lagi
+5. Apakah ada batas waktu run notebook final? Model bantu H02 menambah ±30–60 menit CPU.
+tidak ada bebas selama dan seberat apapun
+
+Pertanyaan batch #3
+
+1. Apakah notebook final wajib menghasilkan kedua file submisi terpilih (2 MD5)?
+ya, karena nantinya akan untuk private leaderboard
+2. Panitia menjalankan ulang notebook di mesin apa? Fitur GPU (GRU seq_*/seqx_* di E122x1, NN) belum tentu identik antar mesin, sehingga MD5 bisa berbeda.
+tidak tau
+3. Berapa porsi test untuk public LB ("approximately X%")? Jawaban sebelumnya berisi bobot nilai 45/45, bukan porsi test.
+This leaderboard is calculated with approximately 30% of the test data. The final results will be based on the other 70%
+4. Apakah diff di atas disetujui untuk dipakai?
+ya
+5. Skill audit-leakage Lapis 3 butir 3 ("fitur model baris harus intrinsik") menghalangi H02/H04/H17. Saya usulkan aturan itu dibatasi ke model baris yang labelnya target customer. Untuk model yang labelnya sendiri, konteks customer boleh dipakai asalkan baris itu sendiri dikecualikan (LOO). Setuju? Butir ini belum saya ubah.
+ya setuju

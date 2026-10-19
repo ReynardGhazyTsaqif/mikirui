@@ -1,0 +1,29 @@
+[18/10/2026 16:04:21,72] mulai s32 ulang 
+  fitur app_raw_v1          4 kolom  (0.0 mnt)
+  fitur prof_raw_v1         7 kolom  (0.0 mnt)
+  fitur app_ratios_v1      13 kolom  (0.0 mnt)
+  fitur pa_naive_v1        35 kolom  (0.0 mnt)
+  fitur rp_naive_v1        34 kolom  (0.0 mnt)
+  fitur bu_naive_v1        65 kolom  (0.0 mnt)
+  fitur bp_naive_v1        28 kolom  (0.0 mnt)
+  fitur ab_naive_v1        42 kolom  (0.0 mnt)
+  fitur ec_naive_v1        24 kolom  (0.0 mnt)
+  fitur rp_core_v1         21 kolom  (0.0 mnt)
+  fitur rp_window_v1       26 kolom  (0.0 mnt)
+  fitur rp_loan_v1         17 kolom  (0.0 mnt)
+  fitur rp_trend_v1         7 kolom  (0.0 mnt)
+  fitur bu_extra_v1        17 kolom  (0.0 mnt)
+  fitur bp_trend_v1        13 kolom  (0.0 mnt)
+  fitur pa_window_v1       30 kolom  (0.0 mnt)
+  fitur pa_burden_v1       14 kolom  (0.0 mnt)
+  fitur ab_window_v1       36 kolom  (0.0 mnt)
+  fitur ab_income_v1       12 kolom  (0.0 mnt)
+  fitur ec_window_v1       44 kolom  (0.0 mnt)
+  fitur ec_mix_v1          27 kolom  (0.0 mnt)
+  fitur x_cross_v1         10 kolom  (0.0 mnt)
+  fitur x_rate_resid_v1     2 kolom  (0.0 mnt)
+kolom dibuang (turunan bunga/cicilan sekarang): ['ab_all_avgbal_vs_inst', 'ab_all_inst_vs_income', 'ab_all_minbal_vs_inst', 'ab_all_netflow_vs_inst', 'ab_w3_avgbal_vs_inst', 'ab_w3_inst_vs_income', 'ab_w3_minbal_vs_inst', 'ab_w3_netflow_vs_inst', 'app_annual_interest_rate', 'app_proposed_monthly_installment', 'app_pti', 'app_pti_per_member', 'app_residual_income', 'app_total_interest', 'x_rate_pred', 'x_rate_resid', 'x_rate_x_pti', 'x_rate_x_score', 'x_total_inst_vs_acct_income', 'x_total_pti', 'pa_rate_minus_last', 'pa_rate_minus_mean', 'pa_inst_vs_last', 'pa_total_inst_with_current']
+fold 0: iter reg 166, multiclass 111
+fold 1: iter reg 117, multiclass 111
+fold 2: iter reg 125, multiclass 127
+^C

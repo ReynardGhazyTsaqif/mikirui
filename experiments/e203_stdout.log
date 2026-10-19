@@ -1,0 +1,41 @@
+[18/10/2026 11:51:40,06] mulai E203 
+  fitur app_raw_v1          4 kolom  (0.0 mnt)
+  fitur prof_raw_v1         7 kolom  (0.0 mnt)
+  fitur app_ratios_v1      13 kolom  (0.0 mnt)
+  fitur pa_naive_v1        35 kolom  (0.0 mnt)
+  fitur rp_naive_v1        34 kolom  (0.0 mnt)
+  fitur bu_naive_v1        65 kolom  (0.0 mnt)
+  fitur bp_naive_v1        28 kolom  (0.0 mnt)
+  fitur ab_naive_v1        42 kolom  (0.0 mnt)
+  fitur ec_naive_v1        24 kolom  (0.0 mnt)
+  fitur rp_core_v1         21 kolom  (0.0 mnt)
+  fitur rp_window_v1       26 kolom  (0.0 mnt)
+  fitur rp_loan_v1         17 kolom  (0.0 mnt)
+  fitur rp_trend_v1         7 kolom  (0.0 mnt)
+  fitur bu_extra_v1        17 kolom  (0.0 mnt)
+  fitur bp_trend_v1        13 kolom  (0.0 mnt)
+  fitur pa_window_v1       30 kolom  (0.0 mnt)
+  fitur pa_burden_v1       14 kolom  (0.0 mnt)
+  fitur ab_window_v1       36 kolom  (0.0 mnt)
+  fitur ab_income_v1       12 kolom  (0.0 mnt)
+  fitur ec_window_v1       44 kolom  (0.0 mnt)
+  fitur ec_mix_v1          27 kolom  (0.0 mnt)
+  fitur x_cross_v1         10 kolom  (0.0 mnt)
+  fitur x_rate_resid_v1     2 kolom  (0.0 mnt)
+{'config': 'tuned', 'mean_fold_auc': np.float64(0.8459432650675872), 'f0': 0.8466082402156608, 'f1': 0.8501150359612107, 'f2': 0.854773604350119, 'f3': 0.8417998108333294, 'f4': 0.836419633977616, 'iters': 995, 'menit': 1.8}
+{'config': 'ff0.08', 'mean_fold_auc': np.float64(0.8454281945944746), 'f0': 0.8453350338403595, 'f1': 0.8498666902838536, 'f2': 0.8543457819647562, 'f3': 0.8418241476591711, 'f4': 0.8357693192242325, 'iters': 1117, 'menit': 1.4}
+{'config': 'ff0.20', 'mean_fold_auc': np.float64(0.8455173156440194), 'f0': 0.84513633990732, 'f1': 0.8506494661198366, 'f2': 0.8551889051046907, 'f3': 0.840805347287374, 'f4': 0.835806519800876, 'iters': 1010, 'menit': 2.4}
+{'config': 'ff0.30', 'mean_fold_auc': np.float64(0.8457794249092705), 'f0': 0.8455844664648337, 'f1': 0.8499236463127993, 'f2': 0.8544064770917852, 'f3': 0.8422077568765006, 'f4': 0.8367747778004343, 'iters': 602, 'menit': 2.2}
+{'config': 'depth5', 'mean_fold_auc': np.float64(0.8455725320540871), 'f0': 0.8461135923215274, 'f1': 0.8501444704891467, 'f2': 0.8545947798103833, 'f3': 0.8411823942534495, 'f4': 0.8358274233959294, 'iters': 815, 'menit': 1.6}
+{'config': 'depth6_l63', 'mean_fold_auc': np.float64(0.8453684260484613), 'f0': 0.8454513371819087, 'f1': 0.84960873599398, 'f2': 0.854145218482675, 'f3': 0.8411801344053359, 'f4': 0.836456704178407, 'iters': 674, 'menit': 1.4}
+{'config': 'no_extra_trees', 'mean_fold_auc': np.float64(0.8445713185365552), 'f0': 0.8440880011516422, 'f1': 0.8486330053057367, 'f2': 0.853365964355352, 'f3': 0.8412501896968657, 'f4': 0.8355194321731795, 'iters': 403, 'menit': 1.1}
+{'config': 'minchild100', 'mean_fold_auc': np.float64(0.845257320073366), 'f0': 0.8450316451609832, 'f1': 0.8498238210895479, 'f2': 0.8540593061825248, 'f3': 0.8415164171881266, 'f4': 0.8358554107456475, 'iters': 821, 'menit': 1.5}
+        config  mean_fold_auc      f0      f1      f2      f3      f4  iters  menit
+         tuned        0.84594 0.84661 0.85012 0.85477 0.84180 0.83642    995    1.8
+        ff0.08        0.84543 0.84534 0.84987 0.85435 0.84182 0.83577   1117    1.4
+        ff0.20        0.84552 0.84514 0.85065 0.85519 0.84081 0.83581   1010    2.4
+        ff0.30        0.84578 0.84558 0.84992 0.85441 0.84221 0.83677    602    2.2
+        depth5        0.84557 0.84611 0.85014 0.85459 0.84118 0.83583    815    1.6
+    depth6_l63        0.84537 0.84545 0.84961 0.85415 0.84118 0.83646    674    1.4
+no_extra_trees        0.84457 0.84409 0.84863 0.85337 0.84125 0.83552    403    1.1
+   minchild100        0.84526 0.84503 0.84982 0.85406 0.84152 0.83586    821    1.5
